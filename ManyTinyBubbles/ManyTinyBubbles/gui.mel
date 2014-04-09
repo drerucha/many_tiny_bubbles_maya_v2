@@ -49,8 +49,7 @@ global proc createMenu()
 	menuItem -label "Render Simulation"
 			 -command "temp()";
 
-	// debug
-	debugPrint( "Many Tiny Bubbles: created menu" );
+	nlPrint( "Many Tiny Bubbles: created menu" );
 }
 
 
@@ -59,9 +58,9 @@ global proc createMenu()
 
 
 ////////////////////////////////////////////////////
-// debugPrint()
+// nlPrint()
 ////////////////////////////////////////////////////
-global proc debugPrint( string $print )
+global proc nlPrint( string $print )
 {
 	print( $print + "\n" );
 }
@@ -73,5 +72,5 @@ global proc debugPrint( string $print )
 
 global proc temp()
 {
-	debugPrint( "not yet implemented\n" );
+	nlPrint( "not yet implemented\n" );
 }

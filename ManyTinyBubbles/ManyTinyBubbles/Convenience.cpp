@@ -1,0 +1,52 @@
+#include "Convenience.h"
+
+#include <maya/MGlobal.h>
+
+
+////////////////////////////////////////////////////
+// constructor
+////////////////////////////////////////////////////
+Convenience::Convenience( void )
+{
+}
+
+
+////////////////////////////////////////////////////
+// constructor
+////////////////////////////////////////////////////
+Convenience::~Convenience( void )
+{
+}
+
+
+////////////////////////////////////////////////////
+// convertMStringToStdString
+////////////////////////////////////////////////////
+std::string Convenience::convertMStringToStdString( MString mstring )
+{
+	std::string std_string = mstring.asChar();
+	return std_string;
+}
+
+
+////////////////////////////////////////////////////
+// convertStdStringToMString
+////////////////////////////////////////////////////
+MString Convenience::convertStdStringToMString( std::string std_string )
+{
+	MString mstring = std_string.c_str();
+	return mstring;
+}
+
+
+////////////////////////////////////////////////////
+// printInScriptEditor
+////////////////////////////////////////////////////
+void Convenience::printInScriptEditor( MString mstring )
+{
+	MGlobal::displayInfo( mstring );
+}
+void Convenience::printInScriptEditor( std::string std_string )
+{
+	MGlobal::displayInfo( convertStdStringToMString( std_string ) );
+}

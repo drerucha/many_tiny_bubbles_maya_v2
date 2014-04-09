@@ -10,14 +10,7 @@
 
 #include <maya/MFnPlugin.h>
 #include <maya/MGlobal.h>
-
-
-////////////////////////////////////////////////////
-// function prototypes
-////////////////////////////////////////////////////
-
-std::string convertMStringToStdString( MString mstring );
-MString convertStdStringToMString( std::string std_string );
+#include "Convenience.h"
 
 
 //
@@ -72,9 +65,9 @@ MStatus initializePlugin( MObject obj )
 	MString mll_filepath = plugin.loadPath();
 
 	// go up one level in path
-	std::string mll_filepath_std = convertMStringToStdString( mll_filepath );
+	std::string mll_filepath_std = Convenience::convertMStringToStdString( mll_filepath );
 	std::string mel_filepath_std = mll_filepath_std.substr( 0, mll_filepath_std.find_last_of( "\\/" ) );
-	MString mel_filepath = convertStdStringToMString( mel_filepath_std );
+	MString mel_filepath = Convenience::convertStdStringToMString( mel_filepath_std );
 
 	// execute script
 	MString command = "source \"" + mel_filepath + "/gui.mel\";";
@@ -104,6 +97,7 @@ MStatus uninitializePlugin( MObject obj )
 
 	// TODO: circumvent need for hardcoded menu name
 
+	// "many_tiny_bubbles_menu" is menu name defined in gui.mel
 	MGlobal::executeCommand( "if ( `menu -exists many_tiny_bubbles_menu` ) { deleteUI many_tiny_bubbles_menu; }" );
 
 
@@ -135,28 +129,4 @@ MStatus uninitializePlugin( MObject obj )
 	}
 
 	return status;
-}
-
-
-
-/*********** HELPER FUNCTIONS ***********/
-
-
-////////////////////////////////////////////////////
-// convertMStringToStdString
-////////////////////////////////////////////////////
-std::string convertMStringToStdString( MString mstring )
-{
-	std::string std_string = mstring.asChar();
-	return std_string;
-}
-
-
-////////////////////////////////////////////////////
-// convertStdStringToMString
-////////////////////////////////////////////////////
-MString convertStdStringToMString( std::string std_string )
-{
-	MString mstring = std_string.c_str();
-	return mstring;
 }

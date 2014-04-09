@@ -32,12 +32,18 @@
     <ClInclude Include="ManyTinyBubblesNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Convenience.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ManyTinyBubblesNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pluginMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Convenience.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

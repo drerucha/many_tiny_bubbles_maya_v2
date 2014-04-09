@@ -16,9 +16,11 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Convenience.h" />
     <ClInclude Include="ManyTinyBubblesNode.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Convenience.cpp" />
     <ClCompile Include="ManyTinyBubblesNode.cpp" />
     <ClCompile Include="pluginMain.cpp" />
   </ItemGroup>
