@@ -12,7 +12,7 @@
 
 #include <maya/MPxNode.h>
 #include <maya/MFnNumericAttribute.h>
-#include <maya/MTypeId.h> 
+#include <maya/MTypeId.h>
 
  
 class ManyTinyBubbles : public MPxNode

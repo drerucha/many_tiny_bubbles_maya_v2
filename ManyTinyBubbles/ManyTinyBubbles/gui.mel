@@ -1,0 +1,76 @@
+////////////////////////////////////////////////////
+// commands executed when gui.mel is executed
+////////////////////////////////////////////////////
+
+createMenu();
+
+
+
+/*********** TOP-LEVEL MENU ***********/
+
+
+////////////////////////////////////////////////////
+// createMenu()
+////////////////////////////////////////////////////
+global proc createMenu()
+{
+	// top level menu item
+	menu -label "Many Tiny Bubbles"
+		 -parent MayaWindow myMenu;
+
+	// Create 3D Container + option box
+	menuItem -label "Create 3D Container"
+			 -command "temp()";
+	menuItem -optionBox true
+			 -command "temp()";
+	
+	// Create 3D Container with Emitter + option box
+	menuItem -label "Create 3D Container with Emitter"
+			 -command "temp()";
+	menuItem -optionBox true
+			 -command "temp()";
+	
+	// Add Bubble Emitter + option box
+	// fluidShape must be selected
+	menuItem -label "Add Bubble Emitter"
+			 -command "temp()";
+	menuItem -optionBox true
+			 -command "temp()";
+	
+	// Convert Mesh to Bubble Emitter + option box
+	// fluidShape and mesh must be selected
+	menuItem -label "Convert Mesh to Bubble Emitter"
+			 -command "temp()";
+	menuItem -optionBox true
+			 -command "temp()";
+	
+	// Render Simulation
+	menuItem -label "Render Simulation"
+			 -command "temp()";
+
+	// debug
+	debugPrint( "Many Tiny Bubbles: created menu" );
+}
+
+
+
+/*********** HELPER FUNCTIONS ***********/
+
+
+////////////////////////////////////////////////////
+// debugPrint()
+////////////////////////////////////////////////////
+global proc debugPrint( string $print )
+{
+	print( $print + "\n" );
+}
+
+
+
+/*********** TODOS ***********/
+
+
+global proc temp()
+{
+	debugPrint( "not yet implemented\n" );
+}

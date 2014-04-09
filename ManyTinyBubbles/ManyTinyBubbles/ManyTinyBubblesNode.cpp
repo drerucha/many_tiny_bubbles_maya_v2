@@ -16,10 +16,7 @@
 
 #include <maya/MGlobal.h>
 
-// You MUST change this to a unique value!!!  The id is a 32bit value used
-// to identify this type of node in the binary file format.  
-//
-//#error change the following to a unique value and then erase this line 
+
 MTypeId     ManyTinyBubbles::id( 0x70256 );
 
 // Example attributes
@@ -27,10 +24,11 @@ MTypeId     ManyTinyBubbles::id( 0x70256 );
 MObject     ManyTinyBubbles::input;        
 MObject     ManyTinyBubbles::output;       
 
+
 ManyTinyBubbles::ManyTinyBubbles() {}
 ManyTinyBubbles::~ManyTinyBubbles() {}
 
-MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
+
 //
 //	Description:
 //		This method computes the value of the given output plug based
@@ -40,6 +38,8 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 //		plug - the plug to compute
 //		data - object that provides access to the attributes for this node
 //
+MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
+
 {
 	MStatus returnStatus;
  
@@ -85,7 +85,7 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 	return MS::kSuccess;
 }
 
-void* ManyTinyBubbles::creator()
+
 //
 //	Description:
 //		this method exists to give Maya a way to create new objects
@@ -94,11 +94,12 @@ void* ManyTinyBubbles::creator()
 //	Return Value:
 //		a new object of this type
 //
+void* ManyTinyBubbles::creator()
 {
 	return new ManyTinyBubbles();
 }
 
-MStatus ManyTinyBubbles::initialize()
+
 //
 //	Description:
 //		This method is called to create and initialize all of the attributes
@@ -108,7 +109,8 @@ MStatus ManyTinyBubbles::initialize()
 //	Return Values:
 //		MS::kSuccess
 //		MS::kFailure
-//		
+//	
+MStatus ManyTinyBubbles::initialize()	
 {
 	// This sample creates a single input float attribute and a single
 	// output float attribute.

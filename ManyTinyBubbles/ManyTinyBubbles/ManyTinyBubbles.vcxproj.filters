@@ -13,6 +13,9 @@
       <UniqueIdentifier>{f1837db3-60cf-4911-9754-be9f42c3d223}</UniqueIdentifier>
       <Extensions>txt</Extensions>
     </Filter>
+    <Filter Include="Scripts">
+      <UniqueIdentifier>{31808074-2739-4078-8d9c-ec967d7a7b0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt">
@@ -20,6 +23,9 @@
     </None>
     <None Include="Options.txt">
       <Filter>Miscellaneous Files</Filter>
+    </None>
+    <None Include="gui.mel">
+      <Filter>Scripts</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
