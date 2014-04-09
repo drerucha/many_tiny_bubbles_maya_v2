@@ -16,7 +16,8 @@ global proc createMenu()
 {
 	// top level menu item
 	menu -label "Many Tiny Bubbles"
-		 -parent MayaWindow myMenu;
+		 -parent MayaWindow
+		 many_tiny_bubbles_menu;
 
 	// Create 3D Container + option box
 	menuItem -label "Create 3D Container"

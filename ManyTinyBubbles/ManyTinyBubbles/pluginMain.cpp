@@ -10,7 +10,6 @@
 
 #include <maya/MFnPlugin.h>
 #include <maya/MGlobal.h>
-#include <iostream>
 
 
 ////////////////////////////////////////////////////
@@ -37,7 +36,7 @@ MStatus initializePlugin( MObject obj )
 
 
 	////////////////////////////////////////////////////
-	// TODO: register any commands
+	// register commands
 	////////////////////////////////////////////////////
 
     //status = plugin.registerCommand( "CreateBubbleCmd", CreateBubbleCmd::creator );
@@ -84,7 +83,7 @@ MStatus initializePlugin( MObject obj )
 	return status;
 }
 
-MStatus uninitializePlugin( MObject obj)
+
 //
 //	Description:
 //		this method is called when the plug-in is unloaded from Maya. It 
@@ -93,13 +92,45 @@ MStatus uninitializePlugin( MObject obj)
 //	Arguments:
 //		obj - a handle to the plug-in object (use MFnPlugin to access it)
 //
+MStatus uninitializePlugin( MObject obj )
 {
 	MStatus   status;
 	MFnPlugin plugin( obj );
 
+
+	////////////////////////////////////////////////////
+	// remove top-level menu
+	////////////////////////////////////////////////////
+
+	// TODO: circumvent need for hardcoded menu name
+
+	MGlobal::executeCommand( "if ( `menu -exists many_tiny_bubbles_menu` ) { deleteUI many_tiny_bubbles_menu; }" );
+
+
+	////////////////////////////////////////////////////
+	// deregister commands
+	////////////////////////////////////////////////////
+
+	//status = plugin.deregisterCommand( "CreateBubbleCmd" );
+	//if ( !status ) {
+	//	status.perror( "deregisterCommand" );
+	//	return status;
+	//}
+	//
+	//status = plugin.deregisterCommand( "RenderSequentialImagesCmd" );
+	//if ( !status ) {
+	//	status.perror( "deregisterCommand" );
+	//	return status;
+	//}
+
+
+	////////////////////////////////////////////////////
+	// deregister ManyTinyBubbles node
+	////////////////////////////////////////////////////
+
 	status = plugin.deregisterNode( ManyTinyBubbles::id );
-	if (!status) {
-		status.perror("deregisterNode");
+	if ( !status ) {
+		status.perror( "deregisterNode" );
 		return status;
 	}
 
@@ -111,12 +142,19 @@ MStatus uninitializePlugin( MObject obj)
 /*********** HELPER FUNCTIONS ***********/
 
 
+////////////////////////////////////////////////////
+// convertMStringToStdString
+////////////////////////////////////////////////////
 std::string convertMStringToStdString( MString mstring )
 {
 	std::string std_string = mstring.asChar();
 	return std_string;
 }
 
+
+////////////////////////////////////////////////////
+// convertStdStringToMString
+////////////////////////////////////////////////////
 MString convertStdStringToMString( std::string std_string )
 {
 	MString mstring = std_string.c_str();
