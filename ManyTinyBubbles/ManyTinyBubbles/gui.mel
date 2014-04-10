@@ -1,17 +1,13 @@
-////////////////////////////////////////////////////
-// commands executed when gui.mel is executed
-////////////////////////////////////////////////////
 
+// executed when script is loaded
 createMenu();
 
 
 
-/*********** TOP-LEVEL MENU ***********/
+/****************
+ * createMenu() *
+ ****************/
 
-
-////////////////////////////////////////////////////
-// createMenu()
-////////////////////////////////////////////////////
 global proc createMenu()
 {
 	// top level menu item
@@ -21,9 +17,9 @@ global proc createMenu()
 
 	// Create 3D Container + option box
 	menuItem -label "Create 3D Container"
-			 -command "temp()";
+			 -command "create3dContainer( false, true )";
 	menuItem -optionBox true
-			 -command "temp()";
+			 -command "showCreate3dContainerOptionsWindow()";
 	
 	// Create 3D Container with Emitter + option box
 	menuItem -label "Create 3D Container with Emitter"
@@ -54,12 +50,10 @@ global proc createMenu()
 
 
 
-/*********** HELPER FUNCTIONS ***********/
+/*************
+ * nlPrint() *
+ *************/
 
-
-////////////////////////////////////////////////////
-// nlPrint()
-////////////////////////////////////////////////////
 global proc nlPrint( string $print )
 {
 	print( $print + "\n" );
@@ -67,8 +61,9 @@ global proc nlPrint( string $print )
 
 
 
-/*********** TODOS ***********/
-
+/**********
+ * temp() *
+ **********/
 
 global proc temp()
 {

@@ -1,0 +1,365 @@
+
+
+/****************************************
+ * showCreate3dContainerOptionsWindow() *
+ ****************************************/
+
+global proc showCreate3dContainerOptionsWindow()
+{
+	////////////////////////////////////////////////////
+	// constants
+	////////////////////////////////////////////////////
+
+	int $WINDOW_WIDTH = 600;
+	int $WINDOW_HEIGHT = 400;
+	int $BUTTON_HEIGHT = 25;
+
+
+	////////////////////////////////////////////////////
+	// clear window if it already exists
+	////////////////////////////////////////////////////
+
+	if ( `window -exists create_3d_container_options_window` ) {
+  		deleteUI create_3d_container_options_window;
+		windowPref -remove create_3d_container_options_window;
+	}
+
+
+	////////////////////////////////////////////////////
+	// create window
+	////////////////////////////////////////////////////
+
+	window -title "Create 3D Container Options"
+		   -width $WINDOW_WIDTH -height $WINDOW_HEIGHT
+		   create_3d_container_options_window;
+	    
+	columnLayout -adjustableColumn true
+				 -columnAttach "both" 10
+				 -rowSpacing 5;
+
+	// resolution sliders
+	intSliderGrp -label "X resolution" -field true
+				 -minValue 3 -maxValue 100
+				 -fieldMinValue 3
+				 -value 20
+				 ui_res_x;
+	intSliderGrp -label "Y resolution" -field true
+				 -minValue 3 -maxValue 100
+				 -fieldMinValue 3
+				 -value 20
+				 ui_res_y;
+	intSliderGrp -label "Z resolution" -field true
+				 -minValue 3 -maxValue 100
+				 -fieldMinValue 3
+				 -value 20
+				 ui_res_z;
+
+	// container dimension sliders
+	floatSliderGrp -label "X size" -field true
+				   -minValue 0.0 -maxValue 100.0
+				   -fieldMinValue 0.0
+				   -value 10.0
+				   ui_dim_x;
+	floatSliderGrp -label "Y size" -field true
+				   -minValue 0.0 -maxValue 100.0
+				   -fieldMinValue 0.0
+				   -value 10.0
+				   ui_dim_y;
+	floatSliderGrp -label "Z size" -field true
+				   -minValue 0.0 -maxValue 100.0
+				   -fieldMinValue 0.0
+				   -value 10.0
+				   ui_dim_z;
+
+	// default fluid
+	checkBox -label "Use default fluid"
+			 -value true
+			 ui_default_fluid_checkbox;
+	floatSliderGrp -label "Fraction filled" -field true
+				   -minValue 0.1 -maxValue 1.0
+				   -fieldMinValue 0.1 -fieldMaxValue 1.0
+				   -value 0.8
+				   ui_fill_fraction;
+
+
+	////////////////////////////////////////////////////
+	// setup buttons + button commands
+	////////////////////////////////////////////////////
+
+	rowLayout -numberOfColumns 3
+			  -columnWidth3 ( $WINDOW_WIDTH / 3 ) ( $WINDOW_WIDTH / 3 ) ( $WINDOW_WIDTH / 3 )
+			  -columnAttach 1 "both" 0
+			  -columnAttach 2 "both" 0
+			  -columnAttach 3 "both" 0;
+	button -label "Apply and Close"
+		   -command "create3dContainer( true, true )"
+		   -height $BUTTON_HEIGHT;
+	button -label "Apply"
+		   -command "create3dContainer( true, false )"
+		   -height $BUTTON_HEIGHT;
+	button -label "Close"
+		   -command "deleteUI create_3d_container_options_window"
+		   -height $BUTTON_HEIGHT;
+	
+
+	////////////////////////////////////////////////////
+	// show window
+	////////////////////////////////////////////////////
+
+	showWindow create_3d_container_options_window;
+
+	// debug
+	debugPrint( "Many Tiny Bubbles: showed 3d container options window" );
+}
+
+
+
+/***********************
+ * create3dContainer() *
+ ***********************/
+
+global proc create3dContainer( int $options_window_displayed, int $close_window )
+{
+	////////////////////////////////////////////////////
+	// constants
+	////////////////////////////////////////////////////
+
+	int $DEFAULT_RES = 20;
+	float $DEFAULT_DIM = 10.0;
+	float $DEFAULT_FLUID_FILL_PERCENTAGE = 0.8; // [0.1, 1]
+
+
+	////////////////////////////////////////////////////
+	// query UI fields from options window
+	////////////////////////////////////////////////////
+
+	int $res_x, $res_y, $res_z;
+	float $dim_x, $dim_y, $dim_z;
+
+	if ( $options_window_displayed ) {
+		$res_x = `intSliderGrp -query -value ui_res_x`;
+		$res_y = `intSliderGrp -query -value ui_res_y`;
+		$res_z = `intSliderGrp -query -value ui_res_z`;
+
+		$dim_x = `floatSliderGrp -query -value ui_dim_x`;
+		$dim_y = `floatSliderGrp -query -value ui_dim_y`;
+		$dim_z = `floatSliderGrp -query -value ui_dim_z`;
+	}
+	else {
+		$res_x = $DEFAULT_RES;
+		$res_y = $DEFAULT_RES;
+		$res_z = $DEFAULT_RES;
+
+		$dim_x = $DEFAULT_DIM;
+		$dim_y = $DEFAULT_DIM;
+		$dim_z = $DEFAULT_DIM;
+	}
+
+
+	////////////////////////////////////////////////////
+	// create container
+	////////////////////////////////////////////////////
+
+	string $fluid_container = `create3DFluid $res_x $res_y $res_z $dim_x $dim_y $dim_z`;
+
+
+	////////////////////////////////////////////////////
+	// optionally fill container
+	////////////////////////////////////////////////////
+
+	if ( $options_window_displayed ) {
+		int $use_default_fluid = `checkBox -query -value ui_default_fluid_checkbox`;
+
+		if ( $use_default_fluid ) {
+			float $default_fluid_fill_percentage = `floatSliderGrp -query -value ui_fill_fraction`;
+			fill3dContainer( $fluid_container, $default_fluid_fill_percentage, $res_x, $res_y, $res_z );
+		}
+	}
+	else {
+		fill3dContainer( $fluid_container, $DEFAULT_FLUID_FILL_PERCENTAGE, $res_x, $res_y, $res_z );
+	}
+
+
+	////////////////////////////////////////////////////
+	// optionally close options window
+	////////////////////////////////////////////////////
+
+	if ( `window -exists create_3d_container_options_window` && $close_window ) {
+  		deleteUI create_3d_container_options_window;
+		windowPref -remove create_3d_container_options_window;
+	}
+
+	// debug
+	debugPrint( "Many Tiny Bubbles: created 3d container" );
+}
+
+
+
+/*********************
+ * fill3dContainer() *
+ *********************/
+
+global proc fill3dContainer( string $fluid_container, float $default_fluid_fill_percentage, int $res_x, int $res_y, int $res_z )
+{
+	// initial fluid attributes
+	float $VISCOSITY = 0.02;
+	float $DENSITY_TENSION = 0.1;
+	float $TENSION_FORCE = 0.01;
+	float $DENSITY_PRESSURE = 1.0;
+	float $DENSITY_PRESSURE_THRESHOLD = 1.0;
+	float $BUOYANCY = -1.0;
+	float $SURFACE_THRESHOLD = 0.15;
+
+	// initial fluid color
+	float $COLOR_R = 0.65;
+	float $COLOR_G = 0.93;
+	float $COLOR_B = 1.0;
+
+	// initial fluid attributes to increase simulation quality (optional)
+	int $HIGH_DETAIL_SOLVE = false;		// set true for higher quality, defaults to false
+	int $NUM_SUBSTEPS = 1;				// set greater than 1 for higher quality, defaults to 1
+	int $SOLVER_QUALITY = 20;			// set 40-80 for higher quality, defaults to 20
+	int $MESH_SMOOTHING_ITERATIONS = 0;	// set greater than 0 for higher quality, defaults to 0
+
+
+	////////////////////////////////////////////////////
+	// fill container
+	////////////////////////////////////////////////////
+
+	int $num_filled_cells = $res_x * $res_y * $res_z * $default_fluid_fill_percentage;
+	int $filled_cell_counter = 0;
+	int $continue_filling = true;
+
+	int $index_x, $index_y, $index_z;
+	for ( $index_y = 0; $index_y < $res_y && $continue_filling; ++$index_y ) {
+		for ( $index_z = 0; $index_z < $res_z && $continue_filling; ++$index_z ) {
+			for ( $index_x = 0; $index_x < $res_x && $continue_filling; ++$index_x, ++$filled_cell_counter ) {
+				if ( $filled_cell_counter < $num_filled_cells ) {
+					setFluidAttr -at "density"
+								 -fv 1.0
+								 -xIndex $index_x
+								 -yIndex $index_y
+								 -zIndex $index_z
+								 $fluid_container;
+				}
+				else {
+					$continue_filling = false;
+				}
+			}
+		}
+	}
+
+
+	////////////////////////////////////////////////////
+	// set initial fluid attributes
+	////////////////////////////////////////////////////
+
+	string $cmd;
+
+	// Dynamic Simulation -> Viscosity: 0.02
+	$cmd = $fluid_container + ".viscosity";
+	setAttr $cmd $VISCOSITY;
+
+	// Dynamic Simulation -> Forward Advection: On
+	$cmd = $fluid_container + ".forwardAdvection";
+	setAttr $cmd 1;
+
+	// Liquids -> Enable Liquid Simulation: On
+	$cmd = $fluid_container + ".enableLiquidSimulation";
+	setAttr $cmd 1;
+
+	// Liquids -> Liquid Method: Liquid and Air
+	$cmd = $fluid_container + ".liquidMethod";
+	setAttr $cmd 1;
+
+	// Liquids -> Density Tension: 0.1
+	$cmd = $fluid_container + ".densityTension";
+	setAttr $cmd $DENSITY_TENSION;
+
+	// Liquids -> Tension Force: 0.01
+	$cmd = $fluid_container + ".tensionForce";
+	setAttr $cmd $TENSION_FORCE;
+
+	// Liquids -> Density Pressure: 1
+	$cmd = $fluid_container + ".densityPressure";
+	setAttr $cmd $DENSITY_PRESSURE;
+
+	// Liquids -> Density Pressure Threshold: 1
+	$cmd = $fluid_container + ".densityPressureThreshold";
+	setAttr $cmd $DENSITY_PRESSURE_THRESHOLD;
+
+	// Contents Details -> Density -> Buoyancy: -1
+	$cmd = $fluid_container + ".densityBuoyancy";
+	setAttr $cmd $BUOYANCY;
+
+	// Container Properties -> Boundary X: Both Sides
+	$cmd = $fluid_container + ".boundaryX";
+	setAttr $cmd 1;
+
+	// Container Properties -> Boundary Y: -Y
+	$cmd = $fluid_container + ".boundaryY";
+	setAttr $cmd 2;
+
+	// Container Properties -> Boundary Z: Both Sides
+	$cmd = $fluid_container + ".boundaryZ";
+	setAttr $cmd 1;
+
+	// Auto Resize -> Auto Resize: On
+	$cmd = $fluid_container + ".autoResize";
+	setAttr $cmd 1;
+
+	// Auto Resize -> Resize Closed Boundaries: Off
+	$cmd = $fluid_container + ".resizeClosedBoundaries";
+	setAttr $cmd 0;
+
+	// Auto Resize -> Auto Resize Threshold: 0.2
+	$cmd = $fluid_container + ".autoResizeThreshold";
+	setAttr $cmd 0.2;
+
+	// Auto Resize -> Auto Resize Margin: 1 or greater
+	$cmd = $fluid_container + ".autoResizeMargin";
+	setAttr $cmd 1;
+
+	// Surface -> Surface Render: On
+	$cmd = $fluid_container + ".surfaceRender";
+	setAttr $cmd 1;
+
+	// Surface -> Surface Threshold: 0.15
+	$cmd = $fluid_container + ".surfaceThreshold";
+	setAttr $cmd $SURFACE_THRESHOLD;
+
+	// Output Mesh -> Use Gradient Normals: On
+	$cmd = $fluid_container + ".useGradientNormals";
+	setAttr $cmd 1;
+
+	// Shading -> Color -> Selected Color
+	$cmd = $fluid_container + ".color[0].color_Color";
+	setAttr $cmd -type double3 $COLOR_R $COLOR_G $COLOR_B;
+
+
+	////////////////////////////////////////////////////
+	// notes on attributes to consider setting to increase quality of fluid simulation
+	// will significantly increase computation time
+	////////////////////////////////////////////////////
+
+	// Dynamic Simulation -> High Detail Solve: All Grids
+	if ( $HIGH_DETAIL_SOLVE ) {
+		$cmd = $fluid_container + ".highDetailSolve";
+		setAttr $cmd 3;
+	}
+
+	// Dynamic Simulation -> Substeps: Greater than 1
+	$cmd = $fluid_container + ".substeps";
+	setAttr $cmd $NUM_SUBSTEPS;
+
+	// Dynamic Simulation -> Solver Quality: 40 to 80
+	$cmd = $fluid_container + ".solverQuality";
+	setAttr $cmd $SOLVER_QUALITY;
+
+	// Output Mesh -> Mesh Smoothing Iterations: Greater than 0
+	$cmd = $fluid_container + ".meshSmoothingIterations";
+	setAttr $cmd $MESH_SMOOTHING_ITERATIONS;
+
+	// debug
+	debugPrint( "Many Tiny Bubbles: filled 3d container with default fluid" );
+}
