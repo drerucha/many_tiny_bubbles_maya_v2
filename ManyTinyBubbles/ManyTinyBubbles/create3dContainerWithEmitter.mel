@@ -1,0 +1,199 @@
+
+
+/***************
+ * show window *
+ ***************/
+
+global proc showCreate3dContainerWithEmitterOptionsWindow()
+{
+	////////////////////////////////////////////////////
+	// constants
+	////////////////////////////////////////////////////
+
+	int $WINDOW_WIDTH = 600;
+	int $WINDOW_HEIGHT = 400;
+	int $BUTTON_HEIGHT = 25;
+
+
+	////////////////////////////////////////////////////
+	// clear window if it already exists
+	////////////////////////////////////////////////////
+
+	if ( `window -exists create_3d_container_with_emitter_options_window` ) {
+  		deleteUI create_3d_container_with_emitter_options_window;
+		windowPref -remove create_3d_container_with_emitter_options_window;
+	}
+
+
+	////////////////////////////////////////////////////
+	// create window
+	////////////////////////////////////////////////////
+
+	window -title "Create 3D Container with Emitter Options"
+		   -width $WINDOW_WIDTH -height $WINDOW_HEIGHT
+		   create_3d_container_with_emitter_options_window;
+	    
+
+	////////////////////////////////////////////////////
+	// window container attributes
+	////////////////////////////////////////////////////
+
+	columnLayout -adjustableColumn true
+				 -columnAttach "both" 10
+				 -rowSpacing 5;
+
+	// resolution sliders
+	intSliderGrp -label "X resolution" -field true
+				 -minValue 3 -maxValue 100
+				 -fieldMinValue 3
+				 -value 20
+				 ui_res_x;
+	intSliderGrp -label "Y resolution" -field true
+				 -minValue 3 -maxValue 100
+				 -fieldMinValue 3
+				 -value 20
+				 ui_res_y;
+	intSliderGrp -label "Z resolution" -field true
+				 -minValue 3 -maxValue 100
+				 -fieldMinValue 3
+				 -value 20
+				 ui_res_z;
+
+	// container dimension sliders
+	floatSliderGrp -label "X size" -field true
+				   -minValue 0.0 -maxValue 100.0
+				   -fieldMinValue 0.0
+				   -value 10.0
+				   ui_dim_x;
+	floatSliderGrp -label "Y size" -field true
+				   -minValue 0.0 -maxValue 100.0
+				   -fieldMinValue 0.0
+				   -value 10.0
+				   ui_dim_y;
+	floatSliderGrp -label "Z size" -field true
+				   -minValue 0.0 -maxValue 100.0
+				   -fieldMinValue 0.0
+				   -value 10.0
+				   ui_dim_z;
+
+	// default fluid
+	checkBox -label "Use default fluid"
+			 -value true
+			 ui_default_fluid_checkbox;
+	floatSliderGrp -label "Fraction filled" -field true
+				   -minValue 0.1 -maxValue 1.0
+				   -fieldMinValue 0.1 -fieldMaxValue 1.0
+				   -value 0.8
+				   ui_fill_fraction;
+
+
+	////////////////////////////////////////////////////
+	// bubble emitter attributes
+	////////////////////////////////////////////////////
+
+	floatSliderGrp -label "Emitter radius" -field true
+				   -minValue 0.1 -maxValue 10.0
+				   -fieldMinValue 0.1
+				   -value 0.1
+				   ui_emitter_radius;
+
+	intSliderGrp -label "Bubbles emitted per second" -field true
+				 -minValue 1 -maxValue 1000.0
+				 -fieldMinValue 1
+				 -value 100
+				 ui_bubble_rate;
+
+	floatSliderGrp -label "Scattering frequency (rate)" -field true
+				   -minValue 0.0 -maxValue 1.0
+				   -fieldMinValue 0.0 -fieldMaxValue 1.0
+				   -value 0.5
+				   ui_scattering_rate;
+
+	floatSliderGrp -label "Scattering coefficient (direction)" -field true
+				   -minValue -1.0 -maxValue 1.0
+				   -fieldMinValue -1.0 -fieldMaxValue 1.0
+				   -value 0.0
+				   ui_scattering_coeff;
+
+	floatSliderGrp -label "Bubble breakup frequency" -field true
+				   -minValue 0.0 -maxValue 1.0
+				   -fieldMinValue 0.0 -fieldMaxValue 1.0
+				   -value 0.5
+				   ui_bubble_breakup;
+
+
+	////////////////////////////////////////////////////
+	// setup buttons + button commands
+	////////////////////////////////////////////////////
+
+	rowLayout -numberOfColumns 3
+			  -columnWidth3 ( $WINDOW_WIDTH / 3 ) ( $WINDOW_WIDTH / 3 ) ( $WINDOW_WIDTH / 3 )
+			  -columnAttach 1 "both" 0
+			  -columnAttach 2 "both" 0
+			  -columnAttach 3 "both" 0;
+	button -label "Apply and Close"
+		   -command "create3dContainerWithEmitter( true, true )"
+		   -height $BUTTON_HEIGHT;
+	button -label "Apply"
+		   -command "create3dContainerWithEmitter( true, false )"
+		   -height $BUTTON_HEIGHT;
+	button -label "Close"
+		   -command "deleteUI create_3d_container_with_emitter_options_window"
+		   -height $BUTTON_HEIGHT;
+	
+
+	////////////////////////////////////////////////////
+	// show window
+	////////////////////////////////////////////////////
+
+	showWindow create_3d_container_with_emitter_options_window;
+
+	// print action in script editor
+	nlPrint( "Many Tiny Bubbles: showed 3d container with emitter options window" );
+}
+
+
+
+/****************************************
+ * create container with bubble emitter *
+ ****************************************/
+
+global proc create3dContainerWithEmitter( int $options_window_displayed, int $close_window )
+{
+	// TODO: create ManyTinyBubbles node
+
+	// create 3D container
+	create3dContainer( $options_window_displayed, false );
+
+	// create bubble emitter
+	createEmitter();
+
+
+	////////////////////////////////////////////////////
+	// optionally close options window
+	////////////////////////////////////////////////////
+
+	if ( `window -exists create_3d_container_with_emitter_options_window` && $close_window ) {
+  		deleteUI create_3d_container_with_emitter_options_window;
+		windowPref -remove create_3d_container_with_emitter_options_window;
+	}
+
+	// print action in script editor
+	nlPrint( "Many Tiny Bubbles: created 3d container with emitter" );
+}
+
+
+
+/*************************
+ * create bubble emitter *
+ *************************/
+
+global proc createEmitter()
+{
+	// TODO: create sphere mesh as emitter
+	// TODO: return emitter name
+
+
+	// print action in script editor
+	nlPrint( "in createEmitter()" );
+}

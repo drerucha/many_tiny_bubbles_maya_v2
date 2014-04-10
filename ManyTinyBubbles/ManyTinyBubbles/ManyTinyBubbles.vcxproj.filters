@@ -30,6 +30,9 @@
     <None Include="create3dContainer.mel">
       <Filter>Scripts</Filter>
     </None>
+    <None Include="create3dContainerWithEmitter.mel">
+      <Filter>Scripts</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ManyTinyBubblesNode.h">

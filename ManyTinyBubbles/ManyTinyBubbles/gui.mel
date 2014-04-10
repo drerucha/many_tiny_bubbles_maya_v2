@@ -4,55 +4,76 @@ createMenu();
 
 
 
-/****************
- * createMenu() *
- ****************/
+/*****************************
+ * top-level menu for plugin *
+ *****************************/
 
 global proc createMenu()
 {
+	////////////////////////////////////////////////////
 	// top level menu item
+	////////////////////////////////////////////////////
+
 	menu -label "Many Tiny Bubbles"
 		 -parent MayaWindow
 		 many_tiny_bubbles_menu;
 
-	// Create 3D Container + option box
+
+	////////////////////////////////////////////////////
+	// Create 3D Container
+	////////////////////////////////////////////////////
+
 	menuItem -label "Create 3D Container"
 			 -command "create3dContainer( false, true )";
 	menuItem -optionBox true
 			 -command "showCreate3dContainerOptionsWindow()";
 	
-	// Create 3D Container with Emitter + option box
+
+	////////////////////////////////////////////////////
+	// Create 3D Container with Emitter
+	////////////////////////////////////////////////////
+
 	menuItem -label "Create 3D Container with Emitter"
-			 -command "temp()";
+			 -command "create3dContainerWithEmitter( false, true )";
 	menuItem -optionBox true
-			 -command "temp()";
+			 -command "showCreate3dContainerWithEmitterOptionsWindow()";
 	
-	// Add Bubble Emitter + option box
-	// fluidShape must be selected
+
+	////////////////////////////////////////////////////
+	// Add Bubble Emitter
+	////////////////////////////////////////////////////
+
 	menuItem -label "Add Bubble Emitter"
 			 -command "temp()";
 	menuItem -optionBox true
 			 -command "temp()";
 	
-	// Convert Mesh to Bubble Emitter + option box
-	// fluidShape and mesh must be selected
+
+	////////////////////////////////////////////////////
+	// Convert Mesh to Bubble Emitter
+	////////////////////////////////////////////////////
+
 	menuItem -label "Convert Mesh to Bubble Emitter"
 			 -command "temp()";
 	menuItem -optionBox true
 			 -command "temp()";
 	
+	////////////////////////////////////////////////////
 	// Render Simulation
+	////////////////////////////////////////////////////
+
 	menuItem -label "Render Simulation"
 			 -command "temp()";
 
+	// print action in script editor
 	nlPrint( "Many Tiny Bubbles: created menu" );
 }
 
 
 
-/*************
- * nlPrint() *
- *************/
+/*****************************
+ * printing in script editor *
+ *****************************/
 
 global proc nlPrint( string $print )
 {
@@ -61,11 +82,12 @@ global proc nlPrint( string $print )
 
 
 
-/**********
- * temp() *
- **********/
+/*****************
+ * filler method *
+ *****************/
 
 global proc temp()
 {
+	// print action in script editor
 	nlPrint( "not yet implemented\n" );
 }

@@ -1,8 +1,8 @@
 
 
-/****************************************
- * showCreate3dContainerOptionsWindow() *
- ****************************************/
+/***************
+ * show window *
+ ***************/
 
 global proc showCreate3dContainerOptionsWindow()
 {
@@ -108,18 +108,21 @@ global proc showCreate3dContainerOptionsWindow()
 
 	showWindow create_3d_container_options_window;
 
-	// debug
-	debugPrint( "Many Tiny Bubbles: showed 3d container options window" );
+	// print action in script editor
+	nlPrint( "Many Tiny Bubbles: showed 3d container options window" );
 }
 
 
 
-/***********************
- * create3dContainer() *
- ***********************/
+/********************
+ * create container *
+ ********************/
 
 global proc create3dContainer( int $options_window_displayed, int $close_window )
 {
+	// TODO: return container name
+
+
 	////////////////////////////////////////////////////
 	// constants
 	////////////////////////////////////////////////////
@@ -189,15 +192,15 @@ global proc create3dContainer( int $options_window_displayed, int $close_window 
 		windowPref -remove create_3d_container_options_window;
 	}
 
-	// debug
-	debugPrint( "Many Tiny Bubbles: created 3d container" );
+	// print action in script editor
+	nlPrint( "Many Tiny Bubbles: created 3d container" );
 }
 
 
 
-/*********************
- * fill3dContainer() *
- *********************/
+/*************************************
+ * fill container with default fluid *
+ *************************************/
 
 global proc fill3dContainer( string $fluid_container, float $default_fluid_fill_percentage, int $res_x, int $res_y, int $res_z )
 {
@@ -360,6 +363,6 @@ global proc fill3dContainer( string $fluid_container, float $default_fluid_fill_
 	$cmd = $fluid_container + ".meshSmoothingIterations";
 	setAttr $cmd $MESH_SMOOTHING_ITERATIONS;
 
-	// debug
-	debugPrint( "Many Tiny Bubbles: filled 3d container with default fluid" );
+	// print action in script editor
+	nlPrint( "Many Tiny Bubbles: filled 3d container with default fluid" );
 }
