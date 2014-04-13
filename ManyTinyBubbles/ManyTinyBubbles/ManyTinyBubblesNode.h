@@ -19,7 +19,7 @@ class ManyTinyBubbles : public MPxNode
 {
 public:
 						ManyTinyBubbles();
-	virtual				~ManyTinyBubbles(); 
+	virtual				~ManyTinyBubbles();
 
 	virtual MStatus		compute( const MPlug& plug, MDataBlock& data );
 
@@ -31,15 +31,22 @@ public:
 	// There needs to be a MObject handle declared for each attribute that
 	// the node will have.  These handles are needed for getting and setting
 	// the values later.
-	//
-	static  MObject		input;		// Example input attribute
-	static  MObject		output;		// Example output attribute
 
+	static MObject input;	// test
+	static MObject output;	// test
+
+	static MObject time;
+	static MObject input_mesh;
+	static MObject emission_rate;
+	static MObject scattering_frequency;
+	static MObject scattering_coefficient;
+	static MObject breakup_frequency;
+	static MObject bubble_size_min;
+	static MObject bubble_size_max;
 
 	// The typeid is a unique 32bit indentifier that describes this node.
 	// It is used to save and retrieve nodes of this type from the binary
 	// file format.  If it is not unique, it will cause file IO problems.
-	//
 	static	MTypeId		id;
 };
 
