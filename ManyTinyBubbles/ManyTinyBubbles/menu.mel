@@ -65,8 +65,7 @@ global proc createMenu()
 	menuItem -label "Render Simulation"
 			 -command "temp()";
 
-	// print action in script editor
-	nlPrint( "Many Tiny Bubbles: created menu" );
+	mtbLog( "created menu" );
 }
 
 
@@ -75,9 +74,9 @@ global proc createMenu()
  * printing in script editor *
  *****************************/
 
-global proc nlPrint( string $print )
+global proc mtbLog( string $print )
 {
-	print( $print + "\n" );
+	print( "MTB: " + $print + "\n" );
 }
 
 

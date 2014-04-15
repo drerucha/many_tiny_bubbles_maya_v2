@@ -12,7 +12,8 @@ global proc showCreate3dContainerOptionsWindow()
 
 	int $WINDOW_WIDTH = 600;
 	int $WINDOW_HEIGHT = 400;
-	int $BUTTON_HEIGHT = 25;
+
+	int $button_height = getDefaultButtonHeight();
 
 	float $default_res = getDefaultResolution();
 	float $default_dim = getDefaultDimensions();
@@ -97,13 +98,13 @@ global proc showCreate3dContainerOptionsWindow()
 			  -columnAttach 3 "both" 0;
 	button -label "Apply and Close"
 		   -command "create3dContainer( true, true )"
-		   -height $BUTTON_HEIGHT;
+		   -height $button_height;
 	button -label "Apply"
 		   -command "create3dContainer( true, false )"
-		   -height $BUTTON_HEIGHT;
+		   -height $button_height;
 	button -label "Close"
 		   -command "deleteUI create_3d_container_options_window"
-		   -height $BUTTON_HEIGHT;
+		   -height $button_height;
 	
 
 	////////////////////////////////////////////////////
@@ -112,8 +113,7 @@ global proc showCreate3dContainerOptionsWindow()
 
 	showWindow create_3d_container_options_window;
 
-	// print action in script editor
-	nlPrint( "Many Tiny Bubbles: showed 3d container options window" );
+	mtbLog( "showed 3d container options window" );
 }
 
 
@@ -122,7 +122,7 @@ global proc showCreate3dContainerOptionsWindow()
  * create container *
  ********************/
 
-global proc create3dContainer( int $options_window_displayed, int $close_window )
+global proc string create3dContainer( int $options_window_displayed, int $close_window )
 {
 	////////////////////////////////////////////////////
 	// query UI fields from options window
@@ -188,8 +188,9 @@ global proc create3dContainer( int $options_window_displayed, int $close_window 
 		windowPref -remove create_3d_container_options_window;
 	}
 
-	// print action in script editor
-	nlPrint( "Many Tiny Bubbles: created 3d container" );
+	mtbLog( "created 3d container" );
+
+	return $fluid_container;
 }
 
 
@@ -359,6 +360,5 @@ global proc fill3dContainer( string $fluid_container, float $default_fluid_fill_
 	$cmd = $fluid_container + ".meshSmoothingIterations";
 	setAttr $cmd $MESH_SMOOTHING_ITERATIONS;
 
-	// print action in script editor
-	nlPrint( "Many Tiny Bubbles: filled 3d container with default fluid" );
+	mtbLog( "filled 3d container with default fluid" );
 }

@@ -4,7 +4,7 @@
  * create ManyTinyBubbles node *
  *******************************/
 
-global proc createManyTinyBubblesNode( string $fluid_container, int $options_window_displayed )
+global proc createManyTinyBubblesNode( string $fluid_container, string $emitter_mesh, int $options_window_displayed )
 {
 	//createNode transform -n Bubble1;
 	//createNode mesh -n BubbleShape1 -p Bubble1;
@@ -13,19 +13,76 @@ global proc createManyTinyBubblesNode( string $fluid_container, int $options_win
 	//connectAttr time1.outTime CreateBubbleNode1.time;
 	//connectAttr CreateBubbleNode1.outputMesh BubbleShape1.inMesh;
 
-	//string $fluid_container = `create3DFluid $res_x $res_y $res_z $dim_x $dim_y $dim_z`;
+
+	////////////////////////////////////////////////////
+	// query UI fields from options window
+	////////////////////////////////////////////////////
 
 
-	//string $node = `createNode ManyTinyBubbles`;
-
-	//string $cmd;
-
-	//$cmd = $node + ".time";
-	//connectAttr time1.outTime $cmd;
+	// TODO: query UI sliders for $bubble_radius_min and $bubble_radius_max
 
 
-	//setAttr $cmd 10;
+	int $emission_rate;
+	float $scattering_frequency, $scattering_coefficient, $bubble_breakup, $bubble_radius_min, $bubble_radius_max;
+
+	if ( $options_window_displayed ) {
+		$emission_rate			= `intSliderGrp -query -value ui_bubble_rate`;
+		$scattering_frequency	= `floatSliderGrp -query -value ui_scattering_rate`;
+		$scattering_coefficient	= `floatSliderGrp -query -value ui_scattering_coeff`;
+		$bubble_breakup			= `floatSliderGrp -query -value ui_bubble_breakup`;
+		$bubble_radius_min		= getDefaultBubbleRadiusMin();
+		$bubble_radius_max		= getDefaultBubbleRadiusMax();
+	}
+	else {
+		$emission_rate			= getDefaultEmissionRate();
+		$scattering_frequency	= getDefaultScatteringFrequency();
+		$scattering_coefficient	= getDefaultScatteringCoefficient();
+		$bubble_breakup			= getDefaultBreakupFrequency();
+		$bubble_radius_min		= getDefaultBubbleRadiusMin();
+		$bubble_radius_max		= getDefaultBubbleRadiusMax();
+	}
 
 
+	////////////////////////////////////////////////////
+	// create node
+	////////////////////////////////////////////////////
 
+	string $node = `createNode ManyTinyBubbles`;
+
+
+	////////////////////////////////////////////////////
+	// set node attributes
+	////////////////////////////////////////////////////
+
+	string $cmd;
+
+
+	// TODO: connect time attribute to system clock?
+
+
+	$cmd = $node + ".emitter_mesh_name";
+	setAttr $cmd -type "string" $emitter_mesh;
+
+	$cmd = $node + ".fluid_container_name";
+	setAttr $cmd -type "string" $fluid_container;
+
+	$cmd = $node + ".emission_rate";
+	setAttr $cmd $emission_rate;
+
+	$cmd = $node + ".scattering_frequency";
+	setAttr $cmd $scattering_frequency;
+
+	$cmd = $node + ".scattering_coefficient";
+	setAttr $cmd $scattering_coefficient;
+
+	$cmd = $node + ".breakup_frequency";
+	setAttr $cmd $bubble_breakup;
+
+	$cmd = $node + ".bubble_size_min";
+	setAttr $cmd $bubble_radius_min;
+
+	$cmd = $node + ".bubble_size_max";
+	setAttr $cmd $bubble_radius_max;
+
+	mtbLog( "created node" );
 }

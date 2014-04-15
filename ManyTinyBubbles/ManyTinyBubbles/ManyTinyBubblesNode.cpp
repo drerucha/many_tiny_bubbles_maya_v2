@@ -28,8 +28,8 @@ MObject ManyTinyBubbles::input;		// test
 MObject ManyTinyBubbles::output;	// test
 
 MObject ManyTinyBubbles::time;
-MObject ManyTinyBubbles::input_mesh;
-//MObject ManyTinyBubbles::fluid_container;
+MObject ManyTinyBubbles::emitter_mesh_name;
+MObject ManyTinyBubbles::fluid_container_name;
 MObject ManyTinyBubbles::emission_rate;
 MObject ManyTinyBubbles::scattering_frequency;
 MObject ManyTinyBubbles::scattering_coefficient;
@@ -119,6 +119,9 @@ void* ManyTinyBubbles::creator()
 //	
 MStatus ManyTinyBubbles::initialize()	
 {
+	// TODO: change input_mesh and fluid_container attributes to strings
+
+
 	////////////////////////////////////////////////////
 	// create attributes
 	////////////////////////////////////////////////////
@@ -155,24 +158,29 @@ MStatus ManyTinyBubbles::initialize()
  	uAttr.setStorable( false );
 
 	//ManyTinyBubbles::input_mesh = tAttr.create( "mesh", "m", MFnData::kMesh );
-	ManyTinyBubbles::input_mesh = tAttr.create( "mesh", "m", MFnMeshData::kMesh );
- 	tAttr.setStorable( true );
-    tAttr.setWritable( false );
-	tAttr.setStorable( false );
-
-	//ManyTinyBubbles::fluid_container = tAttr.create( "container", "c", MFnMeshData::kMesh );
+	//ManyTinyBubbles::emitter_mesh = tAttr.create( "input_mesh", "m", MFnMeshData::kMesh );
 	//tAttr.setStorable( true );
 	//tAttr.setWritable( false );
 	//tAttr.setStorable( false );
 
-	ManyTinyBubbles::emission_rate = nAttr.create( "rate", "r", MFnNumericData::kInt, 1000 );
+	ManyTinyBubbles::emitter_mesh_name = tAttr.create( "emitter_mesh_name", "emn", MFnData::kString );
+ 	tAttr.setStorable( true );
+    tAttr.setWritable( false );
+	tAttr.setStorable( false );
+
+	ManyTinyBubbles::fluid_container_name = tAttr.create( "fluid_container_name", "fcn", MFnData::kString );
+ 	tAttr.setStorable( true );
+    tAttr.setWritable( false );
+	tAttr.setStorable( false );
+
+	ManyTinyBubbles::emission_rate = nAttr.create( "emission_rate", "er", MFnNumericData::kInt, 1000 );
 	nAttr.setSoftMax( 10000 );
 	nAttr.setSoftMin( 1 );
 	nAttr.setMin( 1 );
  	nAttr.setStorable( true );
  	nAttr.setKeyable( true );
 
-	ManyTinyBubbles::scattering_frequency = nAttr.create( "scattfreq", "sf", MFnNumericData::kFloat, 0.5 );
+	ManyTinyBubbles::scattering_frequency = nAttr.create( "scattering_frequency", "sf", MFnNumericData::kFloat, 0.5 );
 	nAttr.setSoftMax( 1.0 );
 	nAttr.setSoftMin( 0.0 );
 	nAttr.setMax( 1.0 );
@@ -180,7 +188,7 @@ MStatus ManyTinyBubbles::initialize()
  	nAttr.setStorable( true );
  	nAttr.setKeyable( true );
 
-	ManyTinyBubbles::scattering_coefficient = nAttr.create( "scattcoeff", "sc", MFnNumericData::kFloat, 0.0 );
+	ManyTinyBubbles::scattering_coefficient = nAttr.create( "scattering_coefficient", "sc", MFnNumericData::kFloat, 0.0 );
 	nAttr.setSoftMax( 1.0 );
 	nAttr.setSoftMin( -1.0 );
 	nAttr.setMax( 1.0 );
@@ -188,7 +196,7 @@ MStatus ManyTinyBubbles::initialize()
  	nAttr.setStorable( true );
  	nAttr.setKeyable( true );
 
-	ManyTinyBubbles::breakup_frequency = nAttr.create( "breakup", "brk", MFnNumericData::kFloat, 0.5 );
+	ManyTinyBubbles::breakup_frequency = nAttr.create( "breakup_frequency", "bf", MFnNumericData::kFloat, 0.5 );
 	nAttr.setSoftMax( 1.0 );
 	nAttr.setSoftMin( 0.0 );
 	nAttr.setMax( 1.0 );
@@ -196,14 +204,14 @@ MStatus ManyTinyBubbles::initialize()
  	nAttr.setStorable( true );
  	nAttr.setKeyable( true );
 
-	ManyTinyBubbles::bubble_size_min = nAttr.create( "sizemin", "min", MFnNumericData::kFloat, 0.001 );
+	ManyTinyBubbles::bubble_size_min = nAttr.create( "bubble_size_min", "smin", MFnNumericData::kFloat, 0.001 );
 	nAttr.setSoftMax( 0.1 );
 	nAttr.setSoftMin( 0.001 );
 	nAttr.setMin( 0.0 );
  	nAttr.setStorable( true );
  	nAttr.setKeyable( true );
 
-	ManyTinyBubbles::bubble_size_max = nAttr.create( "sizemax", "max", MFnNumericData::kFloat, 0.001 );
+	ManyTinyBubbles::bubble_size_max = nAttr.create( "bubble_size_max", "smax", MFnNumericData::kFloat, 0.001 );
 	nAttr.setSoftMax( 0.1 );
 	nAttr.setSoftMin( 0.001 );
 	nAttr.setMin( 0.0 );
@@ -221,10 +229,10 @@ MStatus ManyTinyBubbles::initialize()
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
 	stat = addAttribute( ManyTinyBubbles::time );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	stat = addAttribute( ManyTinyBubbles::input_mesh );
+	stat = addAttribute( ManyTinyBubbles::emitter_mesh_name );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	//stat = addAttribute( ManyTinyBubbles::fluid_container );
-	//	if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
+	stat = addAttribute( ManyTinyBubbles::fluid_container_name );
+		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
 	stat = addAttribute( ManyTinyBubbles::emission_rate );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
 	stat = addAttribute( ManyTinyBubbles::scattering_frequency );
@@ -251,10 +259,10 @@ MStatus ManyTinyBubbles::initialize()
 
 	stat = attributeAffects( ManyTinyBubbles::time, ManyTinyBubbles::output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	stat = attributeAffects( ManyTinyBubbles::input_mesh, ManyTinyBubbles::output );
+	stat = attributeAffects( ManyTinyBubbles::emitter_mesh_name, ManyTinyBubbles::output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	//stat = attributeAffects( ManyTinyBubbles::fluid_container, ManyTinyBubbles::output );
-	//	if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
+	stat = attributeAffects( ManyTinyBubbles::fluid_container_name, ManyTinyBubbles::output );
+		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
 	stat = attributeAffects( ManyTinyBubbles::emission_rate, ManyTinyBubbles::output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
 	stat = attributeAffects( ManyTinyBubbles::scattering_frequency, ManyTinyBubbles::output );

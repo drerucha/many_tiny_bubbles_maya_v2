@@ -1,5 +1,16 @@
 
 
+/*******************
+ * menu attributes *
+ *******************/
+
+ global proc int getDefaultButtonHeight()
+{
+	return 25;
+}
+
+
+
 /******************************
  * fluid container attributes *
  ******************************/
@@ -26,10 +37,10 @@ global proc float getDefaultFluidFillPercentage()
 
 global proc float getDefaultEmitterRadius()
 {
-	return 0.1;
+	return 1.0;
 }
 
-global proc int getDefaultEmitterRate()
+global proc int getDefaultEmissionRate()
 {
 	return 100;
 }

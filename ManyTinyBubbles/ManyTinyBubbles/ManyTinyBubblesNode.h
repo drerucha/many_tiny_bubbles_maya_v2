@@ -36,8 +36,8 @@ public:
 	static MObject output;	// test
 
 	static MObject time;
-	static MObject input_mesh;
-	//static MObject fluid_container;
+	static MObject emitter_mesh_name;
+	static MObject fluid_container_name;
 	static MObject emission_rate;
 	static MObject scattering_frequency;
 	static MObject scattering_coefficient;

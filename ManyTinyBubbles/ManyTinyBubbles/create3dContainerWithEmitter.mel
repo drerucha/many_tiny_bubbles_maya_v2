@@ -14,11 +14,18 @@ global proc showCreate3dContainerWithEmitterOptionsWindow()
 
 	int $WINDOW_WIDTH = 600;
 	int $WINDOW_HEIGHT = 400;
-	int $BUTTON_HEIGHT = 25;
+
+	int $button_height = getDefaultButtonHeight();
 
 	float $default_res = getDefaultResolution();
 	float $default_dim = getDefaultDimensions();
 	float $default_fluid_fill_percentage = getDefaultFluidFillPercentage();
+
+	float $default_emitter_radius = getDefaultEmitterRadius();
+	int $default_emitter_rate = getDefaultEmissionRate();
+	float $default_scattering_frequency = getDefaultScatteringFrequency();
+	float $default_scattering_coefficient = getDefaultScatteringCoefficient();
+	float $default_breakup_frequency = getDefaultBreakupFrequency();
 
 
 	////////////////////////////////////////////////////
@@ -100,31 +107,31 @@ global proc showCreate3dContainerWithEmitterOptionsWindow()
 	floatSliderGrp -label "Emitter radius" -field true
 				   -minValue 0.1 -maxValue 10.0
 				   -fieldMinValue 0.1
-				   -value 0.1
+				   -value $default_emitter_radius
 				   ui_emitter_radius;
 
 	intSliderGrp -label "Bubbles emitted per second" -field true
 				 -minValue 1 -maxValue 1000.0
 				 -fieldMinValue 1
-				 -value 100
+				 -value $default_emitter_rate
 				 ui_bubble_rate;
 
 	floatSliderGrp -label "Scattering frequency (rate)" -field true
 				   -minValue 0.0 -maxValue 1.0
 				   -fieldMinValue 0.0 -fieldMaxValue 1.0
-				   -value 0.5
+				   -value $default_scattering_frequency
 				   ui_scattering_rate;
 
 	floatSliderGrp -label "Scattering coefficient (direction)" -field true
 				   -minValue -1.0 -maxValue 1.0
 				   -fieldMinValue -1.0 -fieldMaxValue 1.0
-				   -value 0.0
+				   -value $default_scattering_coefficient
 				   ui_scattering_coeff;
 
 	floatSliderGrp -label "Bubble breakup frequency" -field true
 				   -minValue 0.0 -maxValue 1.0
 				   -fieldMinValue 0.0 -fieldMaxValue 1.0
-				   -value 0.5
+				   -value $default_breakup_frequency
 				   ui_bubble_breakup;
 
 
@@ -139,13 +146,13 @@ global proc showCreate3dContainerWithEmitterOptionsWindow()
 			  -columnAttach 3 "both" 0;
 	button -label "Apply and Close"
 		   -command "create3dContainerWithEmitter( true, true )"
-		   -height $BUTTON_HEIGHT;
+		   -height $button_height;
 	button -label "Apply"
 		   -command "create3dContainerWithEmitter( true, false )"
-		   -height $BUTTON_HEIGHT;
+		   -height $button_height;
 	button -label "Close"
 		   -command "deleteUI create_3d_container_with_emitter_options_window"
-		   -height $BUTTON_HEIGHT;
+		   -height $button_height;
 	
 
 	////////////////////////////////////////////////////
@@ -154,8 +161,7 @@ global proc showCreate3dContainerWithEmitterOptionsWindow()
 
 	showWindow create_3d_container_with_emitter_options_window;
 
-	// print action in script editor
-	nlPrint( "Many Tiny Bubbles: showed 3d container with emitter options window" );
+	mtbLog( "showed 3d container with emitter options window" );
 }
 
 
@@ -167,12 +173,42 @@ global proc showCreate3dContainerWithEmitterOptionsWindow()
 global proc create3dContainerWithEmitter( int $options_window_displayed, int $close_window )
 {
 	// TODO: create ManyTinyBubbles node
+	// TODO: move spherical emitter to bottom of fluid container
 
+
+	////////////////////////////////////////////////////
+	// query UI fields from options window
+	////////////////////////////////////////////////////
+
+	float $emitter_radius;
+
+	if ( $options_window_displayed ) {
+		$emitter_radius = `floatSliderGrp -query -value ui_emitter_radius`;
+	}
+	else {
+		$emitter_radius = getDefaultEmitterRadius();
+	}
+
+
+	////////////////////////////////////////////////////
 	// create 3D container
-	create3dContainer( $options_window_displayed, false );
+	////////////////////////////////////////////////////
 
+	string $fluid_container = create3dContainer( $options_window_displayed, false );
+
+
+	////////////////////////////////////////////////////
 	// create bubble emitter
-	createEmitter();
+	////////////////////////////////////////////////////
+
+	string $emitter_mesh = createEmitter( $emitter_radius );
+
+
+	////////////////////////////////////////////////////
+	// create node
+	////////////////////////////////////////////////////
+
+	createManyTinyBubblesNode( $fluid_container, $emitter_mesh, $options_window_displayed );
 
 
 	////////////////////////////////////////////////////
@@ -184,8 +220,7 @@ global proc create3dContainerWithEmitter( int $options_window_displayed, int $cl
 		windowPref -remove create_3d_container_with_emitter_options_window;
 	}
 
-	// print action in script editor
-	nlPrint( "Many Tiny Bubbles: created 3d container with emitter" );
+	mtbLog( "created 3d container with emitter" );
 }
 
 
@@ -194,14 +229,11 @@ global proc create3dContainerWithEmitter( int $options_window_displayed, int $cl
  * create bubble emitter *
  *************************/
 
-global proc createEmitter()
+global proc string createEmitter( float $radius )
 {
-	// TODO: create sphere mesh as emitter
-	// TODO: return emitter name
+	string $emitter_mesh[] = `polySphere -radius $radius -subdivisionsX 20 -subdivisionsY 20 -axis 0 1 0 -createUVs 2 -constructionHistory 1`;
 
-	//polySphere -r 1 -sx 20 -sy 20 -ax 0 1 0 -cuv 2 -ch 1;
+	mtbLog( "created spherical bubble emitter" );
 
-
-	// print action in script editor
-	nlPrint( "in createEmitter()" );
+	return $emitter_mesh[0];
 }
