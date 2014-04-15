@@ -24,13 +24,19 @@
     <None Include="Options.txt">
       <Filter>Miscellaneous Files</Filter>
     </None>
-    <None Include="gui.mel">
-      <Filter>Scripts</Filter>
-    </None>
     <None Include="create3dContainer.mel">
       <Filter>Scripts</Filter>
     </None>
     <None Include="create3dContainerWithEmitter.mel">
+      <Filter>Scripts</Filter>
+    </None>
+    <None Include="menu.mel">
+      <Filter>Scripts</Filter>
+    </None>
+    <None Include="node.mel">
+      <Filter>Scripts</Filter>
+    </None>
+    <None Include="constants.mel">
       <Filter>Scripts</Filter>
     </None>
   </ItemGroup>

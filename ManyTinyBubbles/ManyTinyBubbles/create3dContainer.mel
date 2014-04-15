@@ -14,6 +14,10 @@ global proc showCreate3dContainerOptionsWindow()
 	int $WINDOW_HEIGHT = 400;
 	int $BUTTON_HEIGHT = 25;
 
+	float $default_res = getDefaultResolution();
+	float $default_dim = getDefaultDimensions();
+	float $default_fluid_fill_percentage = getDefaultFluidFillPercentage();
+
 
 	////////////////////////////////////////////////////
 	// clear window if it already exists
@@ -41,34 +45,34 @@ global proc showCreate3dContainerOptionsWindow()
 	intSliderGrp -label "X resolution" -field true
 				 -minValue 3 -maxValue 100
 				 -fieldMinValue 3
-				 -value 20
+				 -value $default_res
 				 ui_res_x;
 	intSliderGrp -label "Y resolution" -field true
 				 -minValue 3 -maxValue 100
 				 -fieldMinValue 3
-				 -value 20
+				 -value $default_res
 				 ui_res_y;
 	intSliderGrp -label "Z resolution" -field true
 				 -minValue 3 -maxValue 100
 				 -fieldMinValue 3
-				 -value 20
+				 -value $default_res
 				 ui_res_z;
 
 	// container dimension sliders
 	floatSliderGrp -label "X size" -field true
 				   -minValue 0.0 -maxValue 100.0
 				   -fieldMinValue 0.0
-				   -value 10.0
+				   -value $default_dim
 				   ui_dim_x;
 	floatSliderGrp -label "Y size" -field true
 				   -minValue 0.0 -maxValue 100.0
 				   -fieldMinValue 0.0
-				   -value 10.0
+				   -value $default_dim
 				   ui_dim_y;
 	floatSliderGrp -label "Z size" -field true
 				   -minValue 0.0 -maxValue 100.0
 				   -fieldMinValue 0.0
-				   -value 10.0
+				   -value $default_dim
 				   ui_dim_z;
 
 	// default fluid
@@ -78,7 +82,7 @@ global proc showCreate3dContainerOptionsWindow()
 	floatSliderGrp -label "Fraction filled" -field true
 				   -minValue 0.1 -maxValue 1.0
 				   -fieldMinValue 0.1 -fieldMaxValue 1.0
-				   -value 0.8
+				   -value $default_fluid_fill_percentage
 				   ui_fill_fraction;
 
 
@@ -120,18 +124,6 @@ global proc showCreate3dContainerOptionsWindow()
 
 global proc create3dContainer( int $options_window_displayed, int $close_window )
 {
-	// TODO: return container name
-
-
-	////////////////////////////////////////////////////
-	// constants
-	////////////////////////////////////////////////////
-
-	int $DEFAULT_RES = 20;
-	float $DEFAULT_DIM = 10.0;
-	float $DEFAULT_FLUID_FILL_PERCENTAGE = 0.8; // [0.1, 1]
-
-
 	////////////////////////////////////////////////////
 	// query UI fields from options window
 	////////////////////////////////////////////////////
@@ -149,13 +141,16 @@ global proc create3dContainer( int $options_window_displayed, int $close_window 
 		$dim_z = `floatSliderGrp -query -value ui_dim_z`;
 	}
 	else {
-		$res_x = $DEFAULT_RES;
-		$res_y = $DEFAULT_RES;
-		$res_z = $DEFAULT_RES;
+		float $default_res = getDefaultResolution();
+		float $default_dim = getDefaultDimensions();
 
-		$dim_x = $DEFAULT_DIM;
-		$dim_y = $DEFAULT_DIM;
-		$dim_z = $DEFAULT_DIM;
+		$res_x = $default_res;
+		$res_y = $default_res;
+		$res_z = $default_res;
+
+		$dim_x = $default_dim;
+		$dim_y = $default_dim;
+		$dim_z = $default_dim;
 	}
 
 
@@ -179,7 +174,8 @@ global proc create3dContainer( int $options_window_displayed, int $close_window 
 		}
 	}
 	else {
-		fill3dContainer( $fluid_container, $DEFAULT_FLUID_FILL_PERCENTAGE, $res_x, $res_y, $res_z );
+		float $default_fluid_fill_percentage = getDefaultFluidFillPercentage();
+		fill3dContainer( $fluid_container, $default_fluid_fill_percentage, $res_x, $res_y, $res_z );
 	}
 
 

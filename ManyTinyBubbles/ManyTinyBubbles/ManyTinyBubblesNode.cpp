@@ -29,6 +29,7 @@ MObject ManyTinyBubbles::output;	// test
 
 MObject ManyTinyBubbles::time;
 MObject ManyTinyBubbles::input_mesh;
+//MObject ManyTinyBubbles::fluid_container;
 MObject ManyTinyBubbles::emission_rate;
 MObject ManyTinyBubbles::scattering_frequency;
 MObject ManyTinyBubbles::scattering_coefficient;
@@ -159,6 +160,11 @@ MStatus ManyTinyBubbles::initialize()
     tAttr.setWritable( false );
 	tAttr.setStorable( false );
 
+	//ManyTinyBubbles::fluid_container = tAttr.create( "container", "c", MFnMeshData::kMesh );
+	//tAttr.setStorable( true );
+	//tAttr.setWritable( false );
+	//tAttr.setStorable( false );
+
 	ManyTinyBubbles::emission_rate = nAttr.create( "rate", "r", MFnNumericData::kInt, 1000 );
 	nAttr.setSoftMax( 10000 );
 	nAttr.setSoftMin( 1 );
@@ -217,6 +223,8 @@ MStatus ManyTinyBubbles::initialize()
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
 	stat = addAttribute( ManyTinyBubbles::input_mesh );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
+	//stat = addAttribute( ManyTinyBubbles::fluid_container );
+	//	if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
 	stat = addAttribute( ManyTinyBubbles::emission_rate );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
 	stat = addAttribute( ManyTinyBubbles::scattering_frequency );
@@ -245,6 +253,8 @@ MStatus ManyTinyBubbles::initialize()
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
 	stat = attributeAffects( ManyTinyBubbles::input_mesh, ManyTinyBubbles::output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
+	//stat = attributeAffects( ManyTinyBubbles::fluid_container, ManyTinyBubbles::output );
+	//	if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
 	stat = attributeAffects( ManyTinyBubbles::emission_rate, ManyTinyBubbles::output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
 	stat = attributeAffects( ManyTinyBubbles::scattering_frequency, ManyTinyBubbles::output );

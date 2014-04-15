@@ -69,7 +69,13 @@ MStatus initializePlugin( MObject obj )
 	std::string mel_filepath_std = mll_filepath_std.substr( 0, mll_filepath_std.find_last_of( "\\/" ) );
 	MString mel_filepath = Convenience::convertStdStringToMString( mel_filepath_std );
 
-	MString command = "source \"" + mel_filepath + "/gui.mel\";";
+	MString command = "source \"" + mel_filepath + "/menu.mel\";";
+	MGlobal::executeCommand( command );
+
+	command = "source \"" + mel_filepath + "/constants.mel\";";
+	MGlobal::executeCommand( command );
+
+	command = "source \"" + mel_filepath + "/node.mel\";";
 	MGlobal::executeCommand( command );
 
 	command = "source \"" + mel_filepath + "/create3dContainer.mel\";";

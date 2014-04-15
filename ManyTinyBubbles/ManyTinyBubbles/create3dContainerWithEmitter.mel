@@ -16,6 +16,10 @@ global proc showCreate3dContainerWithEmitterOptionsWindow()
 	int $WINDOW_HEIGHT = 400;
 	int $BUTTON_HEIGHT = 25;
 
+	float $default_res = getDefaultResolution();
+	float $default_dim = getDefaultDimensions();
+	float $default_fluid_fill_percentage = getDefaultFluidFillPercentage();
+
 
 	////////////////////////////////////////////////////
 	// clear window if it already exists
@@ -48,34 +52,34 @@ global proc showCreate3dContainerWithEmitterOptionsWindow()
 	intSliderGrp -label "X resolution" -field true
 				 -minValue 3 -maxValue 100
 				 -fieldMinValue 3
-				 -value 20
+				 -value $default_res
 				 ui_res_x;
 	intSliderGrp -label "Y resolution" -field true
 				 -minValue 3 -maxValue 100
 				 -fieldMinValue 3
-				 -value 20
+				 -value $default_res
 				 ui_res_y;
 	intSliderGrp -label "Z resolution" -field true
 				 -minValue 3 -maxValue 100
 				 -fieldMinValue 3
-				 -value 20
+				 -value $default_res
 				 ui_res_z;
 
 	// container dimension sliders
 	floatSliderGrp -label "X size" -field true
 				   -minValue 0.0 -maxValue 100.0
 				   -fieldMinValue 0.0
-				   -value 10.0
+				   -value $default_dim
 				   ui_dim_x;
 	floatSliderGrp -label "Y size" -field true
 				   -minValue 0.0 -maxValue 100.0
 				   -fieldMinValue 0.0
-				   -value 10.0
+				   -value $default_dim
 				   ui_dim_y;
 	floatSliderGrp -label "Z size" -field true
 				   -minValue 0.0 -maxValue 100.0
 				   -fieldMinValue 0.0
-				   -value 10.0
+				   -value $default_dim
 				   ui_dim_z;
 
 	// default fluid
@@ -85,7 +89,7 @@ global proc showCreate3dContainerWithEmitterOptionsWindow()
 	floatSliderGrp -label "Fraction filled" -field true
 				   -minValue 0.1 -maxValue 1.0
 				   -fieldMinValue 0.1 -fieldMaxValue 1.0
-				   -value 0.8
+				   -value $default_fluid_fill_percentage
 				   ui_fill_fraction;
 
 
@@ -194,6 +198,8 @@ global proc createEmitter()
 {
 	// TODO: create sphere mesh as emitter
 	// TODO: return emitter name
+
+	//polySphere -r 1 -sx 20 -sy 20 -ax 0 1 0 -cuv 2 -ch 1;
 
 
 	// print action in script editor

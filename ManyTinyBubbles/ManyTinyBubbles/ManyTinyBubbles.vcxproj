@@ -11,9 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="constants.mel" />
     <None Include="create3dContainer.mel" />
     <None Include="create3dContainerWithEmitter.mel" />
-    <None Include="gui.mel" />
+    <None Include="menu.mel" />
+    <None Include="node.mel" />
     <None Include="Options.txt" />
     <None Include="ReadMe.txt" />
   </ItemGroup>

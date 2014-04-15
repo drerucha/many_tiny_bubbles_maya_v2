@@ -1,0 +1,31 @@
+
+
+/*******************************
+ * create ManyTinyBubbles node *
+ *******************************/
+
+global proc createManyTinyBubblesNode( string $fluid_container, int $options_window_displayed )
+{
+	//createNode transform -n Bubble1;
+	//createNode mesh -n BubbleShape1 -p Bubble1;
+	//sets -add initialShadingGroup BubbleShape1;
+	//createNode CreateBubbleNode -n CreateBubbleNode1;
+	//connectAttr time1.outTime CreateBubbleNode1.time;
+	//connectAttr CreateBubbleNode1.outputMesh BubbleShape1.inMesh;
+
+	//string $fluid_container = `create3DFluid $res_x $res_y $res_z $dim_x $dim_y $dim_z`;
+
+
+	//string $node = `createNode ManyTinyBubbles`;
+
+	//string $cmd;
+
+	//$cmd = $node + ".time";
+	//connectAttr time1.outTime $cmd;
+
+
+	//setAttr $cmd 10;
+
+
+
+}

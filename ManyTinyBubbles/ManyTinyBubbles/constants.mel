@@ -1,0 +1,60 @@
+
+
+/******************************
+ * fluid container attributes *
+ ******************************/
+
+global proc int getDefaultResolution()
+{
+	return 20;
+}
+
+global proc float getDefaultDimensions()
+{
+	return 10.0;
+}
+
+global proc float getDefaultFluidFillPercentage()
+{
+	return 0.8; // [0.1, 1]
+}
+
+
+/*****************************
+ * bubble emitter attributes *
+ *****************************/
+
+global proc float getDefaultEmitterRadius()
+{
+	return 0.1;
+}
+
+global proc int getDefaultEmitterRate()
+{
+	return 100;
+}
+
+global proc float getDefaultScatteringFrequency()
+{
+	return 0.5;
+}
+
+global proc float getDefaultScatteringCoefficient()
+{
+	return 0.0;
+}
+
+global proc float getDefaultBreakupFrequency()
+{
+	return 0.5;
+}
+
+global proc float getDefaultBubbleRadiusMin()
+{
+	return 0.001;
+}
+
+global proc float getDefaultBubbleRadiusMax()
+{
+	return 0.01;
+}
