@@ -21,8 +21,19 @@
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MTime.h>
 
+#include "Convenience.h"
+
 
 MTypeId ManyTinyBubbles::id( 0x70256 );
+
+
+////////////////////////////////////////////////////
+// consts
+////////////////////////////////////////////////////
+
+const int VX = 0;
+const int VY = 1;
+const int VZ = 2;
 
 
 ////////////////////////////////////////////////////
@@ -105,23 +116,62 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			float bubble_size_max_val			= bubble_size_max_data.asFloat();
 
 
-			// TODO: get fluid container attributes
+			////////////////////////////////////////////////////
+			// get fluid container attributes
+			////////////////////////////////////////////////////
 
-			// TODO: get bubble emitter attributes
+			MIntArray fluid_container_res_array = Convenience::getAttributeIntArray( emitter_mesh_name_val, MString( "resolution" ) );
+			MDoubleArray fluid_container_dim_array = Convenience::getAttributeDoubleArray( emitter_mesh_name_val, MString( "dimension" ) );
+
+			// get fluid shape parent to retrieve translation attributes of fluid container
+			MString fluid = Convenience::getParent( fluid_container_name_val );
+			MDoubleArray fluid_container_translation_array = Convenience::getAttributeDoubleArray( fluid, MString( "translation" ) );
+
+			fluid_container_res_x = fluid_container_res_array[VX];
+			fluid_container_res_y = fluid_container_res_array[VY];
+			fluid_container_res_z = fluid_container_res_array[VZ];
+
+			fluid_container_dim_x = fluid_container_dim_array[VX];
+			fluid_container_dim_y = fluid_container_dim_array[VY];
+			fluid_container_dim_z = fluid_container_dim_array[VZ];
+
+			fluid_container_trans_x = fluid_container_translation_array[VX];
+			fluid_container_trans_y = fluid_container_translation_array[VY];
+			fluid_container_trans_z = fluid_container_translation_array[VZ];
+
+			fluid_container_cell_size_x = fluid_container_dim_x / fluid_container_res_x;
+			fluid_container_cell_size_y = fluid_container_dim_y / fluid_container_res_y;
+			fluid_container_cell_size_z = fluid_container_dim_z / fluid_container_res_z;
 
 
+			////////////////////////////////////////////////////
+			// get bubble emitter attributes
+			////////////////////////////////////////////////////
 
-			// Get a handle to the output attribute.  This is similar to the
-			// "inputValue" call above except that no dependency graph 
-			// computation will be done as a result of this call.
-			MDataHandle outputHandle = data.outputValue( ManyTinyBubbles::output );
-			// This just copies the input value through to the output.  
-			outputHandle.set( input_val );
-			// Mark the destination plug as being clean.  This will prevent the
-			// dependency graph from repeating this calculation until an input 
-			// of this node changes.
+			// TODO: implement this
+
+
+			////////////////////////////////////////////////////
+			// create bubbles
+			////////////////////////////////////////////////////
+
+			//createBubble(times, timeSteps, scatterFreqs, scatterCoefs, bubbleBreakFreqs, bubbleMinRadiuss, bubbleMaxRadiuss, newOutputData, plug, data );
+
+
+			////////////////////////////////////////////////////
+			// get a handle to the output attribute
+			////////////////////////////////////////////////////
+
+			MDataHandle output_handle = data.outputValue( ManyTinyBubbles::output );
+			
+			// this just copies the input value through to the output
+			output_handle.set( input_val );
+
+			////////////////////////////////////////////////////
+			// mark destination plug as clean to prevent dependency graph from repeating this calculation until an input of this node changes
+			////////////////////////////////////////////////////
+
 			data.setClean( plug );
-
 		}
 	}
 	else {

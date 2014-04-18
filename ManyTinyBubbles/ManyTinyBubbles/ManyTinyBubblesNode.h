@@ -28,13 +28,10 @@ public:
 
 public:
 
-	// There needs to be a MObject handle declared for each attribute that
-	// the node will have.  These handles are needed for getting and setting
-	// the values later.
+	// must be an MObject handle declared for each attribute that the node will have
 
-	static MObject input;	// test
-	static MObject output;	// test
-
+	static MObject input;
+	static MObject output;
 	static MObject time;
 	static MObject emitter_mesh;
 	static MObject emitter_mesh_name;
@@ -46,10 +43,28 @@ public:
 	static MObject bubble_size_min;
 	static MObject bubble_size_max;
 
-	// The typeid is a unique 32bit indentifier that describes this node.
-	// It is used to save and retrieve nodes of this type from the binary
-	// file format.  If it is not unique, it will cause file IO problems.
-	static	MTypeId		id;
+	// typeid is a unique 32bit indentifier that describes this node
+	static	MTypeId id;
+
+
+private:
+
+	int fluid_container_res_x;
+	int fluid_container_res_y;
+	int fluid_container_res_z;
+
+	double fluid_container_dim_x;
+	double fluid_container_dim_y;
+	double fluid_container_dim_z;
+
+	double fluid_container_trans_x;
+	double fluid_container_trans_y;
+	double fluid_container_trans_z;
+
+	double fluid_container_cell_size_x;
+	double fluid_container_cell_size_y;
+	double fluid_container_cell_size_z;
+
 };
 
 #endif
