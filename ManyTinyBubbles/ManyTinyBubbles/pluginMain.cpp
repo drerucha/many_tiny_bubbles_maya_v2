@@ -49,7 +49,7 @@ MStatus initializePlugin( MObject obj )
 	// register ManyTinyBubbles node
 	////////////////////////////////////////////////////
 
-	status = plugin.registerNode( "ManyTinyBubbles", ManyTinyBubbles::id, ManyTinyBubbles::creator,
+	status = plugin.registerNode( "ManyTinyBubbles", ManyTinyBubbles::m_id, ManyTinyBubbles::creator,
 								  ManyTinyBubbles::initialize );
 	if ( !status ) {
 		status.perror( "registerNode" );
@@ -133,7 +133,7 @@ MStatus uninitializePlugin( MObject obj )
 	// deregister ManyTinyBubbles node
 	////////////////////////////////////////////////////
 
-	status = plugin.deregisterNode( ManyTinyBubbles::id );
+	status = plugin.deregisterNode( ManyTinyBubbles::m_id );
 	if ( !status ) {
 		status.perror( "deregisterNode" );
 		return status;

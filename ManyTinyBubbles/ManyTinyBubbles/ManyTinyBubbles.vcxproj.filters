@@ -47,6 +47,12 @@
     <ClInclude Include="Convenience.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BubbleData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ManyTinyBubblesNode.cpp">
@@ -56,6 +62,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Convenience.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BubbleData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vec.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -17,54 +17,71 @@
  
 class ManyTinyBubbles : public MPxNode
 {
-public:
-						ManyTinyBubbles();
-	virtual				~ManyTinyBubbles();
 
-	virtual MStatus		compute( const MPlug& plug, MDataBlock& data );
-
-	static  void*		creator();
-	static  MStatus		initialize();
+////////////////////////////////////////////////////
+// methods
+////////////////////////////////////////////////////
 
 public:
 
-	// must be an MObject handle declared for each attribute that the node will have
+	ManyTinyBubbles();
+	virtual ~ManyTinyBubbles();
 
-	static MObject input;
-	static MObject output;
-	static MObject time;
-	static MObject emitter_mesh;
-	static MObject emitter_mesh_name;
-	static MObject fluid_container_name;
-	static MObject emission_rate;
-	static MObject scattering_frequency;
-	static MObject scattering_coefficient;
-	static MObject breakup_frequency;
-	static MObject bubble_size_min;
-	static MObject bubble_size_max;
+	virtual MStatus	compute( const MPlug& plug, MDataBlock& data );
 
-	// typeid is a unique 32bit indentifier that describes this node
-	static	MTypeId id;
-
+	static void* creator();
+	static MStatus initialize();
 
 private:
 
-	int fluid_container_res_x;
-	int fluid_container_res_y;
-	int fluid_container_res_z;
+MStatus	createBubbles( const MTime& time, double timeStep, double scatterFreq,
+					   double scatterCoef, double bubbleBreakFreq, double bubbleRadiusMin,
+					   double bubbleRadiusMax, MObject& outData, const MPlug& plug,
+					   MDataBlock& block );
 
-	double fluid_container_dim_x;
-	double fluid_container_dim_y;
-	double fluid_container_dim_z;
 
-	double fluid_container_trans_x;
-	double fluid_container_trans_y;
-	double fluid_container_trans_z;
+////////////////////////////////////////////////////
+// members
+////////////////////////////////////////////////////
 
-	double fluid_container_cell_size_x;
-	double fluid_container_cell_size_y;
-	double fluid_container_cell_size_z;
+public:
 
+	// there must be an MObject handle declared for each attribute that the node will have
+
+	//static MObject input;
+	static MObject m_output;
+	static MObject m_time;
+	//static MObject m_emitter_mesh;
+	static MObject m_emitter_mesh_name;
+	static MObject m_fluid_container_name;
+	static MObject m_emission_rate;
+	static MObject m_scattering_frequency;
+	static MObject m_scattering_coefficient;
+	static MObject m_breakup_frequency;
+	static MObject m_bubble_size_min;
+	static MObject m_bubble_size_max;
+	static MObject m_step_size;
+
+	// typeid is a unique 32bit indentifier that describes this node
+	static	MTypeId m_id;
+
+private:	// members
+
+	int m_fluid_container_res_x;
+	int m_fluid_container_res_y;
+	int m_fluid_container_res_z;
+
+	double m_fluid_container_dim_x;
+	double m_fluid_container_dim_y;
+	double m_fluid_container_dim_z;
+
+	double m_fluid_container_trans_x;
+	double m_fluid_container_trans_y;
+	double m_fluid_container_trans_z;
+
+	double m_fluid_container_cell_size_x;
+	double m_fluid_container_cell_size_y;
+	double m_fluid_container_cell_size_z;
 };
 
 #endif

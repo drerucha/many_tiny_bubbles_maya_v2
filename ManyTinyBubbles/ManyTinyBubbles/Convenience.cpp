@@ -111,8 +111,8 @@ MStringArray Convenience::getAttributeMStringArray( MString object_name, MString
 
 MString Convenience::getParent( MString child )
 {
-	MString parent;
+	MStringArray parent;
 	MString cmd = "listRelatives -parent -path " + child;
 	MGlobal::executeCommand( cmd, parent );
-	return parent;
+	return parent[0];
 }

@@ -22,36 +22,38 @@
 #include <maya/MTime.h>
 
 #include "Convenience.h"
+#include "vec.h"
 
 
-MTypeId ManyTinyBubbles::id( 0x70256 );
+MTypeId ManyTinyBubbles::m_id( 0x70256 );
 
 
 ////////////////////////////////////////////////////
 // consts
 ////////////////////////////////////////////////////
 
-const int VX = 0;
-const int VY = 1;
-const int VZ = 2;
+//const int VX = 0;
+//const int VY = 1;
+//const int VZ = 2;
 
 
 ////////////////////////////////////////////////////
 // node attributes
 ////////////////////////////////////////////////////
 
-MObject ManyTinyBubbles::input;
-MObject ManyTinyBubbles::output;
-MObject ManyTinyBubbles::time;
-MObject ManyTinyBubbles::emitter_mesh;
-MObject ManyTinyBubbles::emitter_mesh_name;
-MObject ManyTinyBubbles::fluid_container_name;
-MObject ManyTinyBubbles::emission_rate;
-MObject ManyTinyBubbles::scattering_frequency;
-MObject ManyTinyBubbles::scattering_coefficient;
-MObject ManyTinyBubbles::breakup_frequency;
-MObject ManyTinyBubbles::bubble_size_min;
-MObject ManyTinyBubbles::bubble_size_max;
+//MObject ManyTinyBubbles::input;
+MObject ManyTinyBubbles::m_output;
+MObject ManyTinyBubbles::m_time;
+//MObject ManyTinyBubbles::m_emitter_mesh;
+MObject ManyTinyBubbles::m_emitter_mesh_name;
+MObject ManyTinyBubbles::m_fluid_container_name;
+MObject ManyTinyBubbles::m_emission_rate;
+MObject ManyTinyBubbles::m_scattering_frequency;
+MObject ManyTinyBubbles::m_scattering_coefficient;
+MObject ManyTinyBubbles::m_breakup_frequency;
+MObject ManyTinyBubbles::m_bubble_size_min;
+MObject ManyTinyBubbles::m_bubble_size_max;
+MObject ManyTinyBubbles::m_step_size;
 
 
 ////////////////////////////////////////////////////
@@ -69,6 +71,12 @@ ManyTinyBubbles::~ManyTinyBubbles() {}
 ////////////////////////////////////////////////////
 MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 {
+	// TODO: arrange output attribute in such a way that Maya recomputes it when I want it to
+	// TODO: set output value to value of time?
+
+	// debug
+	Convenience::printInScriptEditor( MString( "in compute()" ) );
+
 	MStatus returnStatus;
 
 
@@ -76,23 +84,28 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 	// check which output attribute we have been asked to compute
 	////////////////////////////////////////////////////
 
-	if ( plug == ManyTinyBubbles::output ) {
+	if ( plug == ManyTinyBubbles::m_output ) {
+
+		// debug
+		Convenience::printInScriptEditor( MString( "recomputing stuff" ) );
+
 
 		////////////////////////////////////////////////////
 		// get handles to input attribute we will need for computation
 		////////////////////////////////////////////////////
 
-		MDataHandle input_data						= data.inputValue( ManyTinyBubbles::input, &returnStatus );
-		MDataHandle time_data						= data.inputValue( ManyTinyBubbles::time, &returnStatus );
-		MDataHandle emitter_mesh_data				= data.inputValue( ManyTinyBubbles::emitter_mesh, &returnStatus );
-		MDataHandle emitter_mesh_name_data			= data.inputValue( ManyTinyBubbles::emitter_mesh_name, &returnStatus );
-		MDataHandle fluid_container_name_data		= data.inputValue( ManyTinyBubbles::fluid_container_name, &returnStatus );
-		MDataHandle emission_rate_data				= data.inputValue( ManyTinyBubbles::emission_rate, &returnStatus );
-		MDataHandle scattering_frequency_data		= data.inputValue( ManyTinyBubbles::scattering_frequency, &returnStatus );
-		MDataHandle scattering_coefficient_data		= data.inputValue( ManyTinyBubbles::scattering_coefficient, &returnStatus );
-		MDataHandle breakup_frequency_data			= data.inputValue( ManyTinyBubbles::breakup_frequency, &returnStatus );
-		MDataHandle bubble_size_min_data			= data.inputValue( ManyTinyBubbles::bubble_size_min, &returnStatus );
-		MDataHandle bubble_size_max_data			= data.inputValue( ManyTinyBubbles::bubble_size_max, &returnStatus );
+		//MDataHandle input_data					= data.inputValue( ManyTinyBubbles::m_input, &returnStatus );
+		MDataHandle time_data						= data.inputValue( ManyTinyBubbles::m_time, &returnStatus );
+		//MDataHandle emitter_mesh_data				= data.inputValue( ManyTinyBubbles::m_emitter_mesh, &returnStatus );
+		MDataHandle emitter_mesh_name_data			= data.inputValue( ManyTinyBubbles::m_emitter_mesh_name, &returnStatus );
+		MDataHandle fluid_container_name_data		= data.inputValue( ManyTinyBubbles::m_fluid_container_name, &returnStatus );
+		MDataHandle emission_rate_data				= data.inputValue( ManyTinyBubbles::m_emission_rate, &returnStatus );
+		MDataHandle scattering_frequency_data		= data.inputValue( ManyTinyBubbles::m_scattering_frequency, &returnStatus );
+		MDataHandle scattering_coefficient_data		= data.inputValue( ManyTinyBubbles::m_scattering_coefficient, &returnStatus );
+		MDataHandle breakup_frequency_data			= data.inputValue( ManyTinyBubbles::m_breakup_frequency, &returnStatus );
+		MDataHandle bubble_size_min_data			= data.inputValue( ManyTinyBubbles::m_bubble_size_min, &returnStatus );
+		MDataHandle bubble_size_max_data			= data.inputValue( ManyTinyBubbles::m_bubble_size_max, &returnStatus );
+		MDataHandle step_size_data					= data.inputValue( ManyTinyBubbles::m_step_size, &returnStatus );
 
 		if ( returnStatus != MS::kSuccess ) {
 			MGlobal::displayError( "Node ManyTinyBubbles cannot get value\n" );
@@ -103,9 +116,9 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			// read input values from handles
 			////////////////////////////////////////////////////
 
-			float input_val						= input_data.asFloat();
+			//float input_val					= input_data.asFloat();
 			MTime time_val						= time_data.asTime();
-			MObject emitter_mesh_val			= emitter_mesh_data.asMesh();
+			//MObject emitter_mesh_val			= emitter_mesh_data.asMesh();
 			MString emitter_mesh_name_val		= emitter_mesh_name_data.asString();
 			MString fluid_container_name_val	= fluid_container_name_data.asString();
 			int emission_rate_val				= emission_rate_data.asInt();
@@ -114,34 +127,35 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			float breakup_frequency_val			= breakup_frequency_data.asFloat();
 			float bubble_size_min_val			= bubble_size_min_data.asFloat();
 			float bubble_size_max_val			= bubble_size_max_data.asFloat();
+			float step_size_val					= step_size_data.asFloat();
 
 
 			////////////////////////////////////////////////////
 			// get fluid container attributes
 			////////////////////////////////////////////////////
 
-			MIntArray fluid_container_res_array = Convenience::getAttributeIntArray( emitter_mesh_name_val, MString( "resolution" ) );
-			MDoubleArray fluid_container_dim_array = Convenience::getAttributeDoubleArray( emitter_mesh_name_val, MString( "dimension" ) );
+			MIntArray fluid_container_res_array = Convenience::getAttributeIntArray( fluid_container_name_val, MString( "resolution" ) );
+			MDoubleArray fluid_container_dim_array = Convenience::getAttributeDoubleArray( fluid_container_name_val, MString( "dimensions" ) );
 
 			// get fluid shape parent to retrieve translation attributes of fluid container
 			MString fluid = Convenience::getParent( fluid_container_name_val );
-			MDoubleArray fluid_container_translation_array = Convenience::getAttributeDoubleArray( fluid, MString( "translation" ) );
+			MDoubleArray fluid_container_translation_array = Convenience::getAttributeDoubleArray( fluid, MString( "translate" ) );
 
-			fluid_container_res_x = fluid_container_res_array[VX];
-			fluid_container_res_y = fluid_container_res_array[VY];
-			fluid_container_res_z = fluid_container_res_array[VZ];
+			m_fluid_container_res_x = fluid_container_res_array[VX];
+			m_fluid_container_res_y = fluid_container_res_array[VY];
+			m_fluid_container_res_z = fluid_container_res_array[VZ];
 
-			fluid_container_dim_x = fluid_container_dim_array[VX];
-			fluid_container_dim_y = fluid_container_dim_array[VY];
-			fluid_container_dim_z = fluid_container_dim_array[VZ];
+			m_fluid_container_dim_x = fluid_container_dim_array[VX];
+			m_fluid_container_dim_y = fluid_container_dim_array[VY];
+			m_fluid_container_dim_z = fluid_container_dim_array[VZ];
 
-			fluid_container_trans_x = fluid_container_translation_array[VX];
-			fluid_container_trans_y = fluid_container_translation_array[VY];
-			fluid_container_trans_z = fluid_container_translation_array[VZ];
+			m_fluid_container_trans_x = fluid_container_translation_array[VX];
+			m_fluid_container_trans_y = fluid_container_translation_array[VY];
+			m_fluid_container_trans_z = fluid_container_translation_array[VZ];
 
-			fluid_container_cell_size_x = fluid_container_dim_x / fluid_container_res_x;
-			fluid_container_cell_size_y = fluid_container_dim_y / fluid_container_res_y;
-			fluid_container_cell_size_z = fluid_container_dim_z / fluid_container_res_z;
+			m_fluid_container_cell_size_x = m_fluid_container_dim_x / m_fluid_container_res_x;
+			m_fluid_container_cell_size_y = m_fluid_container_dim_y / m_fluid_container_res_y;
+			m_fluid_container_cell_size_z = m_fluid_container_dim_z / m_fluid_container_res_z;
 
 
 			////////////////////////////////////////////////////
@@ -162,10 +176,11 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			// get a handle to the output attribute
 			////////////////////////////////////////////////////
 
-			MDataHandle output_handle = data.outputValue( ManyTinyBubbles::output );
+			MDataHandle output_data = data.outputValue( ManyTinyBubbles::m_output );
 			
 			// this just copies the input value through to the output
-			output_handle.set( input_val );
+			//output_handle.set( input_val );
+			output_data.set( 1.0f );
 
 			////////////////////////////////////////////////////
 			// mark destination plug as clean to prevent dependency graph from repeating this calculation until an input of this node changes
@@ -183,12 +198,38 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 
 
 
+
+
+
+
+////////////////////////////////////////////////////
+// createBubbles()
+////////////////////////////////////////////////////
+MStatus ManyTinyBubbles::createBubbles( const MTime &time, double timeStep, double scatterFreq,
+										double scatterCoef, double bubbleBreakFreq, double bubbleRadiusMin,
+										double bubbleRadiusMax, MObject& outData, const MPlug& plug,
+										MDataBlock& block )
+{
+	return MS::kSuccess;
+}
+
+
+
+
+
+
+
+
+
 ////////////////////////////////////////////////////
 // creator(): exists to give Maya a way to create new objects of this type
 //		returns a new object of this type
 ////////////////////////////////////////////////////
 void* ManyTinyBubbles::creator()
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in creator()" ) );
+
 	return new ManyTinyBubbles();
 }
 
@@ -199,6 +240,10 @@ void* ManyTinyBubbles::creator()
 ////////////////////////////////////////////////////
 MStatus ManyTinyBubbles::initialize()	
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in initialize()" ) );
+
+
 	////////////////////////////////////////////////////
 	// create attributes
 	////////////////////////////////////////////////////
@@ -216,77 +261,92 @@ MStatus ManyTinyBubbles::initialize()
 	// setStorable: attribute will or will not be written to files when this type of node is stored
 	// setKeyable: attribute is or is not keyable and will show up in the channel box
 
-	ManyTinyBubbles::input = nAttr.create( "input", "in", MFnNumericData::kFloat, 0.0 );
- 	nAttr.setStorable( true );
- 	nAttr.setKeyable( false );
+	//ManyTinyBubbles::m_input = nAttr.create( "input", "in", MFnNumericData::kFloat, 0.0 );
+	//nAttr.setStorable( true );
+	//nAttr.setKeyable( false );
 
-	ManyTinyBubbles::output = nAttr.create( "output", "out", MFnNumericData::kFloat, 0.0 );
+	ManyTinyBubbles::m_output = nAttr.create( "output", "out", MFnNumericData::kFloat, 0.0 );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
+	nAttr.setKeyable( false );
 
-	ManyTinyBubbles::time = uAttr.create( "time", "tm", MFnUnitAttribute::kTime, 0.0 );
+	ManyTinyBubbles::m_time = uAttr.create( "time", "tm", MFnUnitAttribute::kTime, 0.0 );
 	uAttr.setWritable( false );
  	uAttr.setStorable( false );
 
-	ManyTinyBubbles::emitter_mesh = tAttr.create( "emitter_mesh", "em", MFnData::kMesh );
-	//ManyTinyBubbles::emitter_mesh = tAttr.create( "emitter_mesh", "em", MFnMeshData::kMesh );
-	tAttr.setStorable( true );
-	tAttr.setWritable( false );
-	tAttr.setStorable( false );
+	//ManyTinyBubbles::m_emitter_mesh = tAttr.create( "emitter_mesh", "em", MFnData::kMesh );
+	//ManyTinyBubbles::m_emitter_mesh = tAttr.create( "emitter_mesh", "em", MFnMeshData::kMesh );
+	//tAttr.setStorable( true );
+	//tAttr.setWritable( false );
+	//tAttr.setStorable( false );
 
-	ManyTinyBubbles::emitter_mesh_name = tAttr.create( "emitter_mesh_name", "emn", MFnData::kString );
+	ManyTinyBubbles::m_emitter_mesh_name = tAttr.create( "emitter_mesh_name", "emn", MFnData::kString );
  	tAttr.setStorable( true );
     tAttr.setWritable( false );
 	tAttr.setStorable( false );
 
-	ManyTinyBubbles::fluid_container_name = tAttr.create( "fluid_container_name", "fcn", MFnData::kString );
+	ManyTinyBubbles::m_fluid_container_name = tAttr.create( "fluid_container_name", "fcn", MFnData::kString );
  	tAttr.setStorable( true );
     tAttr.setWritable( false );
 	tAttr.setStorable( false );
 
-	ManyTinyBubbles::emission_rate = nAttr.create( "emission_rate", "er", MFnNumericData::kInt, 1000 );
+	ManyTinyBubbles::m_emission_rate = nAttr.create( "emission_rate", "er", MFnNumericData::kInt, 1000 );
 	nAttr.setSoftMax( 10000 );
 	nAttr.setSoftMin( 1 );
 	nAttr.setMin( 1 );
  	nAttr.setStorable( true );
+	nAttr.setWritable( true );
  	nAttr.setKeyable( true );
 
-	ManyTinyBubbles::scattering_frequency = nAttr.create( "scattering_frequency", "sf", MFnNumericData::kFloat, 0.5 );
+	ManyTinyBubbles::m_scattering_frequency = nAttr.create( "scattering_frequency", "sf", MFnNumericData::kFloat, 0.5 );
 	nAttr.setSoftMax( 1.0 );
 	nAttr.setSoftMin( 0.0 );
 	nAttr.setMax( 1.0 );
 	nAttr.setMin( 0.0 );
  	nAttr.setStorable( true );
+	nAttr.setWritable( true );
  	nAttr.setKeyable( true );
 
-	ManyTinyBubbles::scattering_coefficient = nAttr.create( "scattering_coefficient", "sc", MFnNumericData::kFloat, 0.0 );
+	ManyTinyBubbles::m_scattering_coefficient = nAttr.create( "scattering_coefficient", "sc", MFnNumericData::kFloat, 0.0 );
 	nAttr.setSoftMax( 1.0 );
 	nAttr.setSoftMin( -1.0 );
 	nAttr.setMax( 1.0 );
 	nAttr.setMin( -1.0 );
  	nAttr.setStorable( true );
+	nAttr.setWritable( true );
  	nAttr.setKeyable( true );
 
-	ManyTinyBubbles::breakup_frequency = nAttr.create( "breakup_frequency", "bf", MFnNumericData::kFloat, 0.5 );
+	ManyTinyBubbles::m_breakup_frequency = nAttr.create( "breakup_frequency", "bf", MFnNumericData::kFloat, 0.5 );
 	nAttr.setSoftMax( 1.0 );
 	nAttr.setSoftMin( 0.0 );
 	nAttr.setMax( 1.0 );
 	nAttr.setMin( 0.0 );
  	nAttr.setStorable( true );
+	nAttr.setWritable( true );
  	nAttr.setKeyable( true );
 
-	ManyTinyBubbles::bubble_size_min = nAttr.create( "bubble_size_min", "smin", MFnNumericData::kFloat, 0.001 );
+	ManyTinyBubbles::m_bubble_size_min = nAttr.create( "bubble_size_min", "smin", MFnNumericData::kFloat, 0.001 );
 	nAttr.setSoftMax( 0.1 );
 	nAttr.setSoftMin( 0.001 );
 	nAttr.setMin( 0.0 );
  	nAttr.setStorable( true );
+	nAttr.setWritable( true );
  	nAttr.setKeyable( true );
 
-	ManyTinyBubbles::bubble_size_max = nAttr.create( "bubble_size_max", "smax", MFnNumericData::kFloat, 0.001 );
+	ManyTinyBubbles::m_bubble_size_max = nAttr.create( "bubble_size_max", "smax", MFnNumericData::kFloat, 0.001 );
 	nAttr.setSoftMax( 0.1 );
 	nAttr.setSoftMin( 0.001 );
 	nAttr.setMin( 0.0 );
  	nAttr.setStorable( true );
+	nAttr.setWritable( true );
+ 	nAttr.setKeyable( true );
+
+	ManyTinyBubbles::m_step_size = nAttr.create( "simulation_step_size", "sss", MFnNumericData::kFloat, 0.1 );
+	nAttr.setSoftMax( 1.0 );
+	nAttr.setSoftMin( 0.001 );
+	nAttr.setMin( 0.001 );
+ 	nAttr.setStorable( true );
+	nAttr.setWritable( true );
  	nAttr.setKeyable( true );
 
 
@@ -294,29 +354,31 @@ MStatus ManyTinyBubbles::initialize()
 	// add attributes to node
 	////////////////////////////////////////////////////
 
-	stat = addAttribute( ManyTinyBubbles::input );
+	//stat = addAttribute( ManyTinyBubbles::m_input );
+	//	if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
+	stat = addAttribute( ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	stat = addAttribute( ManyTinyBubbles::output );
+	stat = addAttribute( ManyTinyBubbles::m_time );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	stat = addAttribute( ManyTinyBubbles::time );
+	//stat = addAttribute( ManyTinyBubbles::m_emitter_mesh );
+	//	if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
+	stat = addAttribute( ManyTinyBubbles::m_emitter_mesh_name );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	stat = addAttribute( ManyTinyBubbles::emitter_mesh );
+	stat = addAttribute( ManyTinyBubbles::m_fluid_container_name );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	stat = addAttribute( ManyTinyBubbles::emitter_mesh_name );
+	stat = addAttribute( ManyTinyBubbles::m_emission_rate );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	stat = addAttribute( ManyTinyBubbles::fluid_container_name );
+	stat = addAttribute( ManyTinyBubbles::m_scattering_frequency );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	stat = addAttribute( ManyTinyBubbles::emission_rate );
+	stat = addAttribute( ManyTinyBubbles::m_scattering_coefficient );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	stat = addAttribute( ManyTinyBubbles::scattering_frequency );
+	stat = addAttribute( ManyTinyBubbles::m_breakup_frequency );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	stat = addAttribute( ManyTinyBubbles::scattering_coefficient );
+	stat = addAttribute( ManyTinyBubbles::m_bubble_size_min );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	stat = addAttribute( ManyTinyBubbles::breakup_frequency );
+	stat = addAttribute( ManyTinyBubbles::m_bubble_size_max );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	stat = addAttribute( ManyTinyBubbles::bubble_size_min );
-		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	stat = addAttribute( ManyTinyBubbles::bubble_size_max );
+	stat = addAttribute( ManyTinyBubbles::m_step_size );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
 
 
@@ -324,27 +386,29 @@ MStatus ManyTinyBubbles::initialize()
 	// setup dependencies between attributes
 	////////////////////////////////////////////////////
 
-	stat = attributeAffects( ManyTinyBubbles::input, ManyTinyBubbles::output );
+	//stat = attributeAffects( ManyTinyBubbles::m_input, ManyTinyBubbles::m_output );
+	//	if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
+	stat = attributeAffects( ManyTinyBubbles::m_time, ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	stat = attributeAffects( ManyTinyBubbles::time, ManyTinyBubbles::output );
+	//stat = attributeAffects( ManyTinyBubbles::m_emitter_mesh, ManyTinyBubbles::m_output );
+	//	if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
+	stat = attributeAffects( ManyTinyBubbles::m_emitter_mesh_name, ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	stat = attributeAffects( ManyTinyBubbles::emitter_mesh, ManyTinyBubbles::output );
+	stat = attributeAffects( ManyTinyBubbles::m_fluid_container_name, ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	stat = attributeAffects( ManyTinyBubbles::emitter_mesh_name, ManyTinyBubbles::output );
+	stat = attributeAffects( ManyTinyBubbles::m_emission_rate, ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	stat = attributeAffects( ManyTinyBubbles::fluid_container_name, ManyTinyBubbles::output );
+	stat = attributeAffects( ManyTinyBubbles::m_scattering_frequency, ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	stat = attributeAffects( ManyTinyBubbles::emission_rate, ManyTinyBubbles::output );
+	stat = attributeAffects( ManyTinyBubbles::m_scattering_coefficient, ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	stat = attributeAffects( ManyTinyBubbles::scattering_frequency, ManyTinyBubbles::output );
+	stat = attributeAffects( ManyTinyBubbles::m_breakup_frequency, ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	stat = attributeAffects( ManyTinyBubbles::scattering_coefficient, ManyTinyBubbles::output );
+	stat = attributeAffects( ManyTinyBubbles::m_bubble_size_min, ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	stat = attributeAffects( ManyTinyBubbles::breakup_frequency, ManyTinyBubbles::output );
+	stat = attributeAffects( ManyTinyBubbles::m_bubble_size_max, ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	stat = attributeAffects( ManyTinyBubbles::bubble_size_min, ManyTinyBubbles::output );
-		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	stat = attributeAffects( ManyTinyBubbles::bubble_size_max, ManyTinyBubbles::output );
+	stat = attributeAffects( ManyTinyBubbles::m_step_size, ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
 
 	return MS::kSuccess;

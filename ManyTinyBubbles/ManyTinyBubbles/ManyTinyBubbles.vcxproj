@@ -20,13 +20,17 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BubbleData.h" />
     <ClInclude Include="Convenience.h" />
     <ClInclude Include="ManyTinyBubblesNode.h" />
+    <ClInclude Include="vec.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BubbleData.cpp" />
     <ClCompile Include="Convenience.cpp" />
     <ClCompile Include="ManyTinyBubblesNode.cpp" />
     <ClCompile Include="pluginMain.cpp" />
+    <ClCompile Include="vec.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <Keyword>Win32Proj</Keyword>
