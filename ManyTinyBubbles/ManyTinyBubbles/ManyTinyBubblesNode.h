@@ -36,6 +36,7 @@ public:
 	static MObject output;	// test
 
 	static MObject time;
+	static MObject emitter_mesh;
 	static MObject emitter_mesh_name;
 	static MObject fluid_container_name;
 	static MObject emission_rate;

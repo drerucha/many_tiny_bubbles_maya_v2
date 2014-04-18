@@ -59,6 +59,12 @@ global proc createManyTinyBubblesNode( string $fluid_container, string $emitter_
 
 	// TODO: connect time attribute to system clock?
 
+	//string $emitter_shape = getShapeFromName( $emitter_mesh );
+	//$emitter_shape += ".inMesh";
+	//$emitter_shape += ".outMesh";
+	//$cmd = $node + ".emitter_mesh";
+	//connectAttr ManyTinyBubbles1.emitter_mesh pSphere2.outMesh;
+	//connectAttr $cmd $emitter_shape;
 
 	$cmd = $node + ".emitter_mesh_name";
 	setAttr $cmd -type "string" $emitter_mesh;
@@ -85,4 +91,19 @@ global proc createManyTinyBubblesNode( string $fluid_container, string $emitter_
 	setAttr $cmd $bubble_radius_max;
 
 	mtbLog( "created node" );
+}
+
+
+
+/*******************************
+ * create ManyTinyBubbles node *
+ *******************************/
+
+global proc string getShapeFromName( string $emitter_mesh )
+{
+	// TODO: test this with obj meshes b/c hardcoded 0 index may not always work
+
+	string $shapes[] = `listRelatives -shapes -path $emitter_mesh`;
+
+	return $shapes[0];
 }
