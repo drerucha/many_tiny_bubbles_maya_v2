@@ -53,6 +53,29 @@ void Convenience::printInScriptEditor( std::string std_string )
 
 
 ////////////////////////////////////////////////////
+// get parent of passed-in object
+////////////////////////////////////////////////////
+MString Convenience::getParent( MString child )
+{
+	MStringArray parent;
+	MString cmd = "listRelatives -parent -path " + child;
+	MGlobal::executeCommand( cmd, parent );
+	return parent[0];
+}
+
+
+////////////////////////////////////////////////////
+// append number to std::string
+////////////////////////////////////////////////////
+void Convenience::appendNumToStdString( std::string& str, const int& num )
+{
+	char num_str[21]; // large enough to hold all numbers up to 64-bits
+	sprintf( num_str, "%d", num );
+	str += num_str;
+}
+
+
+////////////////////////////////////////////////////
 // attribute getters
 ////////////////////////////////////////////////////
 
@@ -102,17 +125,4 @@ MStringArray Convenience::getAttributeMStringArray( MString object_name, MString
 	MString cmd = "getAttr " + object_name + "." + attr_name;
 	MGlobal::executeCommand( cmd, attr );
 	return attr;
-}
-
-
-////////////////////////////////////////////////////
-// relative getters
-////////////////////////////////////////////////////
-
-MString Convenience::getParent( MString child )
-{
-	MStringArray parent;
-	MString cmd = "listRelatives -parent -path " + child;
-	MGlobal::executeCommand( cmd, parent );
-	return parent[0];
 }

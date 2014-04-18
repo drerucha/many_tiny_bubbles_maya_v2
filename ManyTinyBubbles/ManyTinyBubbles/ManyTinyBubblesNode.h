@@ -14,6 +14,8 @@
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MTypeId.h>
 
+#include "BubbleData.h"
+
  
 class ManyTinyBubbles : public MPxNode
 {
@@ -34,9 +36,12 @@ public:
 
 private:
 
-MStatus	createBubbles( const MTime& time, double timeStep, double scatterFreq,
-					   double scatterCoef, double bubbleBreakFreq, double bubbleRadiusMin,
-					   double bubbleRadiusMax, MObject& outData, const MPlug& plug,
+// for debugging
+void testCode( const unsigned int& num ) const;
+
+MStatus	createBubbles( const MTime& time, float step_size, float scatter_freq,
+					   float scatter_coeff, float breakup_freq, float radius_min,
+					   float radius_max, MObject& out_data, const MPlug& plug,
 					   MDataBlock& block );
 
 
@@ -66,6 +71,8 @@ public:
 	static	MTypeId m_id;
 
 private:	// members
+
+	BubbleData m_bubbles;
 
 	int m_fluid_container_res_x;
 	int m_fluid_container_res_y;

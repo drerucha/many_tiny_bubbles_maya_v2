@@ -29,15 +29,6 @@ MTypeId ManyTinyBubbles::m_id( 0x70256 );
 
 
 ////////////////////////////////////////////////////
-// consts
-////////////////////////////////////////////////////
-
-//const int VX = 0;
-//const int VY = 1;
-//const int VZ = 2;
-
-
-////////////////////////////////////////////////////
 // node attributes
 ////////////////////////////////////////////////////
 
@@ -72,10 +63,14 @@ ManyTinyBubbles::~ManyTinyBubbles() {}
 MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 {
 	// TODO: arrange output attribute in such a way that Maya recomputes it when I want it to
-	// TODO: set output value to value of time?
 
 	// debug
 	Convenience::printInScriptEditor( MString( "in compute()" ) );
+
+	// debug
+	//for ( unsigned int i = 1; i <= 10; ++i ) {
+	//	testCode( i );
+	//}
 
 	MStatus returnStatus;
 
@@ -180,7 +175,8 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			
 			// this just copies the input value through to the output
 			//output_handle.set( input_val );
-			output_data.set( 1.0f );
+			output_data.set( ( int )time_val.as( MTime::kFilm ) );
+
 
 			////////////////////////////////////////////////////
 			// mark destination plug as clean to prevent dependency graph from repeating this calculation until an input of this node changes
@@ -197,28 +193,32 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 }
 
 
-
-
-
-
-
 ////////////////////////////////////////////////////
 // createBubbles()
 ////////////////////////////////////////////////////
-MStatus ManyTinyBubbles::createBubbles( const MTime &time, double timeStep, double scatterFreq,
-										double scatterCoef, double bubbleBreakFreq, double bubbleRadiusMin,
-										double bubbleRadiusMax, MObject& outData, const MPlug& plug,
+MStatus ManyTinyBubbles::createBubbles( const MTime& time, float step_size, float scatter_freq,
+										float scatter_coeff, float breakup_freq, float radius_min,
+										float radius_max, MObject& out_data, const MPlug& plug,
 										MDataBlock& block )
 {
+	// generate bubble radii based on radius_min and radius_max
+	m_bubbles.setRadii( radius_min, radius_max );
+
+	// ensure frame_num is not zero 
+	int	frame_num = ( int )time.as( MTime::kFilm );
+	if ( frame_num == 0 ) {
+		frame_num = 1;
+	}
+
+	// delete all particles in Maya
+	m_bubbles.deleteAllParticlesInMaya();
+
+
+	// TODO: more
+
+
 	return MS::kSuccess;
 }
-
-
-
-
-
-
-
 
 
 ////////////////////////////////////////////////////
@@ -412,4 +412,21 @@ MStatus ManyTinyBubbles::initialize()
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
 
 	return MS::kSuccess;
+}
+
+
+////////////////////////////////////////////////////
+// debug
+////////////////////////////////////////////////////
+void ManyTinyBubbles::testCode( const unsigned int& num ) const
+{
+	std::string cmd = "particleExists bubbleParticle";
+	Convenience::appendNumToStdString( cmd, num );
+	cmd += ";";
+
+	// debug
+	Convenience::printInScriptEditor( cmd );
+
+	//int particle_exists;
+	//	MGlobal::executeCommand( Convenience::convertStdStringToMString( cmd ), particle_exists );
 }
