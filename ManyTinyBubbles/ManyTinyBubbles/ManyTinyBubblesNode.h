@@ -15,6 +15,7 @@
 #include <maya/MTypeId.h>
 
 #include "BubbleData.h"
+#include "FluidContainerData.h"
 
  
 class ManyTinyBubbles : public MPxNode
@@ -37,12 +38,14 @@ public:
 private:
 
 // for debugging
-void testCode( const unsigned int& num ) const;
+void testCode( const MString& str ) const;
 
-MStatus	createBubbles( const MTime& time, float step_size, float scatter_freq,
-					   float scatter_coeff, float breakup_freq, float radius_min,
-					   float radius_max, MObject& out_data, const MPlug& plug,
-					   MDataBlock& block );
+MStatus	createBubbles( const MTime& time,
+					   const float& step_size );
+
+void advectParticles( const float& dt );
+
+void reset();
 
 
 ////////////////////////////////////////////////////
@@ -70,25 +73,12 @@ public:
 	// typeid is a unique 32bit indentifier that describes this node
 	static	MTypeId m_id;
 
-private:	// members
+private:
 
 	BubbleData m_bubbles;
+	FluidContainerData m_fluid_container;
 
-	int m_fluid_container_res_x;
-	int m_fluid_container_res_y;
-	int m_fluid_container_res_z;
-
-	double m_fluid_container_dim_x;
-	double m_fluid_container_dim_y;
-	double m_fluid_container_dim_z;
-
-	double m_fluid_container_trans_x;
-	double m_fluid_container_trans_y;
-	double m_fluid_container_trans_z;
-
-	double m_fluid_container_cell_size_x;
-	double m_fluid_container_cell_size_y;
-	double m_fluid_container_cell_size_z;
+	unsigned int m_current_frame;
 };
 
 #endif

@@ -5,16 +5,12 @@
 
 
 ////////////////////////////////////////////////////
-// constructor
+// constructor / destructor
 ////////////////////////////////////////////////////
 Convenience::Convenience( void )
 {
 }
 
-
-////////////////////////////////////////////////////
-// constructor
-////////////////////////////////////////////////////
 Convenience::~Convenience( void )
 {
 }
@@ -49,29 +45,6 @@ void Convenience::printInScriptEditor( MString mstring )
 void Convenience::printInScriptEditor( std::string std_string )
 {
 	MGlobal::displayInfo( convertStdStringToMString( std_string ) );
-}
-
-
-////////////////////////////////////////////////////
-// get parent of passed-in object
-////////////////////////////////////////////////////
-MString Convenience::getParent( MString child )
-{
-	MStringArray parent;
-	MString cmd = "listRelatives -parent -path " + child;
-	MGlobal::executeCommand( cmd, parent );
-	return parent[0];
-}
-
-
-////////////////////////////////////////////////////
-// append number to std::string
-////////////////////////////////////////////////////
-void Convenience::appendNumToStdString( std::string& str, const int& num )
-{
-	char num_str[21]; // large enough to hold all numbers up to 64-bits
-	sprintf( num_str, "%d", num );
-	str += num_str;
 }
 
 
@@ -125,4 +98,24 @@ MStringArray Convenience::getAttributeMStringArray( MString object_name, MString
 	MString cmd = "getAttr " + object_name + "." + attr_name;
 	MGlobal::executeCommand( cmd, attr );
 	return attr;
+}
+
+
+////////////////////////////////////////////////////
+// miscellaneous
+////////////////////////////////////////////////////
+
+MString Convenience::getParent( MString child )
+{
+	MStringArray parent;
+	MString cmd = "listRelatives -parent -path " + child;
+	MGlobal::executeCommand( cmd, parent );
+	return parent[0];
+}
+
+void Convenience::appendNumToStdString( std::string& str, const int& num )
+{
+	char num_str[21]; // large enough to hold all numbers up to 64-bits
+	sprintf( num_str, "%d", num );
+	str += num_str;
 }

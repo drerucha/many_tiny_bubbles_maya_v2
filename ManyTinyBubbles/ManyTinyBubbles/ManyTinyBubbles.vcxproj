@@ -22,12 +22,14 @@
   <ItemGroup>
     <ClInclude Include="BubbleData.h" />
     <ClInclude Include="Convenience.h" />
+    <ClInclude Include="FluidContainerData.h" />
     <ClInclude Include="ManyTinyBubblesNode.h" />
     <ClInclude Include="vec.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BubbleData.cpp" />
     <ClCompile Include="Convenience.cpp" />
+    <ClCompile Include="FluidContainerData.cpp" />
     <ClCompile Include="ManyTinyBubblesNode.cpp" />
     <ClCompile Include="pluginMain.cpp" />
     <ClCompile Include="vec.cpp" />

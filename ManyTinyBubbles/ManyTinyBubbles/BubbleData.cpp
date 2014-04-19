@@ -5,43 +5,56 @@
 
 
 ////////////////////////////////////////////////////
-// constructor
+// constructor / destructor
 ////////////////////////////////////////////////////
-BubbleData::BubbleData(void)
+
+BubbleData::BubbleData()
+{
+}
+
+BubbleData::~BubbleData()
 {
 }
 
 
 ////////////////////////////////////////////////////
-// destructor
+// initialize member variables
 ////////////////////////////////////////////////////
-BubbleData::~BubbleData(void)
+void BubbleData::init( float scattering_frequency,
+					   float scattering_coefficient,
+					   float breakup_frequency,
+					   float size_min,
+					   float size_max )
 {
+	m_scattering_frequency = scattering_frequency;
+	m_scattering_coefficient = scattering_coefficient;
+	m_breakup_frequency = breakup_frequency;
+	m_size_min = size_min;
+	m_size_max = size_max;
+
+	// populate m_radii_list
+	setRadii( size_min, size_max );
 }
 
 
 ////////////////////////////////////////////////////
 // setRadii()
 ////////////////////////////////////////////////////
-void BubbleData::setRadii( const float& radius_min, const float& radius_max )
+void BubbleData::setRadii( const float& radius_min,
+						   const float& radius_max )
 {
-	m_radii_list.clear();
+	// clear m_radii_list
+	if ( m_radii_list.size() > 0 ) {
+		m_radii_list.clear();
+	}
 
 	float diff = abs( radius_max - radius_min );
 	float step = diff / ( NUM_RADII - 1 );
 
+	// fill m_radii_list
 	for ( unsigned int i = 0; i < NUM_RADII; ++i ) {
 		m_radii_list.push_back( radius_min + step * i );
 	}
-}
-
-
-////////////////////////////////////////////////////
-// getNumRadii()
-////////////////////////////////////////////////////
-unsigned int BubbleData::getNumRadii() const
-{
-	return ( unsigned int )m_radii_list.size();
 }
 
 
@@ -81,10 +94,36 @@ int BubbleData::checkIfParticleExists( const unsigned int& num ) const
 ////////////////////////////////////////////////////
 void BubbleData::deleteParticle( const unsigned int& num ) const
 {
-	std::string cmd = "select -r bubbleParticle";
+	std::string cmd = "select -replace bubbleParticle";
 	Convenience::appendNumToStdString( cmd, num );
 	cmd += ";";
 
 	MGlobal::executeCommand( Convenience::convertStdStringToMString( cmd ) );
 	MGlobal::executeCommand( "doDelete" );
+}
+
+
+////////////////////////////////////////////////////
+// reset
+////////////////////////////////////////////////////
+void BubbleData::reset()
+{
+	m_pos_list.clear();
+	m_vel_list.clear();
+	m_radii_list.clear();
+}
+
+
+////////////////////////////////////////////////////
+// getters
+////////////////////////////////////////////////////
+
+unsigned int BubbleData::getNumRadii() const
+{
+	return ( unsigned int )m_radii_list.size();
+}
+
+std::vector<std::vector<vec3>> BubbleData::getPosList() const
+{
+	return m_pos_list;
 }

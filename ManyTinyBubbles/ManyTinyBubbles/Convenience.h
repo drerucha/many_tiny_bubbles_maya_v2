@@ -20,10 +20,6 @@ public:
 	static void printInScriptEditor( MString mstring );
 	static void printInScriptEditor( std::string std_string );
 
-	static MString getParent( MString child );
-
-	static void appendNumToStdString( std::string& str, const int& num );
-
 	// attribute getters
 	static int getAttributeInt( MString object_name, MString attr_name );
 	static double getAttributeDouble( MString object_name, MString attr_name );
@@ -31,4 +27,8 @@ public:
 	static MIntArray getAttributeIntArray( MString object_name, MString attr_name );
 	static MDoubleArray getAttributeDoubleArray( MString object_name, MString attr_name );
 	static MStringArray getAttributeMStringArray( MString object_name, MString attr_name );
+
+	// miscellaneous
+	static MString getParent( MString child );
+	static void appendNumToStdString( std::string& str, const int& num );
 };

@@ -51,7 +51,11 @@ MObject ManyTinyBubbles::m_step_size;
 // constructor/destructor
 ////////////////////////////////////////////////////
 
-ManyTinyBubbles::ManyTinyBubbles() {}
+ManyTinyBubbles::ManyTinyBubbles()
+{
+	m_current_frame = 0;
+}
+
 ManyTinyBubbles::~ManyTinyBubbles() {}
 
 
@@ -66,11 +70,6 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 
 	// debug
 	Convenience::printInScriptEditor( MString( "in compute()" ) );
-
-	// debug
-	//for ( unsigned int i = 1; i <= 10; ++i ) {
-	//	testCode( i );
-	//}
 
 	MStatus returnStatus;
 
@@ -124,47 +123,26 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			float bubble_size_max_val			= bubble_size_max_data.asFloat();
 			float step_size_val					= step_size_data.asFloat();
 
+			// get fluid container attributes and store in m_fluid_container
+			m_fluid_container.init( fluid_container_name_val );
 
-			////////////////////////////////////////////////////
-			// get fluid container attributes
-			////////////////////////////////////////////////////
-
-			MIntArray fluid_container_res_array = Convenience::getAttributeIntArray( fluid_container_name_val, MString( "resolution" ) );
-			MDoubleArray fluid_container_dim_array = Convenience::getAttributeDoubleArray( fluid_container_name_val, MString( "dimensions" ) );
-
-			// get fluid shape parent to retrieve translation attributes of fluid container
-			MString fluid = Convenience::getParent( fluid_container_name_val );
-			MDoubleArray fluid_container_translation_array = Convenience::getAttributeDoubleArray( fluid, MString( "translate" ) );
-
-			m_fluid_container_res_x = fluid_container_res_array[VX];
-			m_fluid_container_res_y = fluid_container_res_array[VY];
-			m_fluid_container_res_z = fluid_container_res_array[VZ];
-
-			m_fluid_container_dim_x = fluid_container_dim_array[VX];
-			m_fluid_container_dim_y = fluid_container_dim_array[VY];
-			m_fluid_container_dim_z = fluid_container_dim_array[VZ];
-
-			m_fluid_container_trans_x = fluid_container_translation_array[VX];
-			m_fluid_container_trans_y = fluid_container_translation_array[VY];
-			m_fluid_container_trans_z = fluid_container_translation_array[VZ];
-
-			m_fluid_container_cell_size_x = m_fluid_container_dim_x / m_fluid_container_res_x;
-			m_fluid_container_cell_size_y = m_fluid_container_dim_y / m_fluid_container_res_y;
-			m_fluid_container_cell_size_z = m_fluid_container_dim_z / m_fluid_container_res_z;
+			// store emitter in m_bubbles
+			m_bubbles.init( scattering_frequency_val,
+							scattering_coefficient_val,
+							breakup_frequency_val,
+							bubble_size_min_val,
+							bubble_size_max_val );
 
 
-			////////////////////////////////////////////////////
-			// get bubble emitter attributes
-			////////////////////////////////////////////////////
-
-			// TODO: implement this
+			// TODO: get bubble emitter attributes
 
 
 			////////////////////////////////////////////////////
 			// create bubbles
 			////////////////////////////////////////////////////
 
-			//createBubble(times, timeSteps, scatterFreqs, scatterCoefs, bubbleBreakFreqs, bubbleMinRadiuss, bubbleMaxRadiuss, newOutputData, plug, data );
+			createBubbles( time_val,
+						   step_size_val );
 
 
 			////////////////////////////////////////////////////
@@ -196,29 +174,266 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 ////////////////////////////////////////////////////
 // createBubbles()
 ////////////////////////////////////////////////////
-MStatus ManyTinyBubbles::createBubbles( const MTime& time, float step_size, float scatter_freq,
-										float scatter_coeff, float breakup_freq, float radius_min,
-										float radius_max, MObject& out_data, const MPlug& plug,
-										MDataBlock& block )
+MStatus ManyTinyBubbles::createBubbles( const MTime& time,
+										const float& step_size )
 {
-	// generate bubble radii based on radius_min and radius_max
-	m_bubbles.setRadii( radius_min, radius_max );
-
 	// ensure frame_num is not zero 
-	int	frame_num = ( int )time.as( MTime::kFilm );
+	unsigned int frame_num = ( unsigned int )time.as( MTime::kFilm );
 	if ( frame_num == 0 ) {
 		frame_num = 1;
+	}
+
+	// if the user wants a previously simulated frame, then we must run the simulation from the very beginning
+	if ( frame_num < m_current_frame ) {
+		reset();
+		m_current_frame = 0;
 	}
 
 	// delete all particles in Maya
 	m_bubbles.deleteAllParticlesInMaya();
 
+	// simulate ( frame_num - m_current_frame ) frames starting from current m_current_frame
+	for ( unsigned int i = 0; i < frame_num - m_current_frame; ++i ) {
 
-	// TODO: more
+		// TODO: set fraction field to some default value, 1.0f
+		// TODO: allow fraction field to handle voxels that aren't squares
+		//mFractionField.initialize( 1.0f, m_fluid_container_cell_size_x, m_fluid_container_dim_x, m_fluid_container_dim_y, m_fluid_container_dim_z );
+
+		// TODO: compute fraction field
+		//computeFractionField();
+
+		// TODO: set fluid density
+		//setDensity( "fluid1" );
+
+		advectParticles( step_size );
+
+		//computeBubbleGenerationPosFromMesh( LEVEL_SET_RES, 100 );
+		//generateBubbles();
+	}
+
+	m_current_frame = frame_num;
+
+
+
+
+
+
+	// TODO: create particle group in Maya
+
+	// TODO: set bubble size in Maya
+
+	// TODO: maybe create a dummy mesh if the program doesn't work without one?
 
 
 	return MS::kSuccess;
 }
+
+
+
+
+////////////////////////////////////////////////////
+// simulate bubbles
+////////////////////////////////////////////////////
+void ManyTinyBubbles::advectParticles( const float& dt )
+{
+	// update velocity field to match the Maya fluid
+	m_fluid_container.updateVelocityField();
+
+	// get positions for every bubble present in the simulation
+	std::vector<std::vector<vec3>> bubble_pos_list = m_bubbles.getPosList();
+
+	// iterate through the list of bubble position lists (each bubble radius has a unique list of positions)
+	for ( std::vector<std::vector<vec3>>::iterator outer_it = bubble_pos_list.begin() ; outer_it != bubble_pos_list.end(); ++outer_it ) {
+		std::vector<vec3> bubble_pos_sublist = *outer_it;
+
+		// iterate through the list of vec3s (one of the sublists of bubble_pos_list)
+		for ( std::vector<vec3>::iterator inner_it = bubble_pos_sublist.begin() ; inner_it != bubble_pos_sublist.end(); ++inner_it ) {
+			vec3 bubble_pos = *inner_it;
+
+			// get velocity of cell in fluid container
+			vec3 cell_vel = m_fluid_container.getVelocityAtPos( bubble_pos );
+
+
+		}
+	}
+
+
+
+
+
+	//int j = 0;
+	//for ( std::vector<std::vector<vec3>>::iterator iterRadius = bubblePosList.begin(); iterRadius != bubblePosList.end(); ++iterRadius, ++j ) {
+	//	int i = 0;
+	//	for ( std::vector<vec3>::iterator iterPos = bubblePosList[j].begin(), iterVel = bubbleVelList[j].begin(); iterPos != bubblePosList[j].end(); ++i ) {
+	//		vec3 position = bubblePosList[j][i];
+
+	//		int position_grid_X = (int)((position[0] + CONTAINER_DIM_X * CELL_SIZE / 2.0f - CONTAINER_TRANS_X) / CELL_SIZE);
+	//		int position_grid_Y = (int)((position[1] + CONTAINER_DIM_Y * CELL_SIZE / 2.0f - CONTAINER_TRANS_Y) / CELL_SIZE);
+	//		int position_grid_Z = (int)((position[2] + CONTAINER_DIM_Z * CELL_SIZE / 2.0f - CONTAINER_TRANS_Z) / CELL_SIZE);
+
+
+
+	//		vec3 velocity(velocityArray[position_grid_X + position_grid_Y * CONTAINER_DIM_X + position_grid_Z * CONTAINER_DIM_X * CONTAINER_DIM_Y + 0],
+	//			          velocityArray[position_grid_X + position_grid_Y * CONTAINER_DIM_X + position_grid_Z * CONTAINER_DIM_X * CONTAINER_DIM_Y + 1],
+	//					  velocityArray[position_grid_X + position_grid_Y * CONTAINER_DIM_X + position_grid_Z * CONTAINER_DIM_X * CONTAINER_DIM_Y + 2]);
+
+	//		double ran_num = ( rand() % 100 ) / 100.0f;
+	//		double velocityMag = velocity.Length(); 
+	//		double fractionField = mFractionField( position_grid_X, position_grid_Y, position_grid_Z );
+	//		double scatterOdd = scatterFreq * 100* ( 1 - fractionField ) * velocityMag * velocityMag;	//between 0~1 
+
+	//		// alter the direction
+	//		if ( scatterOdd > ran_num ) {
+	//			double x = 2 * ran_num * scatterCoef - scatterCoef + 1;
+	//			double y = 2 * ran_num + scatterCoef - 1;
+	//			double cosTheta;
+	//			double theta;
+
+	//			if ( x == 0 ) {
+	//				theta = PI / 2.0f;
+	//			}
+	//			else {
+	//				cosTheta = y / x;
+	//				theta = acos( cosTheta );
+	//			}
+
+ //				if ( theta != 0 ) {
+	//				double rotateAxisX = 1;
+	//				double rotateAxisY = 0;
+	//				double rotateAxisZ = 0;
+
+	//				if ( velocity[2] != 0 ) {
+	//					rotateAxisX = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
+	//					rotateAxisY = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
+
+	//					while ( rotateAxisX == 0 && rotateAxisY == 0 ) {
+	//						rotateAxisX = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
+	//						rotateAxisY = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
+	//					}
+
+	//					rotateAxisZ = -( rotateAxisX * velocity[0] + rotateAxisY * velocity[1] ) / velocity[2];
+	//				}
+	//				else if ( velocity[1] != 0 ) {
+	//					rotateAxisX = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
+	//					rotateAxisZ = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
+
+	//					while ( rotateAxisX == 0 && rotateAxisZ == 0 ) {
+	//						rotateAxisX = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
+	//						rotateAxisZ = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
+	//					}
+
+	//					rotateAxisY = -( rotateAxisX * velocity[0] + rotateAxisZ * velocity[2] ) / velocity[1];
+	//				}
+	//				else if ( velocity[0] != 0 ) {
+	//					rotateAxisY = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
+	//					rotateAxisZ = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
+
+	//					while ( rotateAxisY == 0 && rotateAxisZ == 0 ) {
+	//						rotateAxisY = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
+	//						rotateAxisZ = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
+	//					}
+
+	//					rotateAxisX = -( rotateAxisY * velocity[1] + rotateAxisZ * velocity[2] ) / velocity[0];
+	//				}
+
+	//				double length = sqrt( rotateAxisX * rotateAxisX + rotateAxisY * rotateAxisY + rotateAxisZ * rotateAxisZ );
+	//				rotateAxisX = rotateAxisX / length;
+	//				rotateAxisY = rotateAxisY / length;
+	//				rotateAxisZ = rotateAxisZ / length;
+
+	//				double ss = cos( theta / 2.0f );
+	//				double xx = sin( theta / 2.0f ) * rotateAxisX;
+	//				double yy = sin( theta / 2.0f ) * rotateAxisY;
+	//				double zz = sin( theta / 2.0f ) * rotateAxisZ;
+
+	//				double newX = ( 1 - 2 * yy * yy - 2 * zz * zz ) * velocity[0] + ( 2 * xx * yy - 2 * ss * zz ) * velocity[1] + ( 2 * xx * zz + 2 * ss * yy ) * velocity[2];
+	//				double newY = ( 2 * xx * yy + 2 * ss * zz ) * velocity[0] + ( 1 - 2 * xx * xx - 2 * zz * zz ) * velocity[1] + ( 2 * yy * zz - 2 * ss * xx ) * velocity[2];
+	//				double newZ = ( 2 * xx * zz - 2 * ss * yy ) * velocity[0] + ( 2 * yy * zz + 2 * ss * xx ) * velocity[1] + ( 1 - 2 * xx * xx - 2 * yy * yy ) * velocity[2];
+	//				velocity[0] = newX;
+	//				velocity[1] = newY;
+	//				velocity[2] = newZ;
+	//			}
+
+	//		}
+
+	//		position += velocity;
+
+	//		// particle goes outside the container
+	//		if ( position[0] - CONTAINER_TRANS_X < -CONTAINER_DIM_X * CELL_SIZE / 2.0f ||
+	//			 position[0] - CONTAINER_TRANS_X >  CONTAINER_DIM_X * CELL_SIZE / 2.0f ||
+	//			 position[1] - CONTAINER_TRANS_Y < -CONTAINER_DIM_Y * CELL_SIZE / 2.0f ||
+	//			 position[1] - CONTAINER_TRANS_Y >= (CONTAINER_DIM_Y * CELL_SIZE) / 2.0f - 0.001 ||
+	//			 position[2] - CONTAINER_TRANS_Z < -CONTAINER_DIM_Z * CELL_SIZE / 2.0f ||
+	//			 position[2] - CONTAINER_TRANS_Z >  CONTAINER_DIM_Z * CELL_SIZE / 2.0f )
+	//		{
+	//			if ( iterPos == bubblePosList[j].begin() ) {
+	//				bubblePosList[j].erase( iterPos );
+	//				iterPos = bubblePosList[j].begin();
+	//				bubbleVelList[j].erase( iterVel );
+	//				iterVel = bubbleVelList[j].begin();
+	//				i--;
+	//			}
+	//			else {
+	//				--( iterPos = bubblePosList[j].erase( iterPos ) );
+	//				--( iterVel = bubbleVelList[j].erase( iterVel ) );
+	//				i--;
+	//				++iterPos; 
+	//				++iterVel;
+	//			}
+	//		}
+	//		else {
+	//			bubblePosList[j][i] = position;
+
+	//			// bubble break
+	//			if ( breakFreq > ( rand() % 100 ) / 100.0f && j > 0 ) {
+	//				vec3 newPosition1 = ( position + vec3( bubbleRadiusList[j], 0, 0 ) );
+	//				vec3 newPosition2 = ( position - vec3( bubbleRadiusList[j], 0, 0 ) );
+
+	//				if ( newPosition1[0] - CONTAINER_TRANS_X  < -CONTAINER_DIM_X * CELL_SIZE / 2.0f ||
+	//					 newPosition1[0] - CONTAINER_TRANS_X  > CONTAINER_DIM_X * CELL_SIZE / 2.0f )
+	//				{
+	//				    newPosition1 = position;
+	//				}
+
+	//				if ( newPosition2[0] - CONTAINER_TRANS_X  < -CONTAINER_DIM_X * CELL_SIZE / 2.0f ||
+	//					 newPosition2[0] - CONTAINER_TRANS_X  > CONTAINER_DIM_X * CELL_SIZE / 2.0f )
+	//				{	 
+	//					 newPosition2 = position;
+	//				}
+
+	//				bubblePosList[j-1].push_back( newPosition1 );
+	//				bubbleVelList[j-1].push_back( bubbleVelList[j][i] );
+	//				bubblePosList[j-1].push_back( newPosition2 );
+	//				bubbleVelList[j-1].push_back( bubbleVelList[j][i] );
+
+	//				if ( iterPos == bubblePosList[j].begin() ) {
+	//					bubblePosList[j].erase( iterPos );
+	//					iterPos = bubblePosList[j].begin();
+	//					bubbleVelList[j].erase( iterVel );
+	//					iterVel = bubbleVelList[j].begin();
+	//					i--;
+	//				}
+	//				else {
+	//					--( iterPos = bubblePosList[j].erase( iterPos ) );
+	//					--( iterVel = bubbleVelList[j].erase( iterVel ) );
+	//					i--;
+	//					++iterPos; 
+	//					++iterVel;
+	//				}
+	//			}
+	//			else {
+	//				++iterPos; 
+	//				++iterVel;
+	//			}
+	//		}
+
+	//	}
+	//}
+
+
+}
+
+
 
 
 ////////////////////////////////////////////////////
@@ -415,18 +630,24 @@ MStatus ManyTinyBubbles::initialize()
 }
 
 
+void ManyTinyBubbles::reset()
+{
+	m_bubbles.reset();
+
+	// TODO: set fraction field to some default value
+	// TODO: allow fraction field to handle voxels that aren't squares
+	//mFractionField.initialize(1.0f, m_fluid_container_cell_size_x, m_fluid_container_dim_x, m_fluid_container_dim_y, m_fluid_container_dim_z); // set default fraction field 
+}
+
+
 ////////////////////////////////////////////////////
 // debug
 ////////////////////////////////////////////////////
-void ManyTinyBubbles::testCode( const unsigned int& num ) const
+void ManyTinyBubbles::testCode( const MString& str  ) const
 {
-	std::string cmd = "particleExists bubbleParticle";
-	Convenience::appendNumToStdString( cmd, num );
-	cmd += ";";
+	//MDoubleArray velocity_field = Convenience::getVelocityFieldFromMayaFluid( str );
 
-	// debug
-	Convenience::printInScriptEditor( cmd );
-
-	//int particle_exists;
-	//	MGlobal::executeCommand( Convenience::convertStdStringToMString( cmd ), particle_exists );
+	//std::string to_print = "velocity_field size: ";
+	//Convenience::appendNumToStdString( to_print, velocity_field.length() );
+	//Convenience::printInScriptEditor( to_print );
 }
