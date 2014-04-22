@@ -24,6 +24,12 @@ public:
 
 	vec3 getVelocityAtPos( const vec3& pos ) const;
 
+	// fraction field methods
+	void resetFractionField( const float& default_val );
+	unsigned int convert3dIndexToLinearIndex( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const;
+	void setFractionFieldAtXYZ( const float& val, const unsigned int& x, const unsigned int& y, const unsigned int& z );
+	float getFractionFieldAtXYZ( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const;
+
 private:
 
 	void convertWorldPosToGridIndices( const vec3&		pos,
@@ -42,9 +48,13 @@ private:
 
 	MDoubleArray m_velocity_field;
 
+	float *m_fraction_field_list;
+
 	int m_res_x;
 	int m_res_y;
 	int m_res_z;
+
+	unsigned int num_voxels;
 
 	double m_dim_x;
 	double m_dim_y;

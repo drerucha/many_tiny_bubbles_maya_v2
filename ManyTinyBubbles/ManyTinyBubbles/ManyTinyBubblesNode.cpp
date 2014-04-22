@@ -254,6 +254,13 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 			vec3 cell_vel = m_fluid_container.getVelocityAtPos( bubble_pos );
 
 
+
+			double random_float = Convenience::generateRandomFloatBetweenZeroAndOneInclusive();
+			double cell_vel_magnitude = cell_vel.Length();
+
+			// TODO: create fraction field
+			//double fractionField = mFractionField( position_grid_X, position_grid_Y, position_grid_Z );
+
 		}
 	}
 

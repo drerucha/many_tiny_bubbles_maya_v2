@@ -9,12 +9,13 @@
 // constructor / destructor
 ////////////////////////////////////////////////////
 
-FluidContainerData::FluidContainerData(void)
+FluidContainerData::FluidContainerData()
 {
 }
 
-FluidContainerData::~FluidContainerData(void)
+FluidContainerData::~FluidContainerData()
 {
+	delete[] m_fraction_field_list;
 }
 
 
@@ -36,6 +37,8 @@ void FluidContainerData::init( MString fluid_container_name )
 	m_res_y = fluid_container_res_array[VY];
 	m_res_z = fluid_container_res_array[VZ];
 
+	num_voxels = m_res_x * m_res_y * m_res_z;
+
 	m_dim_x = fluid_container_dim_array[VX];
 	m_dim_y = fluid_container_dim_array[VY];
 	m_dim_z = fluid_container_dim_array[VZ];
@@ -47,6 +50,9 @@ void FluidContainerData::init( MString fluid_container_name )
 	m_cell_size_x = m_dim_x / m_res_x;
 	m_cell_size_y = m_dim_y / m_res_y;
 	m_cell_size_z = m_dim_z / m_res_z;
+
+	// initialize fraction field data structure
+	m_fraction_field_list = new float[ num_voxels ];
 }
 
 
@@ -79,8 +85,7 @@ vec3 FluidContainerData::getVelocityAtPos( const vec3& pos ) const
 								  fluid_cell_index_y,
 								  fluid_cell_index_z );
 
-	// col + row + stack
-	int vec3_index = ( fluid_cell_index_x ) + ( fluid_cell_index_y * m_res_x ) + ( fluid_cell_index_z * m_res_x * m_res_y );
+	int vec3_index = convert3dIndexToLinearIndex( fluid_cell_index_x, fluid_cell_index_y, fluid_cell_index_z );
 
 	// get velocity of cell that matches the computed indices
 	double vel_x, vel_y, vel_z;
@@ -103,4 +108,48 @@ void FluidContainerData::convertWorldPosToGridIndices( const vec3&		pos,
 	index_x = ( int )( ( pos[VX] + ( m_dim_x / 2.0f ) - m_trans_x ) / m_cell_size_x );
 	index_y = ( int )( ( pos[VY] + ( m_dim_y / 2.0f ) - m_trans_y ) / m_cell_size_y );
 	index_z = ( int )( ( pos[VZ] + ( m_dim_z / 2.0f ) - m_trans_z ) / m_cell_size_z );
+}
+
+
+////////////////////////////////////////////////////
+// fraction field methods
+////////////////////////////////////////////////////
+
+// set every element in m_fraction_field_list to some value
+void FluidContainerData::resetFractionField( const float& default_val )
+{
+	for ( unsigned int i = 0; i < num_voxels; ++i ) {
+		m_fraction_field_list[i] = default_val;
+	}
+}
+
+unsigned int FluidContainerData::convert3dIndexToLinearIndex( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const
+{
+	// col + row + stack
+	return ( x ) + ( y * m_res_x ) + ( z * m_res_x * m_res_y );
+}
+
+void FluidContainerData::setFractionFieldAtXYZ( const float& val, const unsigned int& x, const unsigned int& y, const unsigned int& z )
+{
+	unsigned int index = convert3dIndexToLinearIndex( x, y, z );
+
+	if ( index > 0 && index < num_voxels ) {
+		m_fraction_field_list[index] = val;
+	}
+	else {
+		Convenience::printInScriptEditor( MString( "ERROR: fraction field index out of bounds in FluidContainerData::setFractionFieldAtXYZ" ) );
+	}
+}
+
+float FluidContainerData::getFractionFieldAtXYZ( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const
+{
+	unsigned int index = convert3dIndexToLinearIndex( x, y, z );
+
+	if ( index > 0 && index < num_voxels ) {
+		return m_fraction_field_list[index];
+	}
+	else {
+		Convenience::printInScriptEditor( MString( "ERROR: fraction field index out of bounds in FluidContainerData::getFractionFieldAtXYZ" ) );
+		return 0.0f;
+	}
 }
