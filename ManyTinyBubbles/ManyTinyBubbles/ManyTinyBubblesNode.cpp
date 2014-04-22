@@ -246,7 +246,7 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 	for ( std::vector<std::vector<vec3>>::iterator outer_it = bubble_pos_list.begin() ; outer_it != bubble_pos_list.end(); ++outer_it ) {
 		std::vector<vec3> bubble_pos_sublist = *outer_it;
 
-		// iterate through the list of vec3s (one of the sublists of bubble_pos_list)
+		// iterate through the list of vec3s in one of the radius groups (one of the sublists of bubble_pos_list)
 		for ( std::vector<vec3>::iterator inner_it = bubble_pos_sublist.begin() ; inner_it != bubble_pos_sublist.end(); ++inner_it ) {
 			vec3 bubble_pos = *inner_it;
 

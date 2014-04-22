@@ -31,4 +31,10 @@ public:
 	// miscellaneous
 	static MString getParent( MString child );
 	static void appendNumToStdString( std::string& str, const int& num );
+
+	// random number generation
+	static int generateRandomIntInclusive( const int& min, const int& max );
+	static int generateRandomIntExclusive( const int& min, const int& max );
+	static float generateRandomFloatInclusive( const float& min, const int& max );
+	static float generateRandomFloatBetweenZeroAndOneInclusive( void );
 };

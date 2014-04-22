@@ -119,3 +119,28 @@ void Convenience::appendNumToStdString( std::string& str, const int& num )
 	sprintf( num_str, "%d", num );
 	str += num_str;
 }
+
+
+////////////////////////////////////////////////////
+// random number generation
+////////////////////////////////////////////////////
+
+int Convenience::generateRandomIntInclusive( const int& min, const int& max )
+{
+	return rand() % ( max + 1 - min ) + min;
+}
+
+int Convenience::generateRandomIntExclusive( const int& min, const int& max )
+{
+	return rand() % ( max - min - 1 ) + min + 1;
+}
+
+float Convenience::generateRandomFloatInclusive( const float& min, const int& max )
+{
+	return min + static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX / ( max - min ) ) );
+}
+
+float Convenience::generateRandomFloatBetweenZeroAndOneInclusive()
+{
+	return static_cast<float>( rand() ) / static_cast<float>( RAND_MAX );
+}
