@@ -43,6 +43,8 @@ void testCode( const MString& str ) const;
 MStatus	createBubbles( const MTime& time,
 					   const float& step_size );
 
+void computeFractionField( void );
+
 void advectParticles( const float& dt );
 
 void reset();

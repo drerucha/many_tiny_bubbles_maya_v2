@@ -9,6 +9,10 @@
 //
 
 
+// TODO: add if defines to all classes
+// TODO: change all floats to doubles b/c I think they're faster on x86 architecture
+
+
 #include "ManyTinyBubblesNode.h"
 
 #include <maya/MPlug.h>
@@ -194,13 +198,7 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 
 	// simulate ( frame_num - m_current_frame ) frames starting from current m_current_frame
 	for ( unsigned int i = 0; i < frame_num - m_current_frame; ++i ) {
-
-		// TODO: set fraction field to some default value, 1.0f
-		// TODO: allow fraction field to handle voxels that aren't squares
-		//mFractionField.initialize( 1.0f, m_fluid_container_cell_size_x, m_fluid_container_dim_x, m_fluid_container_dim_y, m_fluid_container_dim_z );
-
-		// TODO: compute fraction field
-		//computeFractionField();
+		computeFractionField();
 
 		// TODO: set fluid density
 		//setDensity( "fluid1" );
@@ -229,6 +227,33 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 }
 
 
+////////////////////////////////////////////////////
+// computeFractionField()
+////////////////////////////////////////////////////
+void ManyTinyBubbles::computeFractionField()
+{
+	// set fraction field value at each voxel to 1.0f
+	m_fluid_container.resetFractionField();
+
+	// get positions for every bubble present in the simulation
+	std::vector<std::vector<vec3>> bubble_pos_list = m_bubbles.getPosList();
+
+	// iterate through the bubble radius groups
+	unsigned int radius_index = 0;
+	for ( std::vector<std::vector<vec3>>::iterator outer_it = bubble_pos_list.begin() ; outer_it != bubble_pos_list.end(); ++outer_it ) {
+		std::vector<vec3> bubble_pos_sublist = *outer_it;
+
+		// iterate through the list of vec3s in the current radius group
+		for ( std::vector<vec3>::iterator inner_it = bubble_pos_sublist.begin() ; inner_it != bubble_pos_sublist.end(); ++inner_it ) {
+			vec3 bubble_pos = *inner_it;
+
+			// reduce fraction field of the voxel the current bubble is inside
+			m_fluid_container.reduceFractionFieldOfVoxelAtPos( bubble_pos, m_bubbles.getRadiusAtIndex( radius_index ) );
+		}
+
+		++radius_index;
+	}
+}
 
 
 ////////////////////////////////////////////////////
@@ -251,16 +276,13 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 			vec3 bubble_pos = *inner_it;
 
 			// get velocity of cell in fluid container
-			vec3 cell_vel = m_fluid_container.getVelocityAtPos( bubble_pos );
+			vec3 voxel_vel = m_fluid_container.getVelocityOfVoxelAtPos( bubble_pos );
 
 
 
 			double random_float = Convenience::generateRandomFloatBetweenZeroAndOneInclusive();
-			double cell_vel_magnitude = cell_vel.Length();
-
-			// TODO: create fraction field
-			//double fractionField = mFractionField( position_grid_X, position_grid_Y, position_grid_Z );
-
+			double cell_vel_magnitude = voxel_vel.Length();
+			double fraction_field = m_fluid_container.getFractionFieldOfVoxelAtPos( bubble_pos );
 		}
 	}
 

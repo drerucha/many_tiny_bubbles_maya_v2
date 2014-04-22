@@ -127,3 +127,8 @@ std::vector<std::vector<vec3>> BubbleData::getPosList() const
 {
 	return m_pos_list;
 }
+
+float BubbleData::getRadiusAtIndex( unsigned int& index ) const
+{
+	return m_radii_list[index];
+}

@@ -4,6 +4,9 @@
 
 #include "Convenience.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 
 ////////////////////////////////////////////////////
 // constructor / destructor
@@ -52,7 +55,10 @@ void FluidContainerData::init( MString fluid_container_name )
 	m_cell_size_z = m_dim_z / m_res_z;
 
 	// initialize fraction field data structure
-	m_fraction_field_list = new float[ num_voxels ];
+	m_fraction_field_list = new double[ num_voxels ];
+
+	// initialize constant used in computing bubble volumes
+	m_sphere_volume_constant = 4.0 / 3.0 * M_PI;
 }
 
 
@@ -70,22 +76,52 @@ void FluidContainerData::updateVelocityField()
 
 
 ////////////////////////////////////////////////////
+// pos / array index conversion methods
+////////////////////////////////////////////////////
+
+unsigned int FluidContainerData::convertPosToLinearIndex( const vec3& pos ) const
+{
+	unsigned int voxel_index_x, voxel_index_y, voxel_index_z;
+
+	convertWorldPosToGridIndices( pos,
+								  voxel_index_x,
+								  voxel_index_y,
+								  voxel_index_z );
+
+	return convert3dIndexToLinearIndex( voxel_index_x,
+										voxel_index_y,
+										voxel_index_z );
+}
+
+void FluidContainerData::convertWorldPosToGridIndices( const vec3&		pos,
+													   unsigned int&	index_x,
+													   unsigned int&	index_y,
+													   unsigned int&	index_z ) const
+{
+	index_x = ( int )( ( pos[VX] + ( m_dim_x / 2.0f ) - m_trans_x ) / m_cell_size_x );
+	index_y = ( int )( ( pos[VY] + ( m_dim_y / 2.0f ) - m_trans_y ) / m_cell_size_y );
+	index_z = ( int )( ( pos[VZ] + ( m_dim_z / 2.0f ) - m_trans_z ) / m_cell_size_z );
+}
+
+unsigned int FluidContainerData::convert3dIndexToLinearIndex( const unsigned int& x,
+															  const unsigned int& y,
+															  const unsigned int& z ) const
+{
+	// col + row + stack
+	return ( x ) + ( y * m_res_x ) + ( z * m_res_x * m_res_y );
+}
+
+
+////////////////////////////////////////////////////
 // get fluid velocity of cell at passed-in index
 ////////////////////////////////////////////////////
-vec3 FluidContainerData::getVelocityAtPos( const vec3& pos ) const
+vec3 FluidContainerData::getVelocityOfVoxelAtPos( const vec3& pos ) const
 {
 	// TODO: return velocity at pos; currently, this method returns the fluid velocity of the cell pos lies inside
 	// TODO: bounds checking, return 0 or something if pos is outside fluid container
 	// TODO: make sure this logic is correct for indexing grid faces b/c velocity is stored at cell faces, not at cell centers
 
-	// get cell indices of fluid container for passed-in pos
-	unsigned int fluid_cell_index_x, fluid_cell_index_y, fluid_cell_index_z;
-	convertWorldPosToGridIndices( pos,
-								  fluid_cell_index_x,
-								  fluid_cell_index_y,
-								  fluid_cell_index_z );
-
-	int vec3_index = convert3dIndexToLinearIndex( fluid_cell_index_x, fluid_cell_index_y, fluid_cell_index_z );
+	int vec3_index = convertPosToLinearIndex( pos );
 
 	// get velocity of cell that matches the computed indices
 	double vel_x, vel_y, vel_z;
@@ -98,52 +134,31 @@ vec3 FluidContainerData::getVelocityAtPos( const vec3& pos ) const
 
 
 ////////////////////////////////////////////////////
-// convert world space position to indices of 
-////////////////////////////////////////////////////
-void FluidContainerData::convertWorldPosToGridIndices( const vec3&		pos,
-													   unsigned int&	index_x,
-													   unsigned int&	index_y,
-													   unsigned int&	index_z ) const
-{
-	index_x = ( int )( ( pos[VX] + ( m_dim_x / 2.0f ) - m_trans_x ) / m_cell_size_x );
-	index_y = ( int )( ( pos[VY] + ( m_dim_y / 2.0f ) - m_trans_y ) / m_cell_size_y );
-	index_z = ( int )( ( pos[VZ] + ( m_dim_z / 2.0f ) - m_trans_z ) / m_cell_size_z );
-}
-
-
-////////////////////////////////////////////////////
 // fraction field methods
 ////////////////////////////////////////////////////
 
-// set every element in m_fraction_field_list to some value
-void FluidContainerData::resetFractionField( const float& default_val )
+void FluidContainerData::resetFractionField()
 {
+	// set every element in m_fraction_field_list to 1.0f
 	for ( unsigned int i = 0; i < num_voxels; ++i ) {
-		m_fraction_field_list[i] = default_val;
+		m_fraction_field_list[i] = 1.0f;
 	}
 }
 
-unsigned int FluidContainerData::convert3dIndexToLinearIndex( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const
+void FluidContainerData::reduceFractionFieldOfVoxelAtPos( const vec3& bubble_pos,
+														  const float& bubble_radius )
 {
-	// col + row + stack
-	return ( x ) + ( y * m_res_x ) + ( z * m_res_x * m_res_y );
+	// TODO: adjust so non-square voxels work
+
+	int linear_index_of_voxel = convertPosToLinearIndex( bubble_pos );
+
+	// reduce fraction field of the voxel the bubble with radius bubble_radius at bubble_pos is inside
+	m_fraction_field_list[linear_index_of_voxel] -= m_sphere_volume_constant * pow( bubble_radius / m_cell_size_x, 3 );
 }
 
-void FluidContainerData::setFractionFieldAtXYZ( const float& val, const unsigned int& x, const unsigned int& y, const unsigned int& z )
+double FluidContainerData::getFractionFieldOfVoxelAtPos( const vec3& pos ) const
 {
-	unsigned int index = convert3dIndexToLinearIndex( x, y, z );
-
-	if ( index > 0 && index < num_voxels ) {
-		m_fraction_field_list[index] = val;
-	}
-	else {
-		Convenience::printInScriptEditor( MString( "ERROR: fraction field index out of bounds in FluidContainerData::setFractionFieldAtXYZ" ) );
-	}
-}
-
-float FluidContainerData::getFractionFieldAtXYZ( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const
-{
-	unsigned int index = convert3dIndexToLinearIndex( x, y, z );
+	unsigned int index = convertPosToLinearIndex( pos );
 
 	if ( index > 0 && index < num_voxels ) {
 		return m_fraction_field_list[index];
@@ -153,3 +168,28 @@ float FluidContainerData::getFractionFieldAtXYZ( const unsigned int& x, const un
 		return 0.0f;
 	}
 }
+
+//double FluidContainerData::getFractionFieldAtXYZ( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const
+//{
+//	unsigned int index = convert3dIndexToLinearIndex( x, y, z );
+//
+//	if ( index > 0 && index < num_voxels ) {
+//		return m_fraction_field_list[index];
+//	}
+//	else {
+//		Convenience::printInScriptEditor( MString( "ERROR: fraction field index out of bounds in FluidContainerData::getFractionFieldAtXYZ" ) );
+//		return 0.0f;
+//	}
+//}
+
+//void FluidContainerData::setFractionFieldAtXYZ( const float& val, const unsigned int& x, const unsigned int& y, const unsigned int& z )
+//{
+//	unsigned int index = convert3dIndexToLinearIndex( x, y, z );
+//
+//	if ( index > 0 && index < num_voxels ) {
+//		m_fraction_field_list[index] = val;
+//	}
+//	else {
+//		Convenience::printInScriptEditor( MString( "ERROR: fraction field index out of bounds in FluidContainerData::setFractionFieldAtXYZ" ) );
+//	}
+//}

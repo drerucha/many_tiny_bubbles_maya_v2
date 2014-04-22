@@ -22,20 +22,28 @@ public:
 
 	void updateVelocityField( void );
 
-	vec3 getVelocityAtPos( const vec3& pos ) const;
+	vec3 getVelocityOfVoxelAtPos( const vec3& pos ) const;
+	//vec3 getVelocityOfVoxel( const int& x, const int& y, const int& z ) const;
 
 	// fraction field methods
-	void resetFractionField( const float& default_val );
-	unsigned int convert3dIndexToLinearIndex( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const;
-	void setFractionFieldAtXYZ( const float& val, const unsigned int& x, const unsigned int& y, const unsigned int& z );
-	float getFractionFieldAtXYZ( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const;
+	void resetFractionField();
+	void reduceFractionFieldOfVoxelAtPos( const vec3&	bubble_pos,
+										  const float&	bubble_radius );
+	double getFractionFieldOfVoxelAtPos( const vec3& pos ) const;
+	//double getFractionFieldAtXYZ( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const;
+	//void setFractionFieldAtXYZ( const float& val, const unsigned int& x, const unsigned int& y, const unsigned int& z );
 
 private:
 
+	// pos / array index conversion methods
+	unsigned int convertPosToLinearIndex( const vec3& pos ) const;
 	void convertWorldPosToGridIndices( const vec3&		pos,
 									   unsigned int&	index_x,
 									   unsigned int&	index_y,
 									   unsigned int&	index_z ) const;
+	unsigned int convert3dIndexToLinearIndex( const unsigned int& x,
+											  const unsigned int& y,
+											  const unsigned int& z ) const;
 
 
 ////////////////////////////////////////////////////
@@ -48,7 +56,7 @@ private:
 
 	MDoubleArray m_velocity_field;
 
-	float *m_fraction_field_list;
+	double *m_fraction_field_list;
 
 	int m_res_x;
 	int m_res_y;
@@ -68,4 +76,5 @@ private:
 	double m_cell_size_y;
 	double m_cell_size_z;
 
+	double m_sphere_volume_constant;
 };

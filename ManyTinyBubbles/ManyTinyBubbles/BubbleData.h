@@ -33,6 +33,7 @@ public:
 	// getters
 	unsigned int getNumRadii( void ) const;
 	std::vector<std::vector<vec3>> getPosList( void ) const;
+	float getRadiusAtIndex( unsigned int& index ) const;
 
 private:
 
