@@ -115,6 +115,20 @@ void BubbleData::reset()
 
 
 ////////////////////////////////////////////////////
+// i indicates radius group
+// j indicates position within a specific radius group
+////////////////////////////////////////////////////
+void BubbleData::removeBubbleAtIndex( const unsigned int& i,
+									  const unsigned int& j )
+{
+	// TODO: test this
+
+	std::vector<vec3> pos_list = m_pos_list[i];
+	pos_list.erase( pos_list.begin() + j );
+}
+
+
+////////////////////////////////////////////////////
 // getters
 ////////////////////////////////////////////////////
 

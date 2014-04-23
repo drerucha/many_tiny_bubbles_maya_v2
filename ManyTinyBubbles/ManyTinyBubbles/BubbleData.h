@@ -37,6 +37,9 @@ public:
 	double getScatteringFrequency( void ) const;
 	double getScatteringCoefficient( void ) const;
 
+	void removeBubbleAtIndex( const unsigned int& i,
+							  const unsigned int& j );
+
 private:
 
 	void setRadii( const double&	radius_min,

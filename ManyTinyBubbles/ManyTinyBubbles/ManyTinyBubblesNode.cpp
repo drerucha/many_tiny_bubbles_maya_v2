@@ -274,6 +274,10 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 	// get positions for every bubble present in the simulation
 	std::vector<std::vector<vec3>> bubble_pos_list = m_bubbles.getPosList();
 
+	// list of bubble indices that map to bubbles that escape fluid container
+	// we store these to remove escaped bubbles from the lists after iteration is complete
+	std::vector<vec2> escaped_bubble_indices;
+
 	// iterate through the bubble radius groups
 	for ( std::vector<std::vector<vec3>>::iterator outer_it = bubble_pos_list.begin() ; outer_it != bubble_pos_list.end(); ++outer_it ) {
 		std::vector<vec3> bubble_pos_sublist = *outer_it;
@@ -301,11 +305,30 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 
 			// TODO: update bubble position using the altered velocity
 			// TODO: update all bubble positions even if their velocity was not altered, probably
+			vec3 new_bubble_pos = bubble_pos;
 
-			// TODO: check if new bubble position escapes fluid container
+			// if new bubble position escapes fluid container, then remove bubble from list
+			if ( m_fluid_container.posIsOutsideFluidContainer( new_bubble_pos ) ) {
 
+				// TODO: if bubble escapes in the x, z, or -y directions, just push them back into the container
+				// TODO: only remove bubbles that have reached the water surface
 
+				// mark bubble to be removed instead of mutating data structure in middle of iterating
+				int radius_group_index = Convenience::getIndexFromIterator( outer_it, bubble_pos_list );
+				int pos_list_index = Convenience::getIndexFromIterator( inner_it, bubble_pos_sublist );
+				escaped_bubble_indices.push_back( vec2( radius_group_index, pos_list_index ) );
+			}
+			else {
+
+			}
 		}
+	}
+
+	// remove escaped bubbles from list
+	for ( std::vector<vec2>::iterator it = escaped_bubble_indices.begin() ; it != escaped_bubble_indices.end(); ++it ) {
+		vec2 bubble_index = *it;
+		m_bubbles.removeBubbleAtIndex( ( int )bubble_index[VX],
+									   ( int )bubble_index[VY] );
 	}
 }
 

@@ -33,6 +33,8 @@ public:
 	//double getFractionFieldAtXYZ( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const;
 	//void setFractionFieldAtXYZ( const float& val, const unsigned int& x, const unsigned int& y, const unsigned int& z );
 
+	bool posIsOutsideFluidContainer( const vec3& pos ) const;
+
 private:
 
 	// pos / array index conversion methods

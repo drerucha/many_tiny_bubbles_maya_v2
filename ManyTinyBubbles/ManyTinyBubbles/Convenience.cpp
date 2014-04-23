@@ -1,6 +1,7 @@
 #include "Convenience.h"
 
 #include <maya/MGlobal.h>
+
 #include <string>
 
 
@@ -150,4 +151,34 @@ double Convenience::generateRandomDoubleBetweenZeroAndOneInclusive()
 double Convenience::generateRandomDoubleBetweenNegativeOneAndOneInclusive()
 {
 	return -1.0 + static_cast<double>( rand() ) / ( static_cast<double>( RAND_MAX / ( 2.0 ) ) );
+}
+
+
+////////////////////////////////////////////////////
+// vector indices
+////////////////////////////////////////////////////
+
+unsigned int Convenience::getIndexFromIterator( std::vector<int>::iterator it, std::vector<int> vec )
+{
+	return ( int )( it - vec.begin() );
+}
+
+unsigned int Convenience::getIndexFromIterator( std::vector<float>::iterator it, std::vector<float> vec )
+{
+	return ( int )( it - vec.begin() );
+}
+
+unsigned int Convenience::getIndexFromIterator( std::vector<double>::iterator it, std::vector<double> vec )
+{
+	return ( int )( it - vec.begin() );
+}
+
+unsigned int Convenience::getIndexFromIterator( std::vector<vec3>::iterator it, std::vector<vec3> vec )
+{
+	return ( int )( it - vec.begin() );
+}
+
+unsigned int Convenience::getIndexFromIterator( std::vector<std::vector<vec3>>::iterator it, std::vector<std::vector<vec3>> vec )
+{
+	return ( int )( it - vec.begin() );
 }

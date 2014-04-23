@@ -193,3 +193,23 @@ double FluidContainerData::getFractionFieldOfVoxelAtPos( const vec3& pos ) const
 //		Convenience::printInScriptEditor( MString( "ERROR: fraction field index out of bounds in FluidContainerData::setFractionFieldAtXYZ" ) );
 //	}
 //}
+
+
+////////////////////////////////////////////////////
+// check if pos is outside bounds of fluid container
+////////////////////////////////////////////////////
+bool FluidContainerData::posIsOutsideFluidContainer( const vec3& pos ) const
+{
+	if ( pos[VX] - m_trans_x < -m_dim_x / 2.0f ||
+		 pos[VX] - m_trans_x >  m_dim_x / 2.0f ||
+		 pos[VY] - m_trans_y < -m_dim_y / 2.0f ||
+		 pos[VY] - m_trans_y >  m_dim_y / 2.0f ||
+		 pos[VZ] - m_trans_z < -m_dim_z / 2.0f ||
+		 pos[VZ] - m_trans_z >  m_dim_z / 2.0f )
+	{
+		return true;
+	}
+	else {
+		return false;
+	}
+}

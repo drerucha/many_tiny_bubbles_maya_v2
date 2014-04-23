@@ -5,6 +5,9 @@
 #include <maya/MDoubleArray.h>
 #include <maya/MStringArray.h>
 
+#include <vector>
+#include "vec.h"
+
 
 class Convenience
 {
@@ -38,4 +41,11 @@ public:
 	static double generateRandomDoubleInclusive( const double& min, const double& max );
 	static double generateRandomDoubleBetweenZeroAndOneInclusive( void );
 	static double generateRandomDoubleBetweenNegativeOneAndOneInclusive( void );
+
+	// vector indices
+	static unsigned int getIndexFromIterator( std::vector<int>::iterator it, std::vector<int> vec );
+	static unsigned int getIndexFromIterator( std::vector<float>::iterator it, std::vector<float> vec );
+	static unsigned int getIndexFromIterator( std::vector<double>::iterator it, std::vector<double> vec );
+	static unsigned int getIndexFromIterator( std::vector<vec3>::iterator it, std::vector<vec3> vec );
+	static unsigned int getIndexFromIterator( std::vector<std::vector<vec3>>::iterator it, std::vector<std::vector<vec3>> vec );
 };
