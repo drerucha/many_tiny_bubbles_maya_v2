@@ -177,3 +177,8 @@ double BubbleData::getBreakupFrequency() const
 {
 	return m_breakup_frequency;
 }
+
+std::vector<double> BubbleData::getRadiiList() const
+{
+	return m_radii_list;
+}

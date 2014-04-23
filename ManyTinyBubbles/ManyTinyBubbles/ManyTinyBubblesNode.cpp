@@ -14,6 +14,8 @@
 // TODO: should bubbles have their own velocity members?
 // TODO: create an EmitterData class to complement the BubbleData class
 // TODO: alter node to allow multiple bubble emitter sources
+// TODO: think about moving EmitterData logic into BubbleData logic
+// TODO: initialize m_pos_list and m_vel_list in BubbleData to ensure lists always exist to add to when generating bubbles
 
 
 #include "ManyTinyBubblesNode.h"
@@ -224,8 +226,16 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 		m_emitter.createEmissionPositionsOnMesh( EMITTER_LEVEL_SET_RES,
 												 EMITTER_MELTING_RATE );
 
-		// TODO: generate bubbbles
-		//generateBubbles();
+		// generate bubbles
+		std::vector<vec3> new_bubble_positions;
+		std::vector<vec3> new_bubble_velocities;
+		std::vector<unsigned int> new_bubble_radius_group;
+		m_emitter.generateBubbles( m_bubbles.getRadiiList(),
+								   new_bubble_positions,
+								   new_bubble_velocities,
+								   new_bubble_radius_group );
+
+		// TODO: add new bubbles to m_bubbles data structure using new_bubble_positions, new_bubble_velocities, and new_bubble_radius_group
 	}
 
 	m_current_frame = frame_num;
@@ -235,7 +245,6 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 	// TODO: set bubble size in Maya
 
 	// TODO: maybe create a dummy mesh if the program doesn't work without one?
-
 
 	return MS::kSuccess;
 }

@@ -10,6 +10,8 @@
 #include "SDFGen/makelevelset3.h"
 #include "Convenience.h"
 
+// TODO: check if mesh is a sphere, and generate emission positions as appropriate
+
 
 ////////////////////////////////////////////////////
 // constructor / destructor
@@ -207,6 +209,7 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 				// TODO: ask what ni, nj, nk are for
 				// TODO: ask about this position computation logic
 
+				// convert linear signed distance array index into 3D indices
 				int z = i / signed_distance_values.ni / signed_distance_values.nj;
 				int y = ( i - z * signed_distance_values.ni * signed_distance_values.nj ) / signed_distance_values.ni;
 				int x = i - z * signed_distance_values.ni * signed_distance_values.nj - y * signed_distance_values.ni;
@@ -215,6 +218,8 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 				double random_num_x = Convenience::generateRandomDoubleInclusive( -0.5, 0.5 );
 				double random_num_y = Convenience::generateRandomDoubleInclusive( -0.5, 0.5 );
 				double random_num_z = Convenience::generateRandomDoubleInclusive( -0.5, 0.5 );
+
+				// TODO: remove jittering here, probably
 
 				// jitter sample with random numbers
 				double gridPoxX = min_bounds[VX] + x * dx + random_num_x * dx;
@@ -311,4 +316,67 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 	// copy source_pos_list into the m_source_pos_list member variable
 	m_source_pos_list.clear();
 	m_source_pos_list = source_pos_list;
+}
+
+
+////////////////////////////////////////////////////
+// generate bubbles on mesh or sphere surface
+// return new bubble positions, velocities, and radius group
+////////////////////////////////////////////////////
+void EmitterData::generateBubbles( const std::vector<double>&	bubble_radii_list,
+								   std::vector<vec3>&			new_bubble_positions,
+								   std::vector<vec3>&			new_bubble_velocities,
+								   std::vector<unsigned int>&	new_bubble_radius_group ) const
+{
+	// TODO: remove this condition b/c both meshes and spheres should fill up m_source_pos_list
+	// TODO: make bubble generate rate dependent on user-defined emission rate
+
+	const vec3 INITIAL_BUBBLE_VELOCITY( 0.0, 1.0, 0.0 );
+
+	// if emitter is a mesh
+	if ( m_source_pos_list.size() != 0 ) {
+
+		// iterate through bubble radius groups
+		for ( unsigned int k = 0; k < bubble_radii_list.size(); ++k ) {
+
+			// iterate through every available emission position
+			for ( unsigned int i = 0; i < m_source_pos_list.size(); ++i ) {
+
+				// generate bubbles randomly so every available emission position in m_source_pos_list is not "filled" every frame
+				// generate random number [1, 10] and generate a bubble 20% of the time
+				double random_num = Convenience::generateRandomIntInclusive( 1, 10 );
+				if ( random_num > 8 ) {
+					new_bubble_positions.push_back( m_source_pos_list[i] );
+					new_bubble_velocities.push_back( INITIAL_BUBBLE_VELOCITY );
+					new_bubble_radius_group.push_back( k );
+				}
+			}
+		}
+	}
+	// if emitter is a sphere
+	else {
+		for ( unsigned int k = 0; k < bubble_radii_list.size(); ++k ) {
+			for ( unsigned int i = 0; i < 180 ; i += 20 ) {
+				for ( unsigned int j = 0; j < 360 ; j += 20 ) {
+
+					// generate random number [1, 10] and generate a bubble 50% of the time
+					double random_num = Convenience::generateRandomIntInclusive( 1, 10 );
+					if ( random_num > 5 ) {
+						double theta = ( double ) i / 180.0 * M_PI;
+						double phi = ( double ) j / 180.0 * M_PI;
+
+						double bubble_pos_x = m_sphere_center[VX] + m_sphere_radius * sin( theta ) * cos( phi );
+						double bubble_pos_y = m_sphere_center[VY] + m_sphere_radius * cos( theta );
+						double bubble_pos_z = m_sphere_center[VZ] + m_sphere_radius * sin( theta ) * sin( phi );
+
+						new_bubble_positions.push_back( vec3( bubble_pos_x,
+															  bubble_pos_y,
+															  bubble_pos_z ) );
+						new_bubble_velocities.push_back( INITIAL_BUBBLE_VELOCITY );
+						new_bubble_radius_group.push_back( k );
+					}
+				}
+			}
+		}
+	}
 }

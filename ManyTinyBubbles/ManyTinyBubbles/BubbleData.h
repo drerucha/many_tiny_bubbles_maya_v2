@@ -30,13 +30,18 @@ public:
 	void deleteAllParticlesInMaya();
 	void reset();
 
-	// getters
+	// int getters
 	unsigned int getNumRadii( void ) const;
-	std::vector<std::vector<vec3>> getPosList( void ) const;
+	
+	// double getters
 	double getRadiusAtIndex( const unsigned int& index ) const;
 	double getScatteringFrequency( void ) const;
 	double getScatteringCoefficient( void ) const;
 	double getBreakupFrequency( void ) const;
+
+	// std::vector getters
+	std::vector<std::vector<vec3>> getPosList( void ) const;
+	std::vector<double> getRadiiList( void ) const;
 
 	void removeBubbleAtIndex( const unsigned int& i,
 							  const unsigned int& j );

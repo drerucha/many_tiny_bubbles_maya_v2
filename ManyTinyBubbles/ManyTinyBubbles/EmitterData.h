@@ -1,7 +1,6 @@
 #pragma once
 
 #include <maya/MString.h>
-//#include <maya/MFnMesh.h>
 
 #include "vec.h"
 #include <vector>
@@ -18,14 +17,20 @@ public:
 	void createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 										const unsigned int& melting_rate );
 
+	void generateBubbles( const std::vector<double>&	bubble_radii_list,
+						  std::vector<vec3>&			new_bubble_positions,
+						  std::vector<vec3>&			new_bubble_velocities,
+						  std::vector<unsigned int>&	new_bubble_radius_group ) const;
+
 private:
 
 	MString m_name;
 
-	//MFnMesh m_mesh;
-
 	// list of positions on mesh where bubbles can emit from
 	std::vector<vec3> m_source_pos_list;
+
+	vec3 m_sphere_center;
+	double m_sphere_radius;
 
 };
 
