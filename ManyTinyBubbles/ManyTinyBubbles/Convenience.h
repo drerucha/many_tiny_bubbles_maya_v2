@@ -4,6 +4,7 @@
 #include <maya/MIntArray.h>
 #include <maya/MDoubleArray.h>
 #include <maya/MStringArray.h>
+//#include <maya/MDagPath.h>
 
 #include <vector>
 #include "vec.h"
@@ -34,6 +35,8 @@ public:
 	// miscellaneous
 	static MString getParent( MString child );
 	static void appendNumToStdString( std::string& str, const int& num );
+	//static bool meshNameDoesCorrespondToMayaMeshObject( const MString& mesh_name );
+	//static MDagPath getDagPathToMeshNodeFromName( const MString& mesh_name );
 
 	// random number generation
 	static int generateRandomIntInclusive( const int& min, const int& max );

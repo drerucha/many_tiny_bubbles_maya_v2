@@ -58,6 +58,8 @@ private:
 ////////////////////////////////////////////////////
 
 private:
+	
+	// TODO: find out what m_vel_list is used for
 
 	std::vector<std::vector<vec3>> m_pos_list;
 	std::vector<std::vector<vec3>> m_vel_list;

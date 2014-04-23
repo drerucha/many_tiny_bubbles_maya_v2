@@ -12,6 +12,8 @@
 // TODO: add if defines to all classes
 // TODO: change all floats to doubles b/c I think they're faster on x86 architecture
 // TODO: should bubbles have their own velocity members?
+// TODO: create an EmitterData class to complement the BubbleData class
+// TODO: alter node to allow multiple bubble emitter sources
 
 
 #include "ManyTinyBubblesNode.h"
@@ -219,11 +221,6 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 
 	m_current_frame = frame_num;
 
-
-
-
-
-
 	// TODO: create particle group in Maya
 
 	// TODO: set bubble size in Maya
@@ -265,7 +262,7 @@ void ManyTinyBubbles::computeFractionField()
 
 
 ////////////////////////////////////////////////////
-// simulate bubbles
+// main simulation loop
 ////////////////////////////////////////////////////
 void ManyTinyBubbles::advectParticles( const float& dt )
 {
@@ -275,16 +272,14 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 	// get positions for every bubble present in the simulation
 	std::vector<std::vector<vec3>> bubble_pos_list = m_bubbles.getPosList();
 
+	// TODO: find a more elegant way to store data for updating bubble list after iteration than vectors of vec2s and vec4s
+
 	// list of bubble indices to remove from lists after iteration is complete
 	// indices map to bubbles that either escape fluid container or are split into two smaller bubbles
 	std::vector<vec2> indices_of_bubbles_to_remove;
 
-	// TODO: make single std::vector<vec4> w/ fourth element the radius group index?
-	// list of bubble positions for new bubbles in case of bubble breakup
-	//std::vector<vec3> positions_of_new_bubbles;
-	//std::vector<int> index_of_radius_group_of_new_bubbles;
+	// list of positions and radius group indices for new bubbles created when bubbles split
 	std::vector<vec4> new_bubble_data_list;
-
 
 	// iterate through the bubble radius groups
 	for ( std::vector<std::vector<vec3>>::iterator outer_it = bubble_pos_list.begin() ; outer_it != bubble_pos_list.end(); ++outer_it ) {
@@ -310,10 +305,12 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 					bubble_vel = updateBubbleVelocity( bubble_vel, altered_angle );
 				}
 			}
+			
 
 			// TODO: update bubble position using the altered velocity
 			// TODO: update all bubble positions even if their velocity was not altered, probably
 			vec3 new_bubble_pos = bubble_pos;
+
 
 			// TODO: clean up everything below this point
 

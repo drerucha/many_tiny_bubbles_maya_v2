@@ -1,6 +1,7 @@
 #include "Convenience.h"
 
 #include <maya/MGlobal.h>
+//#include <maya/MSelectionList.h>
 
 #include <string>
 
@@ -120,6 +121,61 @@ void Convenience::appendNumToStdString( std::string& str, const int& num )
 	sprintf( num_str, "%d", num );
 	str += num_str;
 }
+
+//bool Convenience::meshNameDoesCorrespondToMayaMeshObject( const MString& mesh_name )
+//{
+//	// select Maya object by name
+//	MSelectionList maya_sel_list;
+//	MGlobal::getSelectionListByName( mesh_name, maya_sel_list );
+//
+//	// get path to a mesh DAG node
+//	MDagPath dag_node_path;
+//	maya_sel_list.getDagPath( 0, dag_node_path );
+//
+//	// if dag_node_path points to a transform node instead of a shape node, try to extend the DAG path to reach a shape node
+//	bool node_has_shape = true;
+//	if ( dag_node_path.apiType() == MFn::kTransform ) {
+//		MStatus stat = dag_node_path.extendToShape();
+//		if ( stat != MStatus::kSuccess ) {
+//			node_has_shape = false;
+//		}
+//	}
+//
+//	// if we were able to find the shape node for the input mesh, and the node supports the kMesh function set
+//	if ( node_has_shape && dag_node_path.hasFn( MFn::kMesh ) ) {
+//		return true;
+//	}
+//	
+//	return false;
+//}
+//
+//
+//MDagPath Convenience::getDagPathToMeshNodeFromName( const MString& mesh_name )
+//{
+//	// select Maya object by name
+//	MSelectionList maya_sel_list;
+//	MGlobal::getSelectionListByName( mesh_name, maya_sel_list );
+//
+//	// get path to a mesh DAG node
+//	MDagPath dag_node_path;
+//	maya_sel_list.getDagPath( 0, dag_node_path );
+//
+//	// if dag_node_path points to a transform node instead of a shape node, try to extend the DAG path to reach a shape node
+//	bool node_has_shape = true;
+//	if ( dag_node_path.apiType() == MFn::kTransform ) {
+//		MStatus stat = dag_node_path.extendToShape();
+//		if ( stat != MStatus::kSuccess ) {
+//			node_has_shape = false;
+//		}
+//	}
+//
+//	// if we were able to find the shape node for the input mesh, and the node supports the kMesh function set
+//	if ( node_has_shape && dag_node_path.hasFn( MFn::kMesh ) ) {
+//		return dag_node_path;
+//	}
+//	
+//	return NULL;
+//}
 
 
 ////////////////////////////////////////////////////
