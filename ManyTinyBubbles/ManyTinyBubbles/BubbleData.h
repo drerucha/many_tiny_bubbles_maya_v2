@@ -33,12 +33,16 @@ public:
 	// getters
 	unsigned int getNumRadii( void ) const;
 	std::vector<std::vector<vec3>> getPosList( void ) const;
-	double getRadiusAtIndex( unsigned int& index ) const;
+	double getRadiusAtIndex( const unsigned int& index ) const;
 	double getScatteringFrequency( void ) const;
 	double getScatteringCoefficient( void ) const;
+	double getBreakupFrequency( void ) const;
 
 	void removeBubbleAtIndex( const unsigned int& i,
 							  const unsigned int& j );
+	void addBubblePosToRadiusGroupAtIndex( const vec3& pos,
+										   const unsigned int& i );
+
 
 private:
 

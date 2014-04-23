@@ -11,6 +11,7 @@
 
 // TODO: add if defines to all classes
 // TODO: change all floats to doubles b/c I think they're faster on x86 architecture
+// TODO: should bubbles have their own velocity members?
 
 
 #include "ManyTinyBubblesNode.h"
@@ -274,9 +275,16 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 	// get positions for every bubble present in the simulation
 	std::vector<std::vector<vec3>> bubble_pos_list = m_bubbles.getPosList();
 
-	// list of bubble indices that map to bubbles that escape fluid container
-	// we store these to remove escaped bubbles from the lists after iteration is complete
-	std::vector<vec2> escaped_bubble_indices;
+	// list of bubble indices to remove from lists after iteration is complete
+	// indices map to bubbles that either escape fluid container or are split into two smaller bubbles
+	std::vector<vec2> indices_of_bubbles_to_remove;
+
+	// TODO: make single std::vector<vec4> w/ fourth element the radius group index?
+	// list of bubble positions for new bubbles in case of bubble breakup
+	//std::vector<vec3> positions_of_new_bubbles;
+	//std::vector<int> index_of_radius_group_of_new_bubbles;
+	std::vector<vec4> new_bubble_data_list;
+
 
 	// iterate through the bubble radius groups
 	for ( std::vector<std::vector<vec3>>::iterator outer_it = bubble_pos_list.begin() ; outer_it != bubble_pos_list.end(); ++outer_it ) {
@@ -307,28 +315,72 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 			// TODO: update all bubble positions even if their velocity was not altered, probably
 			vec3 new_bubble_pos = bubble_pos;
 
+			// TODO: clean up everything below this point
+
+			// get indices of radius group and position within radius group
+			unsigned int radius_group_index = Convenience::getIndexFromIterator( outer_it, bubble_pos_list );
+			unsigned int pos_list_index = Convenience::getIndexFromIterator( inner_it, bubble_pos_sublist );
+
 			// if new bubble position escapes fluid container, then remove bubble from list
 			if ( m_fluid_container.posIsOutsideFluidContainer( new_bubble_pos ) ) {
 
 				// TODO: if bubble escapes in the x, z, or -y directions, just push them back into the container
 				// TODO: only remove bubbles that have reached the water surface
 
-				// mark bubble to be removed instead of mutating data structure in middle of iterating
-				int radius_group_index = Convenience::getIndexFromIterator( outer_it, bubble_pos_list );
-				int pos_list_index = Convenience::getIndexFromIterator( inner_it, bubble_pos_sublist );
-				escaped_bubble_indices.push_back( vec2( radius_group_index, pos_list_index ) );
+				// mark escaped bubble to be removed instead of mutating data structure in middle of iterating
+				indices_of_bubbles_to_remove.push_back( vec2( radius_group_index, pos_list_index ) );
 			}
 			else {
 
+				// bubble wants to split
+				if ( m_bubbles.getBreakupFrequency() > Convenience::generateRandomDoubleBetweenZeroAndOneInclusive() ) {
+
+					// bubble cannot split because it is a member of the smallest radius group
+					if ( radius_group_index > 0 ) {
+
+						// compute new positions for two new bubbles created from split bubble
+						vec3 new_pos_1, new_pos_2;
+						splitBubble( new_bubble_pos,
+									 m_bubbles.getRadiusAtIndex( radius_group_index ),
+									 new_pos_1,
+									 new_pos_2 );
+
+						new_bubble_data_list.push_back( vec4( new_pos_1[VX],
+														new_pos_1[VY],
+														new_pos_1[VZ],
+														radius_group_index - 1 ) );
+						new_bubble_data_list.push_back( vec4( new_pos_2[VX],
+														new_pos_2[VY],
+														new_pos_2[VZ],
+														radius_group_index - 1 ) );
+
+						// mark bubble that just split to be removed from bubble list
+						indices_of_bubbles_to_remove.push_back( vec2( radius_group_index, pos_list_index ) );
+					}
+				}
 			}
 		}
 	}
 
 	// remove escaped bubbles from list
-	for ( std::vector<vec2>::iterator it = escaped_bubble_indices.begin() ; it != escaped_bubble_indices.end(); ++it ) {
+	for ( std::vector<vec2>::iterator it = indices_of_bubbles_to_remove.begin() ; it != indices_of_bubbles_to_remove.end(); ++it ) {
 		vec2 bubble_index = *it;
 		m_bubbles.removeBubbleAtIndex( ( int )bubble_index[VX],
 									   ( int )bubble_index[VY] );
+	}
+
+	// add new bubbles to list
+	for ( std::vector<vec4>::iterator it = new_bubble_data_list.begin(); it != new_bubble_data_list.end(); ++it ) {
+		vec4 new_bubble_data = *it;
+
+		vec3 split_bubble_pos( new_bubble_data[VX],
+							   new_bubble_data[VY],
+							   new_bubble_data[VZ] );
+
+		int radius_group_index = ( int )new_bubble_data[VW];
+
+		m_bubbles.addBubblePosToRadiusGroupAtIndex( split_bubble_pos,
+													radius_group_index );
 	}
 }
 
@@ -443,6 +495,38 @@ vec3 ManyTinyBubbles::updateBubbleVelocity( const vec3&		old_vel,
 	new_vel[VZ] = ( 2.0 * xx * zz - 2.0 * ss * yy ) * old_vel[VX] + ( 2.0 * yy * zz + 2.0 * ss * xx ) * old_vel[VY] + ( 1.0 - 2.0 * xx * xx - 2.0 * yy * yy ) * old_vel[VZ];
 
 	return new_vel;
+}
+
+
+////////////////////////////////////////////////////
+// compute new positions for two new bubbles created from split bubble
+////////////////////////////////////////////////////
+void ManyTinyBubbles::splitBubble( const vec3&		current_pos,
+								   const double&	current_radius,
+								   vec3&			new_pos_1,
+								   vec3&			new_pos_2 ) const
+{
+	// random angle for use when generating initial positions of new bubbles formed from split
+	double phi = Convenience::generateRandomDoubleInclusive( 0.0, 2.0 ) * M_PI;
+
+	// TODO: ask about this initial position logic
+
+	// generate new positions located at the two end points of horizontal diameter across parent bubble
+	new_pos_1 = current_pos + vec3( current_radius * cos(phi),
+									0.0,
+									current_radius * sin( phi ) );
+	new_pos_2 = current_pos - vec3( current_radius * cos( phi ),
+									0.0,
+									current_radius * sin( phi ) );
+
+	// check if newly generated positions are outside fluid container
+	// if they are, simply assign them the position of the bubble before it split
+	if ( m_fluid_container.posIsOutsideFluidContainer( new_pos_1 ) ) {
+		new_pos_1 = current_pos;
+	}
+	if ( m_fluid_container.posIsOutsideFluidContainer( new_pos_2 ) ) {
+		new_pos_2 = current_pos;
+	}
 }
 
 

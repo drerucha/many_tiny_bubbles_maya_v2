@@ -51,9 +51,16 @@ void reset();
 
 double computeScatteringProbabilityOfBubble( const vec3& bubble_vel,
 											 const vec3& bubble_pos ) const;
+
 double computeAlteredAngle( void ) const;
+
 vec3 updateBubbleVelocity( const vec3&		old_vel,
 						   const double&	altered_dir ) const;
+
+void splitBubble( const vec3&	current_pos,
+				  const double&	current_radius,
+				  vec3&			new_pos_1,
+				  vec3&			new_pos_2 ) const;
 
 
 ////////////////////////////////////////////////////

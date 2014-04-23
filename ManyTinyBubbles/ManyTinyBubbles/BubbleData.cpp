@@ -43,6 +43,8 @@ void BubbleData::init( double scattering_frequency,
 void BubbleData::setRadii( const double& radius_min,
 						   const double& radius_max )
 {
+	// TODO: add back logic that ensures bubble radii are generated so each bubble size it twice the volume of the size immediately smaller than it
+
 	// clear m_radii_list
 	if ( m_radii_list.size() > 0 ) {
 		m_radii_list.clear();
@@ -123,8 +125,22 @@ void BubbleData::removeBubbleAtIndex( const unsigned int& i,
 {
 	// TODO: test this
 
+	// m_pos_list is std::vector<std::vector<vec3>>
 	std::vector<vec3> pos_list = m_pos_list[i];
-	pos_list.erase( pos_list.begin() + j );
+	m_pos_list.at( i ).erase( pos_list.begin() + j );
+}
+
+
+////////////////////////////////////////////////////
+// i indicates radius group
+////////////////////////////////////////////////////
+void BubbleData::addBubblePosToRadiusGroupAtIndex( const vec3& pos,
+												   const unsigned int& i )
+{
+	// TODO: test this
+
+	// m_pos_list is std::vector<std::vector<vec3>>
+	m_pos_list.at( i ).push_back( pos );
 }
 
 
@@ -142,7 +158,7 @@ std::vector<std::vector<vec3>> BubbleData::getPosList() const
 	return m_pos_list;
 }
 
-double BubbleData::getRadiusAtIndex( unsigned int& index ) const
+double BubbleData::getRadiusAtIndex( const unsigned int& index ) const
 {
 	return m_radii_list[index];
 }
@@ -155,4 +171,9 @@ double BubbleData::getScatteringFrequency() const
 double BubbleData::getScatteringCoefficient() const
 {
 	return m_scattering_coefficient;
+}
+
+double BubbleData::getBreakupFrequency() const
+{
+	return m_breakup_frequency;
 }
