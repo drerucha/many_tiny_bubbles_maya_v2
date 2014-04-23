@@ -37,14 +37,15 @@
 ////////////////////////////////////////////////////
 
 const double GAS_DENSITY = 100.0;
-
-
-MTypeId ManyTinyBubbles::m_id( 0x70256 );
+const unsigned int EMITTER_LEVEL_SET_RES = 100000;
+const unsigned int EMITTER_MELTING_RATE = 100;
 
 
 ////////////////////////////////////////////////////
 // node attributes
 ////////////////////////////////////////////////////
+
+MTypeId ManyTinyBubbles::m_id( 0x70256 );
 
 //MObject ManyTinyBubbles::input;
 MObject ManyTinyBubbles::m_output;
@@ -136,16 +137,21 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			float bubble_size_min_val			= bubble_size_min_data.asFloat();
 			float bubble_size_max_val			= bubble_size_max_data.asFloat();
 			float step_size_val					= step_size_data.asFloat();
+			
+			// TODO: only re-init these data structures if their respective data has changed
 
 			// get fluid container attributes and store in m_fluid_container
 			m_fluid_container.init( fluid_container_name_val );
 
-			// store emitter in m_bubbles
+			// store attributes governing bubble behavior in m_bubbles
 			m_bubbles.init( scattering_frequency_val,
 							scattering_coefficient_val,
 							breakup_frequency_val,
 							bubble_size_min_val,
 							bubble_size_max_val );
+
+			// store emitter name in m_emitter
+			m_emitter.init( emitter_mesh_name_val );
 
 
 			// TODO: get bubble emitter attributes
@@ -215,7 +221,10 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 
 		advectParticles( step_size );
 
-		//computeBubbleGenerationPosFromMesh( LEVEL_SET_RES, 100 );
+		m_emitter.createEmissionPositionsOnMesh( EMITTER_LEVEL_SET_RES,
+												 EMITTER_MELTING_RATE );
+
+		// TODO: generate bubbbles
 		//generateBubbles();
 	}
 

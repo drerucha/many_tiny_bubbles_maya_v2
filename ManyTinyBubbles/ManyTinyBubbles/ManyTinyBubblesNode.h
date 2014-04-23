@@ -16,6 +16,7 @@
 
 #include "BubbleData.h"
 #include "FluidContainerData.h"
+#include "EmitterData.h"
 
  
 class ManyTinyBubbles : public MPxNode
@@ -92,6 +93,7 @@ private:
 
 	BubbleData m_bubbles;
 	FluidContainerData m_fluid_container;
+	EmitterData m_emitter;
 
 	unsigned int m_current_frame;
 };

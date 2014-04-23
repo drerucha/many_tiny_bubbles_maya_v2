@@ -18,20 +18,33 @@
     <None Include="node.mel" />
     <None Include="Options.txt" />
     <None Include="ReadMe.txt" />
+    <None Include="SDFGen\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BubbleData.h" />
     <ClInclude Include="Convenience.h" />
+    <ClInclude Include="EmitterData.h" />
     <ClInclude Include="FluidContainerData.h" />
     <ClInclude Include="ManyTinyBubblesNode.h" />
+    <ClInclude Include="SDFGen\array1.h" />
+    <ClInclude Include="SDFGen\array2.h" />
+    <ClInclude Include="SDFGen\array3.h" />
+    <ClInclude Include="SDFGen\hashgrid.h" />
+    <ClInclude Include="SDFGen\hashtable.h" />
+    <ClInclude Include="SDFGen\makelevelset3.h" />
+    <ClInclude Include="SDFGen\util.h" />
+    <ClInclude Include="SDFGen\vecL.h" />
     <ClInclude Include="vec.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BubbleData.cpp" />
     <ClCompile Include="Convenience.cpp" />
+    <ClCompile Include="EmitterData.cpp" />
     <ClCompile Include="FluidContainerData.cpp" />
     <ClCompile Include="ManyTinyBubblesNode.cpp" />
     <ClCompile Include="pluginMain.cpp" />
+    <ClCompile Include="SDFGen\mainL.cpp" />
+    <ClCompile Include="SDFGen\makelevelset3.cpp" />
     <ClCompile Include="vec.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

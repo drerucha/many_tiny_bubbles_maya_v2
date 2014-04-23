@@ -16,6 +16,9 @@
     <Filter Include="Scripts">
       <UniqueIdentifier>{31808074-2739-4078-8d9c-ec967d7a7b0b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SDFGen">
+      <UniqueIdentifier>{8a4e8388-80b4-40b8-8fe6-87a52e66ef42}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt">
@@ -39,6 +42,9 @@
     <None Include="constants.mel">
       <Filter>Scripts</Filter>
     </None>
+    <None Include="SDFGen\CMakeLists.txt">
+      <Filter>SDFGen</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ManyTinyBubblesNode.h">
@@ -55,6 +61,33 @@
     </ClInclude>
     <ClInclude Include="FluidContainerData.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EmitterData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SDFGen\array1.h">
+      <Filter>SDFGen</Filter>
+    </ClInclude>
+    <ClInclude Include="SDFGen\array2.h">
+      <Filter>SDFGen</Filter>
+    </ClInclude>
+    <ClInclude Include="SDFGen\array3.h">
+      <Filter>SDFGen</Filter>
+    </ClInclude>
+    <ClInclude Include="SDFGen\hashgrid.h">
+      <Filter>SDFGen</Filter>
+    </ClInclude>
+    <ClInclude Include="SDFGen\hashtable.h">
+      <Filter>SDFGen</Filter>
+    </ClInclude>
+    <ClInclude Include="SDFGen\makelevelset3.h">
+      <Filter>SDFGen</Filter>
+    </ClInclude>
+    <ClInclude Include="SDFGen\util.h">
+      <Filter>SDFGen</Filter>
+    </ClInclude>
+    <ClInclude Include="SDFGen\vecL.h">
+      <Filter>SDFGen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -75,6 +108,15 @@
     </ClCompile>
     <ClCompile Include="FluidContainerData.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EmitterData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SDFGen\mainL.cpp">
+      <Filter>SDFGen</Filter>
+    </ClCompile>
+    <ClCompile Include="SDFGen\makelevelset3.cpp">
+      <Filter>SDFGen</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <maya/MString.h>
+//#include <maya/MFnMesh.h>
 
 #include "vec.h"
 #include <vector>
@@ -14,12 +15,14 @@ public:
 
 	void init( MString name );
 
-	void setSourcePosList( const unsigned int& cubicNum,
-						   const unsigned int& meltingSpeed );
+	void createEmissionPositionsOnMesh( const unsigned int& voxel_num,
+										const unsigned int& melting_rate );
 
 private:
 
 	MString m_name;
+
+	//MFnMesh m_mesh;
 
 	// list of positions on mesh where bubbles can emit from
 	std::vector<vec3> m_source_pos_list;
@@ -27,5 +30,5 @@ private:
 };
 
 // TODO: move emitter attributes from BubbleData to here
-// TODO: make mesh emitter name a member variable of this class
 // TODO: create method to generate generation positions from mesh
+// TODO: add the bounding box as a member variable?
