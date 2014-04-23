@@ -49,6 +49,12 @@ void advectParticles( const float& dt );
 
 void reset();
 
+double computeScatteringProbabilityOfBubble( const vec3& bubble_vel,
+											 const vec3& bubble_pos ) const;
+double computeAlteredAngle( void ) const;
+vec3 updateBubbleVelocity( const vec3&		old_vel,
+						   const double&	altered_dir ) const;
+
 
 ////////////////////////////////////////////////////
 // members

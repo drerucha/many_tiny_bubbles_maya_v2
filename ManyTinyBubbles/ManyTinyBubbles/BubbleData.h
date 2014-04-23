@@ -21,11 +21,11 @@ public:
 	BubbleData( void );
 	~BubbleData( void );
 
-	void init( float scattering_frequency,
-			   float scattering_coefficient,
-			   float breakup_frequency,
-			   float size_min,
-			   float size_max );
+	void init( double scattering_frequency,
+			   double scattering_coefficient,
+			   double breakup_frequency,
+			   double size_min,
+			   double size_max );
 
 	void deleteAllParticlesInMaya();
 	void reset();
@@ -33,12 +33,14 @@ public:
 	// getters
 	unsigned int getNumRadii( void ) const;
 	std::vector<std::vector<vec3>> getPosList( void ) const;
-	float getRadiusAtIndex( unsigned int& index ) const;
+	double getRadiusAtIndex( unsigned int& index ) const;
+	double getScatteringFrequency( void ) const;
+	double getScatteringCoefficient( void ) const;
 
 private:
 
-	void setRadii( const float&	radius_min,
-				   const float&	radius_max );
+	void setRadii( const double&	radius_min,
+				   const double&	radius_max );
 
 	int checkIfParticleExists( const unsigned int& num ) const;
 	void deleteParticle( const unsigned int& num ) const;
@@ -52,12 +54,12 @@ private:
 
 	std::vector<std::vector<vec3>> m_pos_list;
 	std::vector<std::vector<vec3>> m_vel_list;
-	std::vector<float> m_radii_list;
+	std::vector<double> m_radii_list;
 
-	float m_scattering_frequency;
-	float m_scattering_coefficient;
-	float m_breakup_frequency;
-	float m_size_min;
-	float m_size_max;
+	double m_scattering_frequency;
+	double m_scattering_coefficient;
+	double m_breakup_frequency;
+	double m_size_min;
+	double m_size_max;
 
 };

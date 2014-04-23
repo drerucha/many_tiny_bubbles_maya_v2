@@ -29,6 +29,13 @@
 #include "vec.h"
 
 
+////////////////////////////////////////////////////
+// constants
+////////////////////////////////////////////////////
+
+const double GAS_DENSITY = 100.0;
+
+
 MTypeId ManyTinyBubbles::m_id( 0x70256 );
 
 
@@ -267,202 +274,153 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 	// get positions for every bubble present in the simulation
 	std::vector<std::vector<vec3>> bubble_pos_list = m_bubbles.getPosList();
 
-	// iterate through the list of bubble position lists (each bubble radius has a unique list of positions)
+	// iterate through the bubble radius groups
 	for ( std::vector<std::vector<vec3>>::iterator outer_it = bubble_pos_list.begin() ; outer_it != bubble_pos_list.end(); ++outer_it ) {
 		std::vector<vec3> bubble_pos_sublist = *outer_it;
 
-		// iterate through the list of vec3s in one of the radius groups (one of the sublists of bubble_pos_list)
+		// iterate through the list of vec3s in the current radius group
 		for ( std::vector<vec3>::iterator inner_it = bubble_pos_sublist.begin() ; inner_it != bubble_pos_sublist.end(); ++inner_it ) {
 			vec3 bubble_pos = *inner_it;
 
-			// get velocity of cell in fluid container
-			vec3 voxel_vel = m_fluid_container.getVelocityOfVoxelAtPos( bubble_pos );
+			// TODO: get actual bubble velocity here instead of just the velocity of the voxel the bubble is in
+			vec3 bubble_vel = m_fluid_container.getVelocityOfVoxelAtPos( bubble_pos );
+
+			double scattering_probability = computeScatteringProbabilityOfBubble( bubble_vel, bubble_pos );
+
+			// bubble will scatter, so alter bubble direction
+			if ( scattering_probability > Convenience::generateRandomDoubleBetweenZeroAndOneInclusive() ) {
+				double altered_angle = computeAlteredAngle();
+
+				// altered angle is not zero, so update bubble velocity direction
+ 				if ( altered_angle < -DBL_EPSILON || altered_angle > DBL_EPSILON ) {
+
+					// update bubble velocity due to scattering
+					bubble_vel = updateBubbleVelocity( bubble_vel, altered_angle );
+				}
+			}
+
+			// TODO: update bubble position using the altered velocity
+			// TODO: update all bubble positions even if their velocity was not altered, probably
+
+			// TODO: check if new bubble position escapes fluid container
 
 
-
-			double random_float = Convenience::generateRandomFloatBetweenZeroAndOneInclusive();
-			double cell_vel_magnitude = voxel_vel.Length();
-			double fraction_field = m_fluid_container.getFractionFieldOfVoxelAtPos( bubble_pos );
 		}
 	}
-
-
-
-
-
-	//int j = 0;
-	//for ( std::vector<std::vector<vec3>>::iterator iterRadius = bubblePosList.begin(); iterRadius != bubblePosList.end(); ++iterRadius, ++j ) {
-	//	int i = 0;
-	//	for ( std::vector<vec3>::iterator iterPos = bubblePosList[j].begin(), iterVel = bubbleVelList[j].begin(); iterPos != bubblePosList[j].end(); ++i ) {
-	//		vec3 position = bubblePosList[j][i];
-
-	//		int position_grid_X = (int)((position[0] + CONTAINER_DIM_X * CELL_SIZE / 2.0f - CONTAINER_TRANS_X) / CELL_SIZE);
-	//		int position_grid_Y = (int)((position[1] + CONTAINER_DIM_Y * CELL_SIZE / 2.0f - CONTAINER_TRANS_Y) / CELL_SIZE);
-	//		int position_grid_Z = (int)((position[2] + CONTAINER_DIM_Z * CELL_SIZE / 2.0f - CONTAINER_TRANS_Z) / CELL_SIZE);
-
-
-
-	//		vec3 velocity(velocityArray[position_grid_X + position_grid_Y * CONTAINER_DIM_X + position_grid_Z * CONTAINER_DIM_X * CONTAINER_DIM_Y + 0],
-	//			          velocityArray[position_grid_X + position_grid_Y * CONTAINER_DIM_X + position_grid_Z * CONTAINER_DIM_X * CONTAINER_DIM_Y + 1],
-	//					  velocityArray[position_grid_X + position_grid_Y * CONTAINER_DIM_X + position_grid_Z * CONTAINER_DIM_X * CONTAINER_DIM_Y + 2]);
-
-	//		double ran_num = ( rand() % 100 ) / 100.0f;
-	//		double velocityMag = velocity.Length(); 
-	//		double fractionField = mFractionField( position_grid_X, position_grid_Y, position_grid_Z );
-	//		double scatterOdd = scatterFreq * 100* ( 1 - fractionField ) * velocityMag * velocityMag;	//between 0~1 
-
-	//		// alter the direction
-	//		if ( scatterOdd > ran_num ) {
-	//			double x = 2 * ran_num * scatterCoef - scatterCoef + 1;
-	//			double y = 2 * ran_num + scatterCoef - 1;
-	//			double cosTheta;
-	//			double theta;
-
-	//			if ( x == 0 ) {
-	//				theta = PI / 2.0f;
-	//			}
-	//			else {
-	//				cosTheta = y / x;
-	//				theta = acos( cosTheta );
-	//			}
-
- //				if ( theta != 0 ) {
-	//				double rotateAxisX = 1;
-	//				double rotateAxisY = 0;
-	//				double rotateAxisZ = 0;
-
-	//				if ( velocity[2] != 0 ) {
-	//					rotateAxisX = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
-	//					rotateAxisY = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
-
-	//					while ( rotateAxisX == 0 && rotateAxisY == 0 ) {
-	//						rotateAxisX = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
-	//						rotateAxisY = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
-	//					}
-
-	//					rotateAxisZ = -( rotateAxisX * velocity[0] + rotateAxisY * velocity[1] ) / velocity[2];
-	//				}
-	//				else if ( velocity[1] != 0 ) {
-	//					rotateAxisX = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
-	//					rotateAxisZ = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
-
-	//					while ( rotateAxisX == 0 && rotateAxisZ == 0 ) {
-	//						rotateAxisX = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
-	//						rotateAxisZ = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
-	//					}
-
-	//					rotateAxisY = -( rotateAxisX * velocity[0] + rotateAxisZ * velocity[2] ) / velocity[1];
-	//				}
-	//				else if ( velocity[0] != 0 ) {
-	//					rotateAxisY = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
-	//					rotateAxisZ = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
-
-	//					while ( rotateAxisY == 0 && rotateAxisZ == 0 ) {
-	//						rotateAxisY = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
-	//						rotateAxisZ = ( ( ( rand() % 200 ) + 1 ) - 100 ) / 100.0f;
-	//					}
-
-	//					rotateAxisX = -( rotateAxisY * velocity[1] + rotateAxisZ * velocity[2] ) / velocity[0];
-	//				}
-
-	//				double length = sqrt( rotateAxisX * rotateAxisX + rotateAxisY * rotateAxisY + rotateAxisZ * rotateAxisZ );
-	//				rotateAxisX = rotateAxisX / length;
-	//				rotateAxisY = rotateAxisY / length;
-	//				rotateAxisZ = rotateAxisZ / length;
-
-	//				double ss = cos( theta / 2.0f );
-	//				double xx = sin( theta / 2.0f ) * rotateAxisX;
-	//				double yy = sin( theta / 2.0f ) * rotateAxisY;
-	//				double zz = sin( theta / 2.0f ) * rotateAxisZ;
-
-	//				double newX = ( 1 - 2 * yy * yy - 2 * zz * zz ) * velocity[0] + ( 2 * xx * yy - 2 * ss * zz ) * velocity[1] + ( 2 * xx * zz + 2 * ss * yy ) * velocity[2];
-	//				double newY = ( 2 * xx * yy + 2 * ss * zz ) * velocity[0] + ( 1 - 2 * xx * xx - 2 * zz * zz ) * velocity[1] + ( 2 * yy * zz - 2 * ss * xx ) * velocity[2];
-	//				double newZ = ( 2 * xx * zz - 2 * ss * yy ) * velocity[0] + ( 2 * yy * zz + 2 * ss * xx ) * velocity[1] + ( 1 - 2 * xx * xx - 2 * yy * yy ) * velocity[2];
-	//				velocity[0] = newX;
-	//				velocity[1] = newY;
-	//				velocity[2] = newZ;
-	//			}
-
-	//		}
-
-	//		position += velocity;
-
-	//		// particle goes outside the container
-	//		if ( position[0] - CONTAINER_TRANS_X < -CONTAINER_DIM_X * CELL_SIZE / 2.0f ||
-	//			 position[0] - CONTAINER_TRANS_X >  CONTAINER_DIM_X * CELL_SIZE / 2.0f ||
-	//			 position[1] - CONTAINER_TRANS_Y < -CONTAINER_DIM_Y * CELL_SIZE / 2.0f ||
-	//			 position[1] - CONTAINER_TRANS_Y >= (CONTAINER_DIM_Y * CELL_SIZE) / 2.0f - 0.001 ||
-	//			 position[2] - CONTAINER_TRANS_Z < -CONTAINER_DIM_Z * CELL_SIZE / 2.0f ||
-	//			 position[2] - CONTAINER_TRANS_Z >  CONTAINER_DIM_Z * CELL_SIZE / 2.0f )
-	//		{
-	//			if ( iterPos == bubblePosList[j].begin() ) {
-	//				bubblePosList[j].erase( iterPos );
-	//				iterPos = bubblePosList[j].begin();
-	//				bubbleVelList[j].erase( iterVel );
-	//				iterVel = bubbleVelList[j].begin();
-	//				i--;
-	//			}
-	//			else {
-	//				--( iterPos = bubblePosList[j].erase( iterPos ) );
-	//				--( iterVel = bubbleVelList[j].erase( iterVel ) );
-	//				i--;
-	//				++iterPos; 
-	//				++iterVel;
-	//			}
-	//		}
-	//		else {
-	//			bubblePosList[j][i] = position;
-
-	//			// bubble break
-	//			if ( breakFreq > ( rand() % 100 ) / 100.0f && j > 0 ) {
-	//				vec3 newPosition1 = ( position + vec3( bubbleRadiusList[j], 0, 0 ) );
-	//				vec3 newPosition2 = ( position - vec3( bubbleRadiusList[j], 0, 0 ) );
-
-	//				if ( newPosition1[0] - CONTAINER_TRANS_X  < -CONTAINER_DIM_X * CELL_SIZE / 2.0f ||
-	//					 newPosition1[0] - CONTAINER_TRANS_X  > CONTAINER_DIM_X * CELL_SIZE / 2.0f )
-	//				{
-	//				    newPosition1 = position;
-	//				}
-
-	//				if ( newPosition2[0] - CONTAINER_TRANS_X  < -CONTAINER_DIM_X * CELL_SIZE / 2.0f ||
-	//					 newPosition2[0] - CONTAINER_TRANS_X  > CONTAINER_DIM_X * CELL_SIZE / 2.0f )
-	//				{	 
-	//					 newPosition2 = position;
-	//				}
-
-	//				bubblePosList[j-1].push_back( newPosition1 );
-	//				bubbleVelList[j-1].push_back( bubbleVelList[j][i] );
-	//				bubblePosList[j-1].push_back( newPosition2 );
-	//				bubbleVelList[j-1].push_back( bubbleVelList[j][i] );
-
-	//				if ( iterPos == bubblePosList[j].begin() ) {
-	//					bubblePosList[j].erase( iterPos );
-	//					iterPos = bubblePosList[j].begin();
-	//					bubbleVelList[j].erase( iterVel );
-	//					iterVel = bubbleVelList[j].begin();
-	//					i--;
-	//				}
-	//				else {
-	//					--( iterPos = bubblePosList[j].erase( iterPos ) );
-	//					--( iterVel = bubbleVelList[j].erase( iterVel ) );
-	//					i--;
-	//					++iterPos; 
-	//					++iterVel;
-	//				}
-	//			}
-	//			else {
-	//				++iterPos; 
-	//				++iterVel;
-	//			}
-	//		}
-
-	//	}
-	//}
-
-
 }
 
 
+////////////////////////////////////////////////////
+// compute scattering probability function, s(x) in paper, [0, 1]
+////////////////////////////////////////////////////
+double ManyTinyBubbles::computeScatteringProbabilityOfBubble( const vec3& bubble_vel,
+															  const vec3& bubble_pos ) const
+{
+	double voxel_vel_magnitude = bubble_vel.Length();
+	double fraction_field = m_fluid_container.getFractionFieldOfVoxelAtPos( bubble_pos );
+
+	return m_bubbles.getScatteringFrequency() * GAS_DENSITY * ( 1.0 - fraction_field ) * voxel_vel_magnitude * voxel_vel_magnitude;
+}
+
+
+////////////////////////////////////////////////////
+// compute bubble's new direction
+////////////////////////////////////////////////////
+double ManyTinyBubbles::computeAlteredAngle() const
+{
+	double uniform_random_num = Convenience::generateRandomDoubleBetweenZeroAndOneInclusive();
+	double numerator = 2.0 * uniform_random_num + m_bubbles.getScatteringCoefficient() - 1.0;
+	double denominator = 2.0 * m_bubbles.getScatteringCoefficient() * uniform_random_num - m_bubbles.getScatteringCoefficient() + 1.0;
+
+	// compute theta, altered angle
+	double theta;
+	if ( denominator > -DBL_EPSILON && denominator < DBL_EPSILON  ) {
+		// if denominator == zero
+		theta = M_PI / 2.0;
+	}
+	else {
+		theta = acos( numerator / denominator );
+	}
+
+	return theta;
+}
+
+
+////////////////////////////////////////////////////
+// updateBubbleVelocity()
+////////////////////////////////////////////////////
+vec3 ManyTinyBubbles::updateBubbleVelocity( const vec3&		old_vel,
+											const double&	altered_dir ) const
+{
+	vec3 new_vel;
+
+	// create a random axis to rotate around using quaternions
+	// random axis must be perpendicular to velocity direction
+	// so, the dot product of the random axis and the velocity direction should equal zero
+	// or, rotation_axis_x * new_vel[VX] + rotation_axis_y * new_vel[VY] + rotation_axis_z * new_vel[VZ] == 0
+	// we randomly provide the first two values and use the above equation to compute the third
+	// we make careful considerations to avoid divide by zero
+
+	// TODO: ask why these variables are initialized this way
+
+	vec3 rotation_axis( 1.0, 0.0, 0.0 );
+					
+	// if velocity[VZ] == 0, then the computation of rotation_axis_z will divide by zero
+	if ( old_vel[VZ] > -DBL_EPSILON && old_vel[VZ] < DBL_EPSILON ) {
+
+		// generate random numbers for x and y components [-1, 1] so that they are not both 0
+		do {
+			rotation_axis[VX] = Convenience::generateRandomDoubleBetweenNegativeOneAndOneInclusive();
+			rotation_axis[VY] = Convenience::generateRandomDoubleBetweenNegativeOneAndOneInclusive();
+		} while ( ( rotation_axis[VX] > -DBL_EPSILON && rotation_axis[VX] < DBL_EPSILON ) &&
+				  ( rotation_axis[VY] > -DBL_EPSILON && rotation_axis[VY] < DBL_EPSILON ) );
+
+		rotation_axis[VZ] = -1.0 * ( rotation_axis[VX] * old_vel[VX] + rotation_axis[VY] * old_vel[VY] ) / old_vel[VZ];
+	}
+	else if ( old_vel[VY] > -DBL_EPSILON && old_vel[VY] < DBL_EPSILON ) {
+
+		// generate random numbers for x and z components [-1, 1] so that they are not both 0
+		do {
+			rotation_axis[VX] = Convenience::generateRandomDoubleBetweenNegativeOneAndOneInclusive();
+			rotation_axis[VZ] = Convenience::generateRandomDoubleBetweenNegativeOneAndOneInclusive();
+		} while ( ( rotation_axis[VX] > -DBL_EPSILON && rotation_axis[VX] < DBL_EPSILON ) &&
+				  ( rotation_axis[VZ] > -DBL_EPSILON && rotation_axis[VZ] < DBL_EPSILON ) );
+
+		rotation_axis[VZ] = -1.0 * ( rotation_axis[VX] * old_vel[VX] + rotation_axis[VZ] * old_vel[VZ] ) / old_vel[VY];
+	}
+	else if ( old_vel[VX] > -DBL_EPSILON && old_vel[VX] < DBL_EPSILON ) {
+
+		// generate random numbers for y and z components [-1, 1] so that they are not both 0
+		do {
+			rotation_axis[VY] = Convenience::generateRandomDoubleBetweenNegativeOneAndOneInclusive();
+			rotation_axis[VZ] = Convenience::generateRandomDoubleBetweenNegativeOneAndOneInclusive();
+		} while ( ( rotation_axis[VY] > -DBL_EPSILON && rotation_axis[VY] < DBL_EPSILON ) &&
+				  ( rotation_axis[VZ] > -DBL_EPSILON && rotation_axis[VZ] < DBL_EPSILON ) );
+
+		rotation_axis[VX] = -1.0 * ( rotation_axis[VY] * old_vel[VY] + rotation_axis[VZ] * old_vel[VZ] ) / old_vel[VX];
+
+	}
+
+	// TODO: check for potential divide by zero before calling Normalize()
+
+	// make unit length
+	rotation_axis.Normalize();
+
+	// use quaternion rotation to rotate velocity
+	double half_altered_dir = altered_dir / 2.0;
+	double sin_half_altered_dir = sin( half_altered_dir );
+	double ss = cos( half_altered_dir ); 
+	double xx = sin_half_altered_dir * rotation_axis[VX];
+	double yy = sin_half_altered_dir * rotation_axis[VY];
+	double zz = sin_half_altered_dir * rotation_axis[VZ];
+
+	// convert quaternion to rotation matrix and multiply by original velocity vector
+	new_vel[VX] = ( 1.0 - 2.0 * yy * yy - 2.0 * zz * zz ) * old_vel[VX] + ( 2.0 * xx * yy - 2.0 * ss * zz ) * old_vel[VY] + (2.0 * xx * zz + 2.0 * ss * yy ) * old_vel[VZ];
+	new_vel[VY] = ( 2.0 * xx * yy + 2.0 * ss * zz ) * old_vel[VX] + ( 1.0 - 2.0 * xx * xx - 2.0 * zz * zz ) * old_vel[VY] + ( 2.0 * yy * zz - 2.0 * ss * xx ) * old_vel[VZ];
+	new_vel[VZ] = ( 2.0 * xx * zz - 2.0 * ss * yy ) * old_vel[VX] + ( 2.0 * yy * zz + 2.0 * ss * xx ) * old_vel[VY] + ( 1.0 - 2.0 * xx * xx - 2.0 * yy * yy ) * old_vel[VZ];
+
+	return new_vel;
+}
 
 
 ////////////////////////////////////////////////////

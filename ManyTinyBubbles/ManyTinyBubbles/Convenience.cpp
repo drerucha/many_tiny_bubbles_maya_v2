@@ -135,12 +135,19 @@ int Convenience::generateRandomIntExclusive( const int& min, const int& max )
 	return rand() % ( max - min - 1 ) + min + 1;
 }
 
-float Convenience::generateRandomFloatInclusive( const float& min, const int& max )
+double Convenience::generateRandomDoubleInclusive( const double& min, const double& max )
 {
-	return min + static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX / ( max - min ) ) );
+	//return min + static_cast<float>( rand() ) / ( static_cast<float>( RAND_MAX / ( max - min ) ) );
+	return min + static_cast<double>( rand() ) / ( static_cast<double>( RAND_MAX / ( max - min ) ) );
 }
 
-float Convenience::generateRandomFloatBetweenZeroAndOneInclusive()
+double Convenience::generateRandomDoubleBetweenZeroAndOneInclusive()
 {
-	return static_cast<float>( rand() ) / static_cast<float>( RAND_MAX );
+	//return static_cast<float>( rand() ) / static_cast<float>( RAND_MAX );
+	return static_cast<double>( rand() ) / static_cast<double>( RAND_MAX );
+}
+
+double Convenience::generateRandomDoubleBetweenNegativeOneAndOneInclusive()
+{
+	return -1.0 + static_cast<double>( rand() ) / ( static_cast<double>( RAND_MAX / ( 2.0 ) ) );
 }

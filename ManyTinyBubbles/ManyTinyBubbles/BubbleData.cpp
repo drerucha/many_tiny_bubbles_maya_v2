@@ -20,11 +20,11 @@ BubbleData::~BubbleData()
 ////////////////////////////////////////////////////
 // initialize member variables
 ////////////////////////////////////////////////////
-void BubbleData::init( float scattering_frequency,
-					   float scattering_coefficient,
-					   float breakup_frequency,
-					   float size_min,
-					   float size_max )
+void BubbleData::init( double scattering_frequency,
+					   double scattering_coefficient,
+					   double breakup_frequency,
+					   double size_min,
+					   double size_max )
 {
 	m_scattering_frequency = scattering_frequency;
 	m_scattering_coefficient = scattering_coefficient;
@@ -40,16 +40,16 @@ void BubbleData::init( float scattering_frequency,
 ////////////////////////////////////////////////////
 // setRadii()
 ////////////////////////////////////////////////////
-void BubbleData::setRadii( const float& radius_min,
-						   const float& radius_max )
+void BubbleData::setRadii( const double& radius_min,
+						   const double& radius_max )
 {
 	// clear m_radii_list
 	if ( m_radii_list.size() > 0 ) {
 		m_radii_list.clear();
 	}
 
-	float diff = abs( radius_max - radius_min );
-	float step = diff / ( NUM_RADII - 1 );
+	double diff = abs( radius_max - radius_min );
+	double step = diff / ( NUM_RADII - 1 );
 
 	// fill m_radii_list
 	for ( unsigned int i = 0; i < NUM_RADII; ++i ) {
@@ -128,7 +128,17 @@ std::vector<std::vector<vec3>> BubbleData::getPosList() const
 	return m_pos_list;
 }
 
-float BubbleData::getRadiusAtIndex( unsigned int& index ) const
+double BubbleData::getRadiusAtIndex( unsigned int& index ) const
 {
 	return m_radii_list[index];
+}
+
+double BubbleData::getScatteringFrequency() const
+{
+	return m_scattering_frequency;
+}
+
+double BubbleData::getScatteringCoefficient() const
+{
+	return m_scattering_coefficient;
 }

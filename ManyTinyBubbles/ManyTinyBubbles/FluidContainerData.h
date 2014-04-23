@@ -28,7 +28,7 @@ public:
 	// fraction field methods
 	void resetFractionField();
 	void reduceFractionFieldOfVoxelAtPos( const vec3&	bubble_pos,
-										  const float&	bubble_radius );
+										  const double&	bubble_radius );
 	double getFractionFieldOfVoxelAtPos( const vec3& pos ) const;
 	//double getFractionFieldAtXYZ( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const;
 	//void setFractionFieldAtXYZ( const float& val, const unsigned int& x, const unsigned int& y, const unsigned int& z );
@@ -56,6 +56,7 @@ private:
 
 	MDoubleArray m_velocity_field;
 
+	// how much water is in each voxel
 	double *m_fraction_field_list;
 
 	int m_res_x;

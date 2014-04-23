@@ -35,6 +35,7 @@ public:
 	// random number generation
 	static int generateRandomIntInclusive( const int& min, const int& max );
 	static int generateRandomIntExclusive( const int& min, const int& max );
-	static float generateRandomFloatInclusive( const float& min, const int& max );
-	static float generateRandomFloatBetweenZeroAndOneInclusive( void );
+	static double generateRandomDoubleInclusive( const double& min, const double& max );
+	static double generateRandomDoubleBetweenZeroAndOneInclusive( void );
+	static double generateRandomDoubleBetweenNegativeOneAndOneInclusive( void );
 };

@@ -145,8 +145,8 @@ void FluidContainerData::resetFractionField()
 	}
 }
 
-void FluidContainerData::reduceFractionFieldOfVoxelAtPos( const vec3& bubble_pos,
-														  const float& bubble_radius )
+void FluidContainerData::reduceFractionFieldOfVoxelAtPos( const vec3&	bubble_pos,
+														  const double&	bubble_radius )
 {
 	// TODO: adjust so non-square voxels work
 
