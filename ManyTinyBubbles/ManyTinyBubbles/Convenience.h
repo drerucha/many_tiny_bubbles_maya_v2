@@ -32,11 +32,23 @@ public:
 	static MDoubleArray getAttributeDoubleArray( MString object_name, MString attr_name );
 	static MStringArray getAttributeMStringArray( MString object_name, MString attr_name );
 
+	// attribute setters
+	//static void setAttributeInt( const MString&	object_name,
+	//							 const MString&	attr_name,
+	//							 const int&		val );
+
 	// miscellaneous
 	static MString getParent( MString child );
-	static void appendNumToStdString( std::string& str, const int& num );
+	static void setParticleRenderTypeToSphere( const MString& particle_name );
 	//static bool meshNameDoesCorrespondToMayaMeshObject( const MString& mesh_name );
 	//static MDagPath getDagPathToMeshNodeFromName( const MString& mesh_name );
+
+	// std::string number concatenation
+	static void appendNumToStdString( std::string& str, const int& num );
+	static void appendNumToStdString( std::string& str, const unsigned int& num );
+	static void appendNumToStdString( std::string& str, const float& num );
+	static void appendNumToStdString( std::string& str, const double& num );
+	static void appendVec3ToStdString( std::string& str, const vec3& vec );
 
 	// random number generation
 	static int generateRandomIntInclusive( const int& min, const int& max );

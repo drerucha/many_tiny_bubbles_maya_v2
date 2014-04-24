@@ -42,11 +42,14 @@ public:
 	// std::vector getters
 	std::vector<std::vector<vec3>> getPosList( void ) const;
 	std::vector<double> getRadiiList( void ) const;
+	//std::vector<vec3> getPosListForRadiusGroupAtIndex( const unsigned int& i ) const;
 
 	void removeBubbleAtIndex( const unsigned int& i,
 							  const unsigned int& j );
 	void addBubblePosToRadiusGroupAtIndex( const vec3& pos,
 										   const unsigned int& i );
+
+	void createMayaParticlesWithName( const std::string& particle_name ) const;
 
 
 private:

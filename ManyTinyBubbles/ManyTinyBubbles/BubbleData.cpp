@@ -145,6 +145,41 @@ void BubbleData::addBubblePosToRadiusGroupAtIndex( const vec3& pos,
 
 
 ////////////////////////////////////////////////////
+// create Maya particle groups from m_pos_list
+////////////////////////////////////////////////////
+void BubbleData::createMayaParticlesWithName( const std::string& particle_name ) const
+{
+	for ( unsigned int radius_group_index = 0; radius_group_index < m_pos_list.size(); ++radius_group_index ) {
+		std::vector<vec3> bubble_pos_list = m_pos_list.at( radius_group_index );
+
+		if ( bubble_pos_list.size() > 0 ) {
+			std::string create_cmd = "particle ";
+
+			for ( std::vector<vec3>::iterator it = bubble_pos_list.begin(); it != bubble_pos_list.end(); ++it ) {
+				create_cmd += "-position ";
+				vec3 pos = *it;
+				Convenience::appendVec3ToStdString( create_cmd, pos );
+				create_cmd += " ";
+			}
+
+			create_cmd += "-conserve 1 -name ";
+			create_cmd += particle_name;
+			Convenience::appendNumToStdString( create_cmd, radius_group_index + 1 );
+
+			// create particle
+			// "particle [-position x y z]+ -conserve 1 -name bubbleParticle1"
+			MGlobal::executeCommand( Convenience::convertStdStringToMString( create_cmd ) );
+
+			// set particle to render as sphere
+			std::string object_name = particle_name;
+			Convenience::appendNumToStdString( object_name, radius_group_index + 1 );
+			Convenience::setParticleRenderTypeToSphere( Convenience::convertStdStringToMString( object_name ) );
+		}
+	}
+}
+
+
+////////////////////////////////////////////////////
 // getters
 ////////////////////////////////////////////////////
 
@@ -182,3 +217,8 @@ std::vector<double> BubbleData::getRadiiList() const
 {
 	return m_radii_list;
 }
+
+//std::vector<vec3> BubbleData::getPosListForRadiusGroupAtIndex( const unsigned int& i ) const
+//{
+//	return m_pos_list.at( i );
+//}

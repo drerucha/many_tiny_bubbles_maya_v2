@@ -104,6 +104,18 @@ MStringArray Convenience::getAttributeMStringArray( MString object_name, MString
 
 
 ////////////////////////////////////////////////////
+// set Maya attribute
+////////////////////////////////////////////////////
+//void Convenience::setAttributeInt( const MString&	object_name,
+//								   const MString&	attr_name,
+//								   const int&		val )
+//{
+//	MString cmd = "setAttr " + object_name + "." + attr_name + " " + val;
+//	MGlobal::executeCommand( cmd );
+//}
+
+
+////////////////////////////////////////////////////
 // miscellaneous
 ////////////////////////////////////////////////////
 
@@ -115,11 +127,9 @@ MString Convenience::getParent( MString child )
 	return parent[0];
 }
 
-void Convenience::appendNumToStdString( std::string& str, const int& num )
+void Convenience::setParticleRenderTypeToSphere( const MString& particle_name )
 {
-	char num_str[21]; // large enough to hold all numbers up to 64-bits
-	sprintf( num_str, "%d", num );
-	str += num_str;
+	MGlobal::executeCommand( "setAttr " + particle_name + "Shape.particleRenderType 4" );
 }
 
 //bool Convenience::meshNameDoesCorrespondToMayaMeshObject( const MString& mesh_name )
@@ -176,6 +186,48 @@ void Convenience::appendNumToStdString( std::string& str, const int& num )
 //	
 //	return NULL;
 //}
+
+
+////////////////////////////////////////////////////
+// std::string number concatenation
+////////////////////////////////////////////////////
+
+void Convenience::appendNumToStdString( std::string& str, const int& num )
+{
+	char num_str[21]; // large enough to hold all numbers up to 64-bits
+	sprintf( num_str, "%d", num );
+	str += num_str;
+}
+
+void Convenience::appendNumToStdString( std::string& str, const unsigned int& num )
+{
+	char num_str[21]; // large enough to hold all numbers up to 64-bits
+	sprintf( num_str, "%d", num );
+	str += num_str;
+}
+
+void Convenience::appendNumToStdString( std::string& str, const float& num )
+{
+	char num_str[21]; // large enough to hold all numbers up to 64-bits
+	sprintf( num_str, "%f", num );
+	str += num_str;
+}
+
+void Convenience::appendNumToStdString( std::string& str, const double& num )
+{
+	char num_str[21]; // large enough to hold all numbers up to 64-bits
+	sprintf( num_str, "%f", num );
+	str += num_str;
+}
+
+void Convenience::appendVec3ToStdString( std::string& str, const vec3& vec )
+{
+	appendNumToStdString( str, vec[VX] );
+	str += " ";
+	appendNumToStdString( str, vec[VY] );
+	str += " ";
+	appendNumToStdString( str, vec[VZ] );
+}
 
 
 ////////////////////////////////////////////////////

@@ -41,6 +41,7 @@
 const double GAS_DENSITY = 100.0;
 const unsigned int EMITTER_LEVEL_SET_RES = 100000;
 const unsigned int EMITTER_MELTING_RATE = 100;
+const std::string MAYA_PARTICLE_NAME = "bubbleParticle";
 
 
 ////////////////////////////////////////////////////
@@ -240,7 +241,8 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 
 	m_current_frame = frame_num;
 
-	// TODO: create particle group in Maya
+	// create particle group in Maya
+	m_bubbles.createMayaParticlesWithName( MAYA_PARTICLE_NAME );
 
 	// TODO: set bubble size in Maya
 
