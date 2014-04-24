@@ -40,6 +40,7 @@ public:
 	// miscellaneous
 	static MString getParent( MString child );
 	static void setParticleRenderTypeToSphere( const MString& particle_name );
+	//static void setParticleRadius( const MString& particle_name, const double& radius );
 	//static bool meshNameDoesCorrespondToMayaMeshObject( const MString& mesh_name );
 	//static MDagPath getDagPathToMeshNodeFromName( const MString& mesh_name );
 

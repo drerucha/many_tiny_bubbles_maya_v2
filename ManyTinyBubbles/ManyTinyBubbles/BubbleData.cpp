@@ -1,7 +1,9 @@
 #include "BubbleData.h"
 
-#include "Convenience.h"
 #include <maya/MGlobal.h>
+
+#include "Convenience.h"
+
 
 
 ////////////////////////////////////////////////////
@@ -175,6 +177,27 @@ void BubbleData::createMayaParticlesWithName( const std::string& particle_name )
 			Convenience::appendNumToStdString( object_name, radius_group_index + 1 );
 			Convenience::setParticleRenderTypeToSphere( Convenience::convertStdStringToMString( object_name ) );
 		}
+	}
+}
+
+
+////////////////////////////////////////////////////
+// set radii of Maya particles
+////////////////////////////////////////////////////
+void BubbleData::setRadiiForMayaParticlesWithName( const std::string& particle_name ) const
+{
+	for ( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
+		std::string object_name = particle_name;
+		Convenience::appendNumToStdString( object_name, i + 1 );
+
+		// TODO: ask about this long MEL command
+		// addAttr -internalSet true -longName radius -attributeType "float" -minValue 0 -maxValue 10 -defaultValue 0.5 bubbleParticle1Shape
+		std::string cmd = "addAttr -internalSet true -longName radius -attributeType \"float\" -minValue 0 -maxValue 10 -defaultValue 0.5 ";
+		cmd += object_name;
+		cmd += "Shape";
+		MGlobal::executeCommand( Convenience::convertStdStringToMString( cmd ) );
+
+		MGlobal::executeCommand( "setAttr " + Convenience::convertStdStringToMString( object_name ) + "Shape.radius " + m_radii_list[i] );
 	}
 }
 

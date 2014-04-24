@@ -16,6 +16,7 @@
 // TODO: alter node to allow multiple bubble emitter sources
 // TODO: think about moving EmitterData logic into BubbleData logic
 // TODO: initialize m_pos_list and m_vel_list in BubbleData to ensure lists always exist to add to when generating bubbles
+// TODO: index vectors using [] instead of at() b/c it seems faster
 
 
 #include "ManyTinyBubblesNode.h"
@@ -244,7 +245,11 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 	// create particle group in Maya
 	m_bubbles.createMayaParticlesWithName( MAYA_PARTICLE_NAME );
 
-	// TODO: set bubble size in Maya
+	// set particle radii in Maya
+	//m_bubbles.setRadiiForMayaParticlesWithName( MAYA_PARTICLE_NAME );
+
+	// TODO: ask why we're selecting the node
+	//MGlobal::executeCommand("select -r CreateBubbleNode1");
 
 	// TODO: maybe create a dummy mesh if the program doesn't work without one?
 

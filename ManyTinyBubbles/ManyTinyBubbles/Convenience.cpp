@@ -132,6 +132,11 @@ void Convenience::setParticleRenderTypeToSphere( const MString& particle_name )
 	MGlobal::executeCommand( "setAttr " + particle_name + "Shape.particleRenderType 4" );
 }
 
+//static void setParticleRadius( const MString& particle_name, const double& radius  )
+//{
+//	MGlobal::executeCommand( "setAttr " + particle_name + "Shape.radius " + radius );
+//}
+
 //bool Convenience::meshNameDoesCorrespondToMayaMeshObject( const MString& mesh_name )
 //{
 //	// select Maya object by name

@@ -30,16 +30,12 @@ public:
 	void deleteAllParticlesInMaya();
 	void reset();
 
-	// int getters
+	// getters
 	unsigned int getNumRadii( void ) const;
-	
-	// double getters
 	double getRadiusAtIndex( const unsigned int& index ) const;
 	double getScatteringFrequency( void ) const;
 	double getScatteringCoefficient( void ) const;
 	double getBreakupFrequency( void ) const;
-
-	// std::vector getters
 	std::vector<std::vector<vec3>> getPosList( void ) const;
 	std::vector<double> getRadiiList( void ) const;
 	//std::vector<vec3> getPosListForRadiusGroupAtIndex( const unsigned int& i ) const;
@@ -50,7 +46,7 @@ public:
 										   const unsigned int& i );
 
 	void createMayaParticlesWithName( const std::string& particle_name ) const;
-
+	void setRadiiForMayaParticlesWithName( const std::string& particle_name ) const;
 
 private:
 
