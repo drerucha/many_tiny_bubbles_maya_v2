@@ -599,7 +599,7 @@ MStatus ManyTinyBubbles::initialize()
 	//nAttr.setKeyable( false );
 
 	ManyTinyBubbles::m_output = nAttr.create( "output", "out", MFnNumericData::kFloat, 0.0 );
-	nAttr.setWritable( false );
+	nAttr.setWritable( true );
 	nAttr.setStorable( false );
 	nAttr.setKeyable( false );
 
