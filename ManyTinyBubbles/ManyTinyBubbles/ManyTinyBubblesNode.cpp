@@ -237,7 +237,9 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 								   new_bubble_velocities,
 								   new_bubble_radius_group );
 
-		// TODO: add new bubbles to m_bubbles data structure using new_bubble_positions, new_bubble_velocities, and new_bubble_radius_group
+		// add new bubble positions and velocities to m_bubbles
+		m_bubbles.addBubblePosToRadiusGroupAtIndex( new_bubble_positions, new_bubble_radius_group );
+		m_bubbles.addBubbleVelToRadiusGroupAtIndex( new_bubble_velocities, new_bubble_radius_group );
 	}
 
 	m_current_frame = frame_num;
@@ -246,7 +248,7 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 	m_bubbles.createMayaParticlesWithName( MAYA_PARTICLE_NAME );
 
 	// set particle radii in Maya
-	//m_bubbles.setRadiiForMayaParticlesWithName( MAYA_PARTICLE_NAME );
+	m_bubbles.setRadiiForMayaParticlesWithName( MAYA_PARTICLE_NAME );
 
 	// TODO: ask why we're selecting the node
 	//MGlobal::executeCommand("select -r CreateBubbleNode1");

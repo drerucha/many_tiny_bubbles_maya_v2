@@ -59,6 +59,14 @@ void BubbleData::setRadii( const double& radius_min,
 	for ( unsigned int i = 0; i < NUM_RADII; ++i ) {
 		m_radii_list.push_back( radius_min + step * i );
 	}
+
+	// TODO: this might be a dumb thing to do
+	// init m_pos_list and m_vel_list with empty std::vector<vec3>
+	for ( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
+		std::vector<vec3> empty_pos, empty_vel;
+		m_pos_list.push_back( empty_pos );
+		m_vel_list.push_back( empty_vel );
+	}
 }
 
 
@@ -112,6 +120,8 @@ void BubbleData::deleteParticle( const unsigned int& num ) const
 ////////////////////////////////////////////////////
 void BubbleData::reset()
 {
+	// TODO: iterate through outer std::vectors and clear inner std::vectors before clearing the outer one
+
 	m_pos_list.clear();
 	m_vel_list.clear();
 	m_radii_list.clear();
@@ -143,6 +153,46 @@ void BubbleData::addBubblePosToRadiusGroupAtIndex( const vec3& pos,
 
 	// m_pos_list is std::vector<std::vector<vec3>>
 	m_pos_list.at( i ).push_back( pos );
+}
+
+
+////////////////////////////////////////////////////
+// i indicates radius group
+////////////////////////////////////////////////////
+void BubbleData::addBubblePosToRadiusGroupAtIndex( std::vector<vec3>			pos_list,
+												   std::vector<unsigned int>	radius_group_index_list )
+{
+	// TODO: test this
+
+	if ( pos_list.size() != radius_group_index_list.size() ) {
+		Convenience::printInScriptEditor( MString( "ERROR: vectors are not same size in BubbleData::addBubblePosToRadiusGroupAtIndex" ) );
+	}
+	else {
+		for ( unsigned int i = 0; i < pos_list.size(); ++i ) {
+			unsigned int radius_group_index = radius_group_index_list[i];
+			m_pos_list[radius_group_index].push_back( pos_list[i] );
+		}
+	}
+}
+
+
+////////////////////////////////////////////////////
+// i indicates radius group
+////////////////////////////////////////////////////
+void BubbleData::addBubbleVelToRadiusGroupAtIndex( std::vector<vec3>			vel_list,
+												   std::vector<unsigned int>	radius_group_index_list )
+{
+	// TODO: test this
+
+	if ( vel_list.size() != radius_group_index_list.size() ) {
+		Convenience::printInScriptEditor( MString( "ERROR: vectors are not same size in BubbleData::addBubbleVelToRadiusGroupAtIndex" ) );
+	}
+	else {
+		for ( unsigned int i = 0; i < vel_list.size(); ++i ) {
+			unsigned int radius_group_index = radius_group_index_list[i];
+			m_pos_list[radius_group_index].push_back( vel_list[i] );
+		}
+	}
 }
 
 

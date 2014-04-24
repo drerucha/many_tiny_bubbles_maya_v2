@@ -45,6 +45,11 @@ public:
 	void addBubblePosToRadiusGroupAtIndex( const vec3& pos,
 										   const unsigned int& i );
 
+	void addBubblePosToRadiusGroupAtIndex( std::vector<vec3>			pos_list,
+										   std::vector<unsigned int>	radius_group_index_list );
+	void addBubbleVelToRadiusGroupAtIndex( std::vector<vec3>			vel_list,
+										   std::vector<unsigned int>	radius_group_index_list );
+
 	void createMayaParticlesWithName( const std::string& particle_name ) const;
 	void setRadiiForMayaParticlesWithName( const std::string& particle_name ) const;
 
