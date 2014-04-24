@@ -165,8 +165,8 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			// create bubbles
 			////////////////////////////////////////////////////
 
-			createBubbles( time_val,
-						   step_size_val );
+			//createBubbles( time_val,
+			//			   step_size_val );
 
 
 			////////////////////////////////////////////////////
@@ -604,7 +604,7 @@ MStatus ManyTinyBubbles::initialize()
 	nAttr.setKeyable( false );
 
 	ManyTinyBubbles::m_time = uAttr.create( "time", "tm", MFnUnitAttribute::kTime, 0.0 );
-	uAttr.setWritable( false );
+	uAttr.setWritable( true );
  	uAttr.setStorable( false );
 
 	//ManyTinyBubbles::m_emitter_mesh = tAttr.create( "emitter_mesh", "em", MFnData::kMesh );

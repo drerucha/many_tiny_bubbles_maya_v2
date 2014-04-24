@@ -66,6 +66,13 @@ global proc createManyTinyBubblesNode( string $fluid_container, string $emitter_
 	//connectAttr ManyTinyBubbles1.emitter_mesh pSphere2.outMesh;
 	//connectAttr $cmd $emitter_shape;
 
+	
+
+	// connect time attribute
+	// connectAttr time1.outTime CreateBubbleNode1.time;
+	string $node_time_attr = $node + ".time";
+	connectAttr time1.outTime $node_time_attr;
+
 	$cmd = $node + ".emitter_mesh_name";
 	setAttr $cmd -type "string" $emitter_mesh;
 
