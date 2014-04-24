@@ -23,6 +23,8 @@ public:
 	// print in Maya's script editor
 	static void printInScriptEditor( MString mstring );
 	static void printInScriptEditor( std::string std_string );
+	static void printInScriptEditor( const int& value_to_print );
+	static void printInScriptEditor( const float& value_to_print );
 
 	// attribute getters
 	static int getAttributeInt( MString object_name, MString attr_name );

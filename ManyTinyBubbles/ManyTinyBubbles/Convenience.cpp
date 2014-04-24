@@ -49,6 +49,20 @@ void Convenience::printInScriptEditor( std::string std_string )
 	MGlobal::displayInfo( convertStdStringToMString( std_string ) );
 }
 
+void Convenience::printInScriptEditor( const int& value_to_print )
+{
+	std::string string_to_print = "";
+	Convenience::appendNumToStdString( string_to_print, value_to_print );
+	Convenience::printInScriptEditor( string_to_print );
+}
+
+void Convenience::printInScriptEditor( const float& value_to_print )
+{
+	std::string string_to_print = "";
+	Convenience::appendNumToStdString( string_to_print, value_to_print );
+	Convenience::printInScriptEditor( string_to_print );
+}
+
 
 ////////////////////////////////////////////////////
 // attribute getters

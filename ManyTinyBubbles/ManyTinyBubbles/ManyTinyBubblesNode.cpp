@@ -88,7 +88,7 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 	// TODO: arrange output attribute in such a way that Maya recomputes it when I want it to
 
 	// debug
-	Convenience::printInScriptEditor( MString( "in compute()" ) );
+	//Convenience::printInScriptEditor( MString( "in compute()" ) );
 
 	MStatus returnStatus;
 
@@ -100,7 +100,7 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 	if ( plug == ManyTinyBubbles::m_output ) {
 
 		// debug
-		Convenience::printInScriptEditor( MString( "recomputing stuff" ) );
+		//Convenience::printInScriptEditor( MString( "recomputing stuff" ) );
 
 
 		////////////////////////////////////////////////////
@@ -141,6 +141,29 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			float bubble_size_min_val			= bubble_size_min_data.asFloat();
 			float bubble_size_max_val			= bubble_size_max_data.asFloat();
 			float step_size_val					= step_size_data.asFloat();
+
+			// debug - print off attributes
+			//Convenience::printInScriptEditor( MString( "time:" ) );
+			//Convenience::printInScriptEditor( ( int )time_val.as( MTime::kFilm ) );
+			//Convenience::printInScriptEditor( MString( "emitter_mesh_name:" ) );
+			//Convenience::printInScriptEditor( emitter_mesh_name_val );
+			//Convenience::printInScriptEditor( MString( "fluid_container_name:" ) );
+			//Convenience::printInScriptEditor( fluid_container_name_val );
+			//Convenience::printInScriptEditor( MString( "emission_rate:" ) );
+			//Convenience::printInScriptEditor( emission_rate_val );
+			//Convenience::printInScriptEditor( MString( "scattering_frequency:" ) );
+			//Convenience::printInScriptEditor( scattering_frequency_val );
+			//Convenience::printInScriptEditor( MString( "scattering_coefficient:" ) );
+			//Convenience::printInScriptEditor( scattering_coefficient_val );
+			//Convenience::printInScriptEditor( MString( "breakup_frequency:" ) );
+			//Convenience::printInScriptEditor( breakup_frequency_val );
+			//Convenience::printInScriptEditor( MString( "bubble_size_min:" ) );
+			//Convenience::printInScriptEditor( bubble_size_min_val );
+			//Convenience::printInScriptEditor( MString( "bubble_size_max:" ) );
+			//Convenience::printInScriptEditor( bubble_size_max_val );
+			//Convenience::printInScriptEditor( MString( "step_size:" ) );
+			//Convenience::printInScriptEditor( step_size_val );
+
 			
 			// TODO: only re-init these data structures if their respective data has changed
 
@@ -561,7 +584,7 @@ void ManyTinyBubbles::splitBubble( const vec3&		current_pos,
 void* ManyTinyBubbles::creator()
 {
 	// debug
-	Convenience::printInScriptEditor( MString( "in creator()" ) );
+	//Convenience::printInScriptEditor( MString( "in creator()" ) );
 
 	return new ManyTinyBubbles();
 }
@@ -574,7 +597,7 @@ void* ManyTinyBubbles::creator()
 MStatus ManyTinyBubbles::initialize()	
 {
 	// debug
-	Convenience::printInScriptEditor( MString( "in initialize()" ) );
+	//Convenience::printInScriptEditor( MString( "in initialize()" ) );
 
 
 	////////////////////////////////////////////////////
