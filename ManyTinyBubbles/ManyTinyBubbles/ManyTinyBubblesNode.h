@@ -59,9 +59,36 @@ void splitBubble( const vec3&	current_pos,
 				  vec3&			new_pos_2 ) const;
 
 
+struct BubbleLocator {
+	unsigned int radius_group;
+	unsigned int list_index;
+
+	BubbleLocator( unsigned int i, unsigned int j )
+	{
+		radius_group = i;
+		list_index = j;
+	}
+};
+
+struct BubbleStruct {
+	vec3 pos;
+	vec3 vel;
+	unsigned int radius_group;
+
+	BubbleStruct( vec3 pos,
+				  vec3 vel,
+				  unsigned int radius_group )
+	{
+		this->pos = pos;
+		this->vel = vel;
+		this->radius_group = radius_group;
+	}
+};
+
 MStatus	simulationLoop( const MTime& time, const float& step_size ); // Danny was here
 unsigned int simulationSetup( const MTime& time ); // Danny was here
 void deleteEscapedBubbles( void ); // Danny was here
+void deleteBubblesInList( std::vector<BubbleLocator> bubbles_to_remove ); // Danny was here
 void generateMoreBubblesFromEmitter( void ); // Danny was here
 void computeFractionField( void ); // Danny was here
 void updateBubbleVelocities( void ); // Danny was here

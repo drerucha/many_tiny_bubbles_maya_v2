@@ -172,12 +172,17 @@ void BubbleData::removeBubbleAtIndex( const unsigned int& i,
 	// TODO: test this
 
 	// m_pos_list is std::vector<std::vector<vec3>>
-	std::vector<vec3> pos_list = m_pos_list[i];
-	m_pos_list.at( i ).erase( pos_list.begin() + j );
+	//std::vector<vec3> pos_list = m_pos_list[i];
+	//m_pos_list.at( i ).erase( pos_list.begin() + j );
 
 	// m_vel_list is std::vector<std::vector<vec3>>
-	std::vector<vec3> vel_list = m_vel_list[i];
-	m_vel_list.at( i ).erase( vel_list.begin() + j );
+	//std::vector<vec3> vel_list = m_vel_list[i];
+	//m_vel_list.at( i ).erase( vel_list.begin() + j );
+
+	// m_pos_list is std::vector<std::vector<vec3>>
+	// m_vel_list is std::vector<std::vector<vec3>>
+	m_pos_list[i].erase( m_pos_list[i].begin() + j );
+	m_vel_list[i].erase( m_vel_list[i].begin() + j );
 }
 
 

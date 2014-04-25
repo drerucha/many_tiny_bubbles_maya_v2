@@ -196,10 +196,6 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 	return MS::kSuccess;
 }
 
-
-
-
-
 MStatus	ManyTinyBubbles::simulationLoop( const MTime& time,
 										 const float& step_size )
 {
@@ -262,17 +258,6 @@ unsigned int ManyTinyBubbles::simulationSetup( const MTime& time )
 	return requested_frame;
 }
 
-struct BubbleLocator {
-	unsigned int radius_group;
-	unsigned int list_index;
-
-	BubbleLocator( unsigned int i, unsigned int j )
-	{
-		radius_group = i;
-		list_index = j;
-	}
-};
-
 void ManyTinyBubbles::deleteEscapedBubbles()
 {
 	std::vector<BubbleLocator> bubbles_to_remove;
@@ -295,11 +280,28 @@ void ManyTinyBubbles::deleteEscapedBubbles()
 		}
 	}
 
-	// TODO: fix removeBubbleAtIndex b/c it's broken when used in this context
+	deleteBubblesInList( bubbles_to_remove );
+}
+
+void ManyTinyBubbles::deleteBubblesInList( std::vector<BubbleLocator> bubbles_to_remove )
+{
+	// TODO: fix this hack
+
+	unsigned int counter = 0;
+	unsigned int radius_group_index = 0;
+	bool firstTimeFlag = true;
 
 	// delete bubbles that were marked for deletion
 	for ( std::vector<BubbleLocator>::iterator it = bubbles_to_remove.begin() ; it != bubbles_to_remove.end(); ++it ) {
-		m_bubbles.removeBubbleAtIndex( it->radius_group, it->list_index );
+
+		if ( it->radius_group != radius_group_index ) {
+			radius_group_index = it->radius_group;
+			counter = 0;
+		}
+
+		m_bubbles.removeBubbleAtIndex( it->radius_group, it->list_index - counter );
+
+		++counter;
 	}
 }
 
@@ -374,21 +376,6 @@ void ManyTinyBubbles::updateBubbleVelocities()
 	}
 }
 
-struct BubbleStruct {
-	vec3 pos;
-	vec3 vel;
-	unsigned int radius_group;
-
-	BubbleStruct( vec3 pos,
-				  vec3 vel,
-				  unsigned int radius_group )
-	{
-		this->pos = pos;
-		this->vel = vel;
-		this->radius_group = radius_group;
-	}
-};
-
 void ManyTinyBubbles::breakupBubbles()
 {
 	std::vector<BubbleLocator> bubbles_to_remove;
@@ -437,12 +424,7 @@ void ManyTinyBubbles::breakupBubbles()
 							 it->vel );
 	}
 
-	// TODO: fix removeBubbleAtIndex b/c it's broken when used in this context
-
-	// delete bubbles that were marked for deletion
-	for ( std::vector<BubbleLocator>::iterator it = bubbles_to_remove.begin() ; it != bubbles_to_remove.end(); ++it ) {
-		m_bubbles.removeBubbleAtIndex( it->radius_group, it->list_index );
-	}
+	deleteBubblesInList( bubbles_to_remove );
 }
 
 
