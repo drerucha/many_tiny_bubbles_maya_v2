@@ -299,6 +299,21 @@ void BubbleData::setRadiiForMayaParticlesWithName( const std::string& particle_n
 
 
 ////////////////////////////////////////////////////
+// set bubble velocity at specific index
+// i indicates radius group
+// j indicates position within a specific radius group
+////////////////////////////////////////////////////
+void BubbleData::setVelocityAtIndex( const vec3& new_vel,
+									 const unsigned int& i,
+									 const unsigned int& j )
+{
+	// m_vel_list is std::vector<std::vector<vec3>>
+	std::vector<vec3> vel_list = m_vel_list[i];
+	vel_list[j] = new_vel;
+}
+
+
+////////////////////////////////////////////////////
 // getters
 ////////////////////////////////////////////////////
 
