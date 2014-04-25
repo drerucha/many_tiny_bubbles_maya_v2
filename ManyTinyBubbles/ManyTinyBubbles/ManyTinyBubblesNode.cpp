@@ -40,7 +40,7 @@
 ////////////////////////////////////////////////////
 
 const double GAS_DENSITY = 100.0;
-const unsigned int EMITTER_LEVEL_SET_RES = 100000;
+const unsigned int EMITTER_LEVEL_SET_RES = 10000;
 const unsigned int EMITTER_MELTING_RATE = 100;
 const std::string MAYA_PARTICLE_NAME = "bubbleParticle";
 
@@ -85,11 +85,6 @@ ManyTinyBubbles::~ManyTinyBubbles() {}
 ////////////////////////////////////////////////////
 MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 {
-	// TODO: arrange output attribute in such a way that Maya recomputes it when I want it to
-
-	// debug
-	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::compute()" ) );
-
 	MStatus returnStatus;
 
 
@@ -138,29 +133,11 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			float bubble_size_max_val			= bubble_size_max_data.asFloat();
 			float step_size_val					= step_size_data.asFloat();
 
-			// debug - print off attributes
-			//Convenience::printInScriptEditor( MString( "time:" ) );
-			//Convenience::printInScriptEditor( ( int )time_val.as( MTime::kFilm ) );
-			//Convenience::printInScriptEditor( MString( "emitter_mesh_name:" ) );
-			//Convenience::printInScriptEditor( emitter_mesh_name_val );
-			//Convenience::printInScriptEditor( MString( "fluid_container_name:" ) );
-			//Convenience::printInScriptEditor( fluid_container_name_val );
-			//Convenience::printInScriptEditor( MString( "emission_rate:" ) );
-			//Convenience::printInScriptEditor( emission_rate_val );
-			//Convenience::printInScriptEditor( MString( "scattering_frequency:" ) );
-			//Convenience::printInScriptEditor( scattering_frequency_val );
-			//Convenience::printInScriptEditor( MString( "scattering_coefficient:" ) );
-			//Convenience::printInScriptEditor( scattering_coefficient_val );
-			//Convenience::printInScriptEditor( MString( "breakup_frequency:" ) );
-			//Convenience::printInScriptEditor( breakup_frequency_val );
-			//Convenience::printInScriptEditor( MString( "bubble_size_min:" ) );
-			//Convenience::printInScriptEditor( bubble_size_min_val );
-			//Convenience::printInScriptEditor( MString( "bubble_size_max:" ) );
-			//Convenience::printInScriptEditor( bubble_size_max_val );
-			//Convenience::printInScriptEditor( MString( "step_size:" ) );
-			//Convenience::printInScriptEditor( step_size_val );
-
 			
+			////////////////////////////////////////////////////
+			// initialize data structures
+			////////////////////////////////////////////////////
+
 			// TODO: only re-init these data structures if their respective data has changed
 
 			// get fluid container attributes and store in m_fluid_container
@@ -184,8 +161,14 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			// create bubbles
 			////////////////////////////////////////////////////
 
-			createBubbles( time_val,
-						   step_size_val );
+			//createBubbles( time_val, step_size_val );
+
+
+			////////////////////////////////////////////////////
+			// perform bubble simulation
+			////////////////////////////////////////////////////
+
+			simulationLoop( time_val, step_size_val );
 
 
 			////////////////////////////////////////////////////
@@ -214,15 +197,264 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 }
 
 
+
+
+
+MStatus	ManyTinyBubbles::simulationLoop( const MTime& time,
+										 const float& step_size )
+{
+	// cleanup before simulation
+	unsigned int requested_frame = simulationSetup( time );
+
+	// loop from current frame to requested frame
+	for ( unsigned int i = 0; i < requested_frame - m_current_frame; ++i ) {
+
+		// update bubble positions using explicit Euler integration
+		m_bubbles.updateBubblePositions( step_size );
+
+		// remove bubbles that "escape" fluid container
+		deleteEscapedBubbles();
+
+		// generate new bubbles on emitter surface
+		generateMoreBubblesFromEmitter();
+
+		// compute fraction field for fluid
+		// fraction field influences bubble scattering properties which influences their velocities
+		computeFractionField();
+
+		// TODO
+		// update bubble velocities taking their current velocities, the fluid velocity field, and their scattering properties into account
+		updateBubbleVelocities();
+
+		// TODO
+		// breakup bubbles
+		// bubbles randomly break apart into two smaller bubbles
+		breakupBubbles();
+	}
+
+	// render bubbles as particles in Maya
+	m_bubbles.createMayaParticlesWithName( MAYA_PARTICLE_NAME );		// create particle groups
+	m_bubbles.setRadiiForMayaParticlesWithName( MAYA_PARTICLE_NAME );	// set particle radii
+
+	// update m_current_frame
+	m_current_frame = requested_frame;
+
+	return MS::kSuccess;
+}
+
+unsigned int ManyTinyBubbles::simulationSetup( const MTime& time )
+{
+	// ensure we simulate at least one frame to visualize results
+	unsigned int requested_frame = ( unsigned int )time.as( MTime::kFilm );
+	if ( requested_frame == 0 ) {
+		requested_frame = 1;
+	}
+
+	// if the user wants to visualize a previously simulated frame, then we must re-run the simulation from the beginning
+	if ( requested_frame < m_current_frame ) {
+		reset();
+		m_current_frame = 0;
+	}
+
+	// delete all rendered particles in Maya b/c we recreate them each simulation
+	m_bubbles.deleteAllParticlesInMaya();
+
+	return requested_frame;
+}
+
+struct BubbleLocator {
+	unsigned int radius_group;
+	unsigned int list_index;
+
+	BubbleLocator( unsigned int i, unsigned int j )
+	{
+		radius_group = i;
+		list_index = j;
+	}
+};
+
+void ManyTinyBubbles::deleteEscapedBubbles()
+{
+	std::vector<BubbleLocator> bubbles_to_remove;
+
+	// loop through radius groups
+	unsigned int num_radius_groups = m_bubbles.getNumRadiusGroups();
+	for ( unsigned int radius_group_index = 0; radius_group_index < num_radius_groups; ++radius_group_index ) {
+
+		// loop through bubbles in the current radius group
+		unsigned int num_bubbles_in_list = m_bubbles.getNumBubblesInListWithIndex( radius_group_index );
+		for ( unsigned int bubble_index = 0; bubble_index < num_bubbles_in_list; ++bubble_index ) {
+
+			// get bubble position
+			vec3 bubble_pos = m_bubbles.getPosAtIndex( radius_group_index, bubble_index );
+
+			// mark the bubble for deletion if it has "escaped" the fluid container
+			if ( m_fluid_container.posIsOutsideFluidContainer( bubble_pos ) ) {
+				bubbles_to_remove.push_back( BubbleLocator( radius_group_index, bubble_index ) );
+			}
+		}
+	}
+
+	// TODO: fix removeBubbleAtIndex b/c it's broken when used in this context
+
+	// delete bubbles that were marked for deletion
+	for ( std::vector<BubbleLocator>::iterator it = bubbles_to_remove.begin() ; it != bubbles_to_remove.end(); ++it ) {
+		m_bubbles.removeBubbleAtIndex( it->radius_group, it->list_index );
+	}
+}
+
+void ManyTinyBubbles::generateMoreBubblesFromEmitter()
+{
+	m_emitter.createEmissionPositionsOnMesh( EMITTER_LEVEL_SET_RES, EMITTER_MELTING_RATE );
+
+	// generate bubbles
+	std::vector<vec3> new_bubble_positions;
+	std::vector<vec3> new_bubble_velocities;
+	std::vector<unsigned int> new_bubble_radius_group;
+	m_emitter.generateBubbles( m_bubbles.getRadiiList(),
+							   new_bubble_positions,
+							   new_bubble_velocities,
+							   new_bubble_radius_group );
+
+	// add new bubble positions and velocities to m_bubbles
+	m_bubbles.addBubblePosToRadiusGroupAtIndex( new_bubble_positions, new_bubble_radius_group );
+	m_bubbles.addBubbleVelToRadiusGroupAtIndex( new_bubble_velocities, new_bubble_radius_group );
+}
+
+void ManyTinyBubbles::updateBubbleVelocities()
+{
+	// update velocity field to match the Maya fluid
+	m_fluid_container.updateVelocityField();
+
+	// loop through radius groups
+	unsigned int num_radius_groups = m_bubbles.getNumRadiusGroups();
+	for ( unsigned int radius_group_index = 0; radius_group_index < num_radius_groups; ++radius_group_index ) {
+
+		// loop through bubbles in the current radius group
+		unsigned int num_bubbles_in_list = m_bubbles.getNumBubblesInListWithIndex( radius_group_index );
+		for ( unsigned int bubble_index = 0; bubble_index < num_bubbles_in_list; ++bubble_index ) {
+
+			vec3 bubble_pos = m_bubbles.getPosAtIndex( radius_group_index, bubble_index );
+
+			// TODO: tune this b/c it's kind of random
+
+			vec3 bubble_vel_at_prev_time_step = m_bubbles.getVelocityAtIndex( radius_group_index, bubble_index );
+			vec3 bubble_vel = vec3( 0.0,
+									bubble_vel_at_prev_time_step.Length(),
+									0.0 );
+
+			double scattering_probability = computeScatteringProbabilityOfBubble( bubble_vel, bubble_pos );
+
+			// bubble will scatter, so alter bubble direction
+			if ( scattering_probability > Convenience::generateRandomDoubleBetweenZeroAndOneInclusive() ) {
+				double altered_angle = computeAlteredAngle();
+
+				// altered angle is not zero, so update bubble velocity direction
+ 				if ( altered_angle < -DBL_EPSILON || altered_angle > DBL_EPSILON ) {
+
+					// update bubble velocity due to scattering
+					bubble_vel = updateBubbleVelocity( bubble_vel, altered_angle );
+				}
+			}
+
+			// TODO: tune this b/c it's kind of random
+
+			vec3 fluid_vel_at_voxel = m_fluid_container.getVelocityOfVoxelAtPos( bubble_pos );
+			vec3 new_bubble_vel = bubble_vel + fluid_vel_at_voxel + vec3( 0.0, 1.0, 0.0 );
+
+			// check for "terminal" velocity
+			if ( new_bubble_vel.Length() > 5.0 ) {
+				new_bubble_vel /= new_bubble_vel.Length() * 5.0;
+			}
+
+			m_bubbles.setVelocityAtIndex( new_bubble_vel,
+										  radius_group_index,
+										  bubble_index );
+		}
+	}
+}
+
+struct BubbleStruct {
+	vec3 pos;
+	vec3 vel;
+	unsigned int radius_group;
+
+	BubbleStruct( vec3 pos,
+				  vec3 vel,
+				  unsigned int radius_group )
+	{
+		this->pos = pos;
+		this->vel = vel;
+		this->radius_group = radius_group;
+	}
+};
+
+void ManyTinyBubbles::breakupBubbles()
+{
+	std::vector<BubbleLocator> bubbles_to_remove;
+	std::vector<BubbleStruct> bubbles_to_add;
+
+	// loop through radius groups
+	// starting index is 1 b/c bubble cannot split if it belongs to the smallest radius group
+	unsigned int num_radius_groups = m_bubbles.getNumRadiusGroups();
+	for ( unsigned int radius_group_index = 1; radius_group_index < num_radius_groups; ++radius_group_index ) {
+
+		// loop through bubbles in the current radius group
+		unsigned int num_bubbles_in_list = m_bubbles.getNumBubblesInListWithIndex( radius_group_index );
+		for ( unsigned int bubble_index = 0; bubble_index < num_bubbles_in_list; ++bubble_index ) {
+
+			// bubble wants to split
+			if ( m_bubbles.getBreakupFrequency() > Convenience::generateRandomDoubleBetweenZeroAndOneInclusive() ) {
+
+				// get bubble's current position and velocity
+				vec3 bubble_pos = m_bubbles.getPosAtIndex( radius_group_index, bubble_index );
+				vec3 bubble_vel = m_bubbles.getVelAtIndex( radius_group_index, bubble_index );
+
+				// compute new positions for two new bubbles created from split bubble
+				vec3 new_pos_1, new_pos_2;
+				splitBubble( bubble_pos,
+							 m_bubbles.getRadiusAtIndex( radius_group_index ),
+							 new_pos_1,
+							 new_pos_2 );
+
+				bubbles_to_add.push_back( BubbleStruct( new_pos_1,
+														bubble_vel,
+														radius_group_index - 1 ) );
+				bubbles_to_add.push_back( BubbleStruct( new_pos_2,
+														bubble_vel,
+														radius_group_index - 1 ) );
+
+				// mark bubble that just split to be removed from bubble list
+				bubbles_to_remove.push_back( BubbleLocator( radius_group_index, bubble_index ) );
+			}
+		}
+	}
+
+	// add new bubbles m_bubbles data structure
+	for ( std::vector<BubbleStruct>::iterator it = bubbles_to_add.begin(); it != bubbles_to_add.end(); ++it ) {
+		m_bubbles.addBubble( it->radius_group,
+							 it->pos,
+							 it->vel );
+	}
+
+	// TODO: fix removeBubbleAtIndex b/c it's broken when used in this context
+
+	// delete bubbles that were marked for deletion
+	for ( std::vector<BubbleLocator>::iterator it = bubbles_to_remove.begin() ; it != bubbles_to_remove.end(); ++it ) {
+		m_bubbles.removeBubbleAtIndex( it->radius_group, it->list_index );
+	}
+}
+
+
+
+
+
 ////////////////////////////////////////////////////
 // createBubbles()
 ////////////////////////////////////////////////////
 MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 										const float& step_size )
 {
-	// debug
-	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::createBubbles()" ) );
-
 	// ensure frame_num is not zero 
 	unsigned int frame_num = ( unsigned int )time.as( MTime::kFilm );
 	if ( frame_num == 0 ) {
@@ -237,9 +469,6 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 
 	// delete all particles in Maya
 	m_bubbles.deleteAllParticlesInMaya();
-
-	// debug
-	return MS::kSuccess;
 
 	// simulate ( frame_num - m_current_frame ) frames starting from current m_current_frame
 	for ( unsigned int i = 0; i < frame_num - m_current_frame; ++i ) {
@@ -289,9 +518,6 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 ////////////////////////////////////////////////////
 void ManyTinyBubbles::computeFractionField()
 {
-	// debug
-	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::computeFractionField()" ) );
-
 	// set fraction field value at each voxel to 1.0f
 	m_fluid_container.resetFractionField();
 
@@ -326,9 +552,6 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 	//		- update all bubble velocities based on scattering and fluid velocity field
 	//		- perform explicit Euler integration to update bubble positions
 	//		- remove or adjust particles that "escape" from the fluid container
-
-	// debug
-	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::advectParticles()" ) );
 
 	// update velocity field to match the Maya fluid
 	m_fluid_container.updateVelocityField();
@@ -483,9 +706,6 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 double ManyTinyBubbles::computeScatteringProbabilityOfBubble( const vec3& bubble_vel,
 															  const vec3& bubble_pos ) const
 {
-	// debug
-	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::computeScatteringProbabilityOfBubble()" ) );
-
 	double voxel_vel_magnitude = bubble_vel.Length();
 	double fraction_field = m_fluid_container.getFractionFieldOfVoxelAtPos( bubble_pos );
 
@@ -498,9 +718,6 @@ double ManyTinyBubbles::computeScatteringProbabilityOfBubble( const vec3& bubble
 ////////////////////////////////////////////////////
 double ManyTinyBubbles::computeAlteredAngle() const
 {
-	// debug
-	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::computeAlteredAngle()" ) );
-
 	double uniform_random_num = Convenience::generateRandomDoubleBetweenZeroAndOneInclusive();
 	double numerator = 2.0 * uniform_random_num + m_bubbles.getScatteringCoefficient() - 1.0;
 	double denominator = 2.0 * m_bubbles.getScatteringCoefficient() * uniform_random_num - m_bubbles.getScatteringCoefficient() + 1.0;
@@ -525,9 +742,6 @@ double ManyTinyBubbles::computeAlteredAngle() const
 vec3 ManyTinyBubbles::updateBubbleVelocity( const vec3&		old_vel,
 											const double&	altered_dir ) const
 {
-	// debug
-	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::updateBubbleVelocity()" ) );
-
 	vec3 new_vel;
 
 	// create a random axis to rotate around using quaternions
@@ -607,9 +821,6 @@ void ManyTinyBubbles::splitBubble( const vec3&		current_pos,
 								   vec3&			new_pos_1,
 								   vec3&			new_pos_2 ) const
 {
-	// debug
-	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::splitBubble()" ) );
-
 	// random angle for use when generating initial positions of new bubbles formed from split
 	double phi = Convenience::generateRandomDoubleInclusive( 0.0, 2.0 ) * M_PI;
 
@@ -640,9 +851,6 @@ void ManyTinyBubbles::splitBubble( const vec3&		current_pos,
 ////////////////////////////////////////////////////
 void* ManyTinyBubbles::creator()
 {
-	// debug
-	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::creator()" ) );
-
 	return new ManyTinyBubbles();
 }
 
@@ -653,10 +861,6 @@ void* ManyTinyBubbles::creator()
 ////////////////////////////////////////////////////
 MStatus ManyTinyBubbles::initialize()	
 {
-	// debug
-	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::initialize()" ) );
-
-
 	////////////////////////////////////////////////////
 	// create attributes
 	////////////////////////////////////////////////////
@@ -833,27 +1037,8 @@ MStatus ManyTinyBubbles::initialize()
 ////////////////////////////////////////////////////
 void ManyTinyBubbles::reset()
 {
-	// debug
-	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::reset()" ) );
-
 	m_bubbles.reset();
 
 	// set fraction field value at each voxel to 1.0f
 	m_fluid_container.resetFractionField();
-}
-
-
-////////////////////////////////////////////////////
-// debug
-////////////////////////////////////////////////////
-void ManyTinyBubbles::testCode( const MString& str  ) const
-{
-	// debug
-	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::testCode()" ) );
-
-	//MDoubleArray velocity_field = Convenience::getVelocityFieldFromMayaFluid( str );
-
-	//std::string to_print = "velocity_field size: ";
-	//Convenience::appendNumToStdString( to_print, velocity_field.length() );
-	//Convenience::printInScriptEditor( to_print );
 }

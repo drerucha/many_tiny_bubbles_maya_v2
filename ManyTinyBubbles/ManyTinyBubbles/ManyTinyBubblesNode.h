@@ -29,11 +29,13 @@ class ManyTinyBubbles : public MPxNode
 public:
 
 	ManyTinyBubbles();
+
 	virtual ~ManyTinyBubbles();
 
 	virtual MStatus	compute( const MPlug& plug, MDataBlock& data );
 
 	static void* creator();
+
 	static MStatus initialize();
 
 private:
@@ -41,27 +43,33 @@ private:
 // for debugging
 void testCode( const MString& str ) const;
 
-MStatus	createBubbles( const MTime& time,
-					   const float& step_size );
-
-void computeFractionField( void );
+MStatus	createBubbles( const MTime& time, const float& step_size );
 
 void advectParticles( const float& dt );
 
-void reset();
-
-double computeScatteringProbabilityOfBubble( const vec3& bubble_vel,
-											 const vec3& bubble_pos ) const;
+double computeScatteringProbabilityOfBubble( const vec3& bubble_vel, const vec3& bubble_pos ) const;
 
 double computeAlteredAngle( void ) const;
 
-vec3 updateBubbleVelocity( const vec3&		old_vel,
-						   const double&	altered_dir ) const;
+vec3 updateBubbleVelocity( const vec3& old_vel, const double& altered_dir ) const;
 
 void splitBubble( const vec3&	current_pos,
 				  const double&	current_radius,
 				  vec3&			new_pos_1,
 				  vec3&			new_pos_2 ) const;
+
+
+MStatus	simulationLoop( const MTime& time, const float& step_size ); // Danny was here
+unsigned int simulationSetup( const MTime& time ); // Danny was here
+void deleteEscapedBubbles( void ); // Danny was here
+void generateMoreBubblesFromEmitter( void ); // Danny was here
+void computeFractionField( void ); // Danny was here
+void updateBubbleVelocities( void ); // Danny was here
+void breakupBubbles( void ); // Danny was here
+void reset(); // Danny was here
+
+// TODO: add method to delete bubbles given a vector of BubbleLocator structs
+// TODO: add method to add bubbles given a vector of BubbleStruct structs
 
 
 ////////////////////////////////////////////////////

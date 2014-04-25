@@ -21,16 +21,6 @@ public:
 	BubbleData( void );
 	~BubbleData( void );
 
-	void init( double scattering_frequency,
-			   double scattering_coefficient,
-			   double breakup_frequency,
-			   double size_min,
-			   double size_max );
-
-	void deleteAllParticlesInMaya();
-
-	void reset();
-
 	// getters
 	unsigned int					getNumRadii( void ) const;
 	double							getRadiusAtIndex( const unsigned int& index ) const;
@@ -40,20 +30,9 @@ public:
 	std::vector<std::vector<vec3>>	getPosList( void ) const;
 	std::vector<double>				getRadiiList( void ) const;
 	vec3							getVelocityAtIndex( const unsigned int& i, const unsigned int& j ) const;
-	vec3							getPosAtIndex( const unsigned int& i, const unsigned int& j ) const;
 	//std::vector<vec3>				getPosListForRadiusGroupAtIndex( const unsigned int& i ) const;
 
-	void removeBubbleAtIndex( const unsigned int& i, const unsigned int& j );
-
 	void addBubblePosToRadiusGroupAtIndex( const vec3& pos, const unsigned int& i );
-
-	void addBubblePosToRadiusGroupAtIndex( std::vector<vec3> pos_list, std::vector<unsigned int> radius_group_index_list );
-
-	void addBubbleVelToRadiusGroupAtIndex( std::vector<vec3> vel_list, std::vector<unsigned int> radius_group_index_list );
-
-	void createMayaParticlesWithName( const std::string& particle_name ) const;
-
-	void setRadiiForMayaParticlesWithName( const std::string& particle_name ) const;
 
 	void setVelocityAtIndex( const vec3& new_vel,
 							 const unsigned int& i,
@@ -61,10 +40,30 @@ public:
 
 	//void updatePosAtIndex( const unsigned int& i, const unsigned int& j );
 
-	void updateBubblePositions( const double& time_step );
-	void updateBubblePositionsAtIndex( const unsigned int& i,
-									   const unsigned int& j,
-									   const double& time_step );
+	void updateBubblePositionsAtIndex( const unsigned int&	i,
+									   const unsigned int&	j,
+									   const float&			time_step );
+
+	void init( double scattering_frequency,
+			   double scattering_coefficient,
+			   double breakup_frequency,
+			   double size_min,
+			   double size_max ); // Danny was here
+	void reset();  // Danny was here
+	void updateBubblePositions( const float& time_step ); // Danny was here
+	void createMayaParticlesWithName( const std::string& particle_name ) const; // Danny was here
+	void setRadiiForMayaParticlesWithName( const std::string& particle_name ) const; // Danny was here
+	void deleteAllParticlesInMaya(); // Danny was here
+	void addBubblePosToRadiusGroupAtIndex( std::vector<vec3> pos_list, std::vector<unsigned int> radius_group_index_list ); // Danny was here
+	void addBubbleVelToRadiusGroupAtIndex( std::vector<vec3> vel_list, std::vector<unsigned int> radius_group_index_list ); // Danny was here
+	unsigned int getNumRadiusGroups( void ) const; // Danny was here
+	unsigned int getNumBubblesInListWithIndex( const unsigned int& i ) const; // Danny was here
+	void removeBubbleAtIndex( const unsigned int& i, const unsigned int& j ); // Danny was here
+	vec3 getPosAtIndex( const unsigned int& i, const unsigned int& j ) const; // Danny was here
+	vec3 getVelAtIndex( const unsigned int& i, const unsigned int& j ) const; // Danny was here
+	void addBubble( const unsigned int&	radius_group_index,
+					vec3				pos,
+					vec3				vel ); // Danny was here
 
 private:
 

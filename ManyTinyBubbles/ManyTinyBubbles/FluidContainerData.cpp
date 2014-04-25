@@ -27,9 +27,6 @@ FluidContainerData::~FluidContainerData()
 ////////////////////////////////////////////////////
 void FluidContainerData::init( MString fluid_container_name )
 {
-	// debug
-	Convenience::printInScriptEditor( MString( "in FluidContainerData::init()" ) );
-
 	m_name = fluid_container_name;
 
 	MIntArray fluid_container_res_array = Convenience::getAttributeIntArray( fluid_container_name, MString( "resolution" ) );
