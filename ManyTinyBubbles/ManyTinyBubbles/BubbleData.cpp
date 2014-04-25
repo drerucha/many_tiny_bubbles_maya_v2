@@ -39,6 +39,18 @@ void BubbleData::init( double scattering_frequency,
 
 	// populate m_radii_list
 	setRadii( size_min, size_max );
+
+
+	// TODO: this might be a dumb thing to do
+	// init m_pos_list and m_vel_list with empty std::vector<vec3>
+	// only perform this action once
+	if ( m_pos_list.size() == 0 ) {
+		for ( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
+			std::vector<vec3> empty_pos, empty_vel;
+			m_pos_list.push_back( empty_pos );
+			m_vel_list.push_back( empty_vel );
+		}
+	}
 }
 
 
@@ -88,23 +100,6 @@ void BubbleData::setRadii( const double& radius_min,
 	for ( unsigned int i = 0; i < segment; ++i ) {
 		double radius = l_radius_min * pow( BASE, ( double )i );
 		m_radii_list.push_back( radius );
-	}
-
-
-	// clear m_pos_list and m_vel_list vectors before pushing empty lists onto them
-	if ( m_pos_list.size() > 0 ) {
-		m_pos_list.clear();
-	}
-	if ( m_vel_list.size() > 0 ) {
-		m_vel_list.clear();
-	}
-
-	// TODO: this might be a dumb thing to do
-	// init m_pos_list and m_vel_list with empty std::vector<vec3>
-	for ( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
-		std::vector<vec3> empty_pos, empty_vel;
-		m_pos_list.push_back( empty_pos );
-		m_vel_list.push_back( empty_vel );
 	}
 }
 
