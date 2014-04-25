@@ -23,45 +23,14 @@ class ManyTinyBubbles : public MPxNode
 {
 
 ////////////////////////////////////////////////////
-// methods
+// structs
 ////////////////////////////////////////////////////
-
-public:
-
-	ManyTinyBubbles();
-
-	virtual ~ManyTinyBubbles();
-
-	virtual MStatus	compute( const MPlug& plug, MDataBlock& data );
-
-	static void* creator();
-
-	static MStatus initialize();
 
 private:
 
-// for debugging
-void testCode( const MString& str ) const;
-
-MStatus	createBubbles( const MTime& time, const float& step_size );
-
-void advectParticles( const float& dt );
-
-double computeScatteringProbabilityOfBubble( const vec3& bubble_vel, const vec3& bubble_pos ) const;
-
-double computeAlteredAngle( void ) const;
-
-vec3 updateBubbleVelocity( const vec3& old_vel, const double& altered_dir ) const;
-
-void splitBubble( const vec3&	current_pos,
-				  const double&	current_radius,
-				  vec3&			new_pos_1,
-				  vec3&			new_pos_2 ) const;
-
-
 struct BubbleLocator {
-	unsigned int radius_group;
-	unsigned int list_index;
+	unsigned int	radius_group;
+	unsigned int	list_index;
 
 	BubbleLocator( unsigned int i, unsigned int j )
 	{
@@ -71,9 +40,9 @@ struct BubbleLocator {
 };
 
 struct BubbleStruct {
-	vec3 pos;
-	vec3 vel;
-	unsigned int radius_group;
+	vec3			pos;
+	vec3			vel;
+	unsigned int	radius_group;
 
 	BubbleStruct( vec3 pos,
 				  vec3 vel,
@@ -85,18 +54,42 @@ struct BubbleStruct {
 	}
 };
 
-MStatus	simulationLoop( const MTime& time, const float& step_size ); // Danny was here
-unsigned int simulationSetup( const MTime& time ); // Danny was here
-void deleteEscapedBubbles( void ); // Danny was here
-void deleteBubblesInList( std::vector<BubbleLocator> bubbles_to_remove ); // Danny was here
-void generateMoreBubblesFromEmitter( void ); // Danny was here
-void computeFractionField( void ); // Danny was here
-void updateBubbleVelocities( void ); // Danny was here
-void breakupBubbles( void ); // Danny was here
-void reset(); // Danny was here
 
-// TODO: add method to delete bubbles given a vector of BubbleLocator structs
-// TODO: add method to add bubbles given a vector of BubbleStruct structs
+////////////////////////////////////////////////////
+// methods
+////////////////////////////////////////////////////
+
+public:
+
+	// necessary for Maya node
+						ManyTinyBubbles();
+	virtual				~ManyTinyBubbles();
+	virtual MStatus		compute( const MPlug& plug, MDataBlock& data );
+	static void*		creator();
+	static MStatus		initialize();
+
+private:
+
+	MStatus			simulationLoop( const MTime& time, const float& step_size );
+	unsigned int	simulationSetup( const MTime& time );
+	void			reset();
+
+	void			deleteEscapedBubbles( void );
+	void			deleteBubblesInList( std::vector<BubbleLocator> bubbles_to_remove );
+
+	void			generateMoreBubblesFromEmitter( void );
+
+	void			updateBubbleVelocities( void );
+	void			computeFractionField( void );
+	double			computeScatteringProbabilityOfBubble( const vec3& bubble_vel, const vec3& bubble_pos ) const;
+	double			computeAlteredAngle( void ) const;
+	vec3			computeBubbleVelAfterScattering( const vec3& old_vel, const double& altered_dir ) const;
+
+	void			breakupBubbles( void );
+	void			splitBubble( const vec3&	current_pos,
+								 const double&	current_radius,
+								 vec3&			new_pos_1,
+								 vec3&			new_pos_2 ) const;
 
 
 ////////////////////////////////////////////////////
@@ -106,31 +99,29 @@ void reset(); // Danny was here
 public:
 
 	// there must be an MObject handle declared for each attribute that the node will have
-
-	//static MObject input;
-	static MObject m_output;
-	static MObject m_time;
+	static MObject	m_output;
+	static MObject	m_time;
 	//static MObject m_emitter_mesh;
-	static MObject m_emitter_mesh_name;
-	static MObject m_fluid_container_name;
-	static MObject m_emission_rate;
-	static MObject m_scattering_frequency;
-	static MObject m_scattering_coefficient;
-	static MObject m_breakup_frequency;
-	static MObject m_bubble_size_min;
-	static MObject m_bubble_size_max;
-	static MObject m_step_size;
+	static MObject	m_emitter_mesh_name;
+	static MObject	m_fluid_container_name;
+	static MObject	m_emission_rate;
+	static MObject	m_scattering_frequency;
+	static MObject	m_scattering_coefficient;
+	static MObject	m_breakup_frequency;
+	static MObject	m_bubble_size_min;
+	static MObject	m_bubble_size_max;
+	static MObject	m_step_size;
 
 	// typeid is a unique 32bit indentifier that describes this node
-	static	MTypeId m_id;
+	static MTypeId	m_id;
 
 private:
 
-	BubbleData m_bubbles;
-	FluidContainerData m_fluid_container;
-	EmitterData m_emitter;
+	BubbleData			m_bubbles;
+	FluidContainerData	m_fluid_container;
+	EmitterData			m_emitter;
 
-	unsigned int m_current_frame;
+	unsigned int		m_current_frame;
 };
 
 #endif
