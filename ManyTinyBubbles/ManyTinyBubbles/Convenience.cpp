@@ -9,11 +9,11 @@
 ////////////////////////////////////////////////////
 // constructor / destructor
 ////////////////////////////////////////////////////
-Convenience::Convenience( void )
+Convenience::Convenience()
 {
 }
 
-Convenience::~Convenience( void )
+Convenience::~Convenience()
 {
 }
 

@@ -51,10 +51,10 @@ void BubbleData::setRadii( const double& radius_min,
 	// debug
 	Convenience::printInScriptEditor( MString( "in BubbleData::setRadii()" ) );
 
-	//// clear m_radii_list
-	//if ( m_radii_list.size() > 0 ) {
-	//	m_radii_list.clear();
-	//}
+	// clear m_radii_list
+	if ( m_radii_list.size() > 0 ) {
+		m_radii_list.clear();
+	}
 
 	//double diff = abs( radius_max - radius_min );
 	//double step = diff / ( NUM_RADII - 1 );
@@ -62,14 +62,6 @@ void BubbleData::setRadii( const double& radius_min,
 	//// fill m_radii_list
 	//for ( unsigned int i = 0; i < NUM_RADII; ++i ) {
 	//	m_radii_list.push_back( radius_min + step * i );
-	//}
-
-	//// TODO: this might be a dumb thing to do
-	//// init m_pos_list and m_vel_list with empty std::vector<vec3>
-	//for ( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
-	//	std::vector<vec3> empty_pos, empty_vel;
-	//	m_pos_list.push_back( empty_pos );
-	//	m_vel_list.push_back( empty_vel );
 	//}
 
 
@@ -96,6 +88,23 @@ void BubbleData::setRadii( const double& radius_min,
 	for ( unsigned int i = 0; i < segment; ++i ) {
 		double radius = l_radius_min * pow( BASE, ( double )i );
 		m_radii_list.push_back( radius );
+	}
+
+
+	// clear m_pos_list and m_vel_list vectors before pushing empty lists onto them
+	if ( m_pos_list.size() > 0 ) {
+		m_pos_list.clear();
+	}
+	if ( m_vel_list.size() > 0 ) {
+		m_vel_list.clear();
+	}
+
+	// TODO: this might be a dumb thing to do
+	// init m_pos_list and m_vel_list with empty std::vector<vec3>
+	for ( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
+		std::vector<vec3> empty_pos, empty_vel;
+		m_pos_list.push_back( empty_pos );
+		m_vel_list.push_back( empty_vel );
 	}
 }
 
@@ -334,6 +343,41 @@ void BubbleData::setVelocityAtIndex( const vec3& new_vel,
 
 
 ////////////////////////////////////////////////////
+// update bubble position at index using corresponding velocity
+////////////////////////////////////////////////////
+//void BubbleData::updatePosAtIndex( const unsigned int& i, const unsigned int& j )
+//{
+//	m_pos_list[i][j] += 
+//}
+
+
+////////////////////////////////////////////////////
+// performs explicit Euler integration to update all bubble positions using their velocities and the time step
+////////////////////////////////////////////////////
+void BubbleData::updateBubblePositions( const double& time_step )
+{
+	for ( unsigned int i = 0; i < m_pos_list.size(); ++i ) {
+		std::vector<vec3> sublist = m_pos_list[i];
+
+		for ( unsigned int j = 0; j < sublist.size(); ++j ) {
+			m_pos_list[i][j] += time_step * m_vel_list[i][j];
+		}
+	}
+}
+
+
+////////////////////////////////////////////////////
+// performs explicit Euler integration to update a single bubble's position using its velocity and the time step
+////////////////////////////////////////////////////
+void BubbleData::updateBubblePositionsAtIndex( const unsigned int& i,
+											   const unsigned int& j,
+											   const double& time_step )
+{
+	m_pos_list[i][j] += time_step * m_vel_list[i][j];
+}
+
+
+////////////////////////////////////////////////////
 // getters
 ////////////////////////////////////////////////////
 
@@ -370,6 +414,16 @@ double BubbleData::getBreakupFrequency() const
 std::vector<double> BubbleData::getRadiiList() const
 {
 	return m_radii_list;
+}
+
+vec3 BubbleData::getVelocityAtIndex( const unsigned int& i, const unsigned int& j ) const
+{
+	return m_vel_list[i][j];
+}
+
+vec3 BubbleData::getPosAtIndex( const unsigned int& i, const unsigned int& j ) const
+{
+	return m_pos_list[i][j];
 }
 
 //std::vector<vec3> BubbleData::getPosListForRadiusGroupAtIndex( const unsigned int& i ) const

@@ -321,6 +321,12 @@ void ManyTinyBubbles::computeFractionField()
 ////////////////////////////////////////////////////
 void ManyTinyBubbles::advectParticles( const float& dt )
 {
+	// TODO: change workflow here
+	// what I'm thinking:
+	//		- update all bubble velocities based on scattering and fluid velocity field
+	//		- perform explicit Euler integration to update bubble positions
+	//		- remove or adjust particles that "escape" from the fluid container
+
 	// debug
 	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::advectParticles()" ) );
 
@@ -347,8 +353,19 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 		for ( std::vector<vec3>::iterator inner_it = bubble_pos_sublist.begin() ; inner_it != bubble_pos_sublist.end(); ++inner_it ) {
 			vec3 bubble_pos = *inner_it;
 
+			// get indices of radius group and position within radius group
+			unsigned int radius_group_index = Convenience::getIndexFromIterator( outer_it, bubble_pos_list );
+			unsigned int pos_list_index = Convenience::getIndexFromIterator( inner_it, bubble_pos_sublist );
+
 			// TODO: get actual bubble velocity here instead of just the velocity of the voxel the bubble is in
-			vec3 bubble_vel = m_fluid_container.getVelocityOfVoxelAtPos( bubble_pos );
+			//vec3 bubble_vel = m_fluid_container.getVelocityOfVoxelAtPos( bubble_pos );
+
+			// TODO: tune this
+			// get stored velocity for bubble
+			vec3 prev_bubble_vel = m_bubbles.getVelocityAtIndex( radius_group_index, pos_list_index );
+			vec3 bubble_vel( 0.0,
+							 prev_bubble_vel.Length(),
+							 0.0 );
 
 			double scattering_probability = computeScatteringProbabilityOfBubble( bubble_vel, bubble_pos );
 
@@ -368,27 +385,33 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 
 
 
-			// TODO: update bubble position using the altered velocity
-			// TODO: update all bubble positions even if their velocity was not altered, probably
-			vec3 new_bubble_pos = bubble_pos;
+			// TODO: This is SUPER messy!  Please, please, please clean this shit up future me!
+			// TODO: tune this
+			// set altered velocity and then update bubble position
 
-			//vec3 velocityField(velocityArray[position_grid_X + position_grid_Y * CONTAINER_DIM_X + position_grid_Z * CONTAINER_DIM_X * CONTAINER_DIM_Y + 0],
-			//	            velocityArray[position_grid_X + position_grid_Y * CONTAINER_DIM_X + position_grid_Z * CONTAINER_DIM_X * CONTAINER_DIM_Y + 1],
-			//	            velocityArray[position_grid_X + position_grid_Y * CONTAINER_DIM_X + position_grid_Z * CONTAINER_DIM_X * CONTAINER_DIM_Y + 2]);
+			vec3 fluid_vel_at_voxel = m_fluid_container.getVelocityOfVoxelAtPos( bubble_pos );
+			vec3 new_bubble_vel = bubble_vel + fluid_vel_at_voxel + vec3( 0.0, 1.0, 0.0 );
 
-			//bubbleVelList[j][i] = velocity+ velocityField + vec3(0, 1, 0);
+			// check for terminal velocity
+			if ( new_bubble_vel.Length() > 5.0 ) {
+				new_bubble_vel = vec3( new_bubble_vel / new_bubble_vel.Length() * 5.0 );
+			}
 
-			// TODO: update bubble velocity in m_bubbles
+			m_bubbles.setVelocityAtIndex( new_bubble_vel,
+										  radius_group_index,
+										  pos_list_index );
+
+			m_bubbles.updateBubblePositionsAtIndex( radius_group_index,
+													pos_list_index,
+													dt );
+
+			vec3 new_bubble_pos = m_bubbles.getPosAtIndex( radius_group_index, pos_list_index );
 
 
 
 
 
 			// TODO: clean up everything below this point
-
-			// get indices of radius group and position within radius group
-			unsigned int radius_group_index = Convenience::getIndexFromIterator( outer_it, bubble_pos_list );
-			unsigned int pos_list_index = Convenience::getIndexFromIterator( inner_it, bubble_pos_sublist );
 
 			// if new bubble position escapes fluid container, then remove bubble from list
 			if ( m_fluid_container.posIsOutsideFluidContainer( new_bubble_pos ) ) {

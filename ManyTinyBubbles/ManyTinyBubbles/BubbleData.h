@@ -39,18 +39,17 @@ public:
 	double							getBreakupFrequency( void ) const;
 	std::vector<std::vector<vec3>>	getPosList( void ) const;
 	std::vector<double>				getRadiiList( void ) const;
+	vec3							getVelocityAtIndex( const unsigned int& i, const unsigned int& j ) const;
+	vec3							getPosAtIndex( const unsigned int& i, const unsigned int& j ) const;
 	//std::vector<vec3>				getPosListForRadiusGroupAtIndex( const unsigned int& i ) const;
 
-	void removeBubbleAtIndex( const unsigned int& i,
-							  const unsigned int& j );
-	void addBubblePosToRadiusGroupAtIndex( const vec3& pos,
-										   const unsigned int& i );
+	void removeBubbleAtIndex( const unsigned int& i, const unsigned int& j );
 
-	void addBubblePosToRadiusGroupAtIndex( std::vector<vec3>			pos_list,
-										   std::vector<unsigned int>	radius_group_index_list );
+	void addBubblePosToRadiusGroupAtIndex( const vec3& pos, const unsigned int& i );
 
-	void addBubbleVelToRadiusGroupAtIndex( std::vector<vec3>			vel_list,
-										   std::vector<unsigned int>	radius_group_index_list );
+	void addBubblePosToRadiusGroupAtIndex( std::vector<vec3> pos_list, std::vector<unsigned int> radius_group_index_list );
+
+	void addBubbleVelToRadiusGroupAtIndex( std::vector<vec3> vel_list, std::vector<unsigned int> radius_group_index_list );
 
 	void createMayaParticlesWithName( const std::string& particle_name ) const;
 
@@ -60,10 +59,16 @@ public:
 							 const unsigned int& i,
 							 const unsigned int& j );
 
+	//void updatePosAtIndex( const unsigned int& i, const unsigned int& j );
+
+	void updateBubblePositions( const double& time_step );
+	void updateBubblePositionsAtIndex( const unsigned int& i,
+									   const unsigned int& j,
+									   const double& time_step );
+
 private:
 
-	void setRadii( const double&	radius_min,
-				   const double&	radius_max );
+	void setRadii( const double& radius_min, const double& radius_max );
 
 	int checkIfParticleExists( const unsigned int& num ) const;
 	void deleteParticle( const unsigned int& num ) const;
