@@ -28,17 +28,18 @@ public:
 			   double size_max );
 
 	void deleteAllParticlesInMaya();
+
 	void reset();
 
 	// getters
-	unsigned int getNumRadii( void ) const;
-	double getRadiusAtIndex( const unsigned int& index ) const;
-	double getScatteringFrequency( void ) const;
-	double getScatteringCoefficient( void ) const;
-	double getBreakupFrequency( void ) const;
-	std::vector<std::vector<vec3>> getPosList( void ) const;
-	std::vector<double> getRadiiList( void ) const;
-	//std::vector<vec3> getPosListForRadiusGroupAtIndex( const unsigned int& i ) const;
+	unsigned int					getNumRadii( void ) const;
+	double							getRadiusAtIndex( const unsigned int& index ) const;
+	double							getScatteringFrequency( void ) const;
+	double							getScatteringCoefficient( void ) const;
+	double							getBreakupFrequency( void ) const;
+	std::vector<std::vector<vec3>>	getPosList( void ) const;
+	std::vector<double>				getRadiiList( void ) const;
+	//std::vector<vec3>				getPosListForRadiusGroupAtIndex( const unsigned int& i ) const;
 
 	void removeBubbleAtIndex( const unsigned int& i,
 							  const unsigned int& j );
@@ -47,10 +48,12 @@ public:
 
 	void addBubblePosToRadiusGroupAtIndex( std::vector<vec3>			pos_list,
 										   std::vector<unsigned int>	radius_group_index_list );
+
 	void addBubbleVelToRadiusGroupAtIndex( std::vector<vec3>			vel_list,
 										   std::vector<unsigned int>	radius_group_index_list );
 
 	void createMayaParticlesWithName( const std::string& particle_name ) const;
+
 	void setRadiiForMayaParticlesWithName( const std::string& particle_name ) const;
 
 	void setVelocityAtIndex( const vec3& new_vel,

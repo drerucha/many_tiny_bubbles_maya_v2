@@ -48,34 +48,54 @@ void BubbleData::init( double scattering_frequency,
 void BubbleData::setRadii( const double& radius_min,
 						   const double& radius_max )
 {
-	// TODO: add back logic that ensures bubble radii are generated so each bubble size it twice the volume of the size immediately smaller than it
-
 	// debug
 	Convenience::printInScriptEditor( MString( "in BubbleData::setRadii()" ) );
 
-	// clear m_radii_list
-	if ( m_radii_list.size() > 0 ) {
-		m_radii_list.clear();
+	//// clear m_radii_list
+	//if ( m_radii_list.size() > 0 ) {
+	//	m_radii_list.clear();
+	//}
+
+	//double diff = abs( radius_max - radius_min );
+	//double step = diff / ( NUM_RADII - 1 );
+
+	//// fill m_radii_list
+	//for ( unsigned int i = 0; i < NUM_RADII; ++i ) {
+	//	m_radii_list.push_back( radius_min + step * i );
+	//}
+
+	//// TODO: this might be a dumb thing to do
+	//// init m_pos_list and m_vel_list with empty std::vector<vec3>
+	//for ( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
+	//	std::vector<vec3> empty_pos, empty_vel;
+	//	m_pos_list.push_back( empty_pos );
+	//	m_vel_list.push_back( empty_vel );
+	//}
+
+
+	// generate possible bubble radii in such a way that each size up is twice the volume of the previous size
+
+	double l_radius_max = radius_max;
+	double l_radius_min = radius_min;
+
+	// ensure radius_max > radius_min
+	if ( l_radius_max < l_radius_min )
+	{
+		double tmp = l_radius_min;
+		l_radius_min = l_radius_max;
+		l_radius_max = tmp;
 	}
-
-	double diff = abs( radius_max - radius_min );
-	double step = diff / ( NUM_RADII - 1 );
-
-	// fill m_radii_list
-	for ( unsigned int i = 0; i < NUM_RADII; ++i ) {
-
-		// debug
-		//Convenience::printInScriptEditor( ( int )radius_min + step * (int)i );
-
-		m_radii_list.push_back( radius_min + step * i );
+	
+	unsigned int segment = 1;
+	while ( l_radius_max / l_radius_min >= 2.0 ) {
+		l_radius_max = l_radius_max / 2.0;
+		++segment;
 	}
-
-	// TODO: this might be a dumb thing to do
-	// init m_pos_list and m_vel_list with empty std::vector<vec3>
-	for ( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
-		std::vector<vec3> empty_pos, empty_vel;
-		m_pos_list.push_back( empty_pos );
-		m_vel_list.push_back( empty_vel );
+	
+	const double BASE = pow( 2.0, 1.0 / 3.0 );
+	for ( unsigned int i = 0; i < segment; ++i ) {
+		double radius = l_radius_min * pow( BASE, ( double )i );
+		m_radii_list.push_back( radius );
 	}
 }
 
