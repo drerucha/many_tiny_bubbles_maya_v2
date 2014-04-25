@@ -365,9 +365,23 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 			}
 			
 
+
+
+
 			// TODO: update bubble position using the altered velocity
 			// TODO: update all bubble positions even if their velocity was not altered, probably
 			vec3 new_bubble_pos = bubble_pos;
+
+			//vec3 velocityField(velocityArray[position_grid_X + position_grid_Y * CONTAINER_DIM_X + position_grid_Z * CONTAINER_DIM_X * CONTAINER_DIM_Y + 0],
+			//	            velocityArray[position_grid_X + position_grid_Y * CONTAINER_DIM_X + position_grid_Z * CONTAINER_DIM_X * CONTAINER_DIM_Y + 1],
+			//	            velocityArray[position_grid_X + position_grid_Y * CONTAINER_DIM_X + position_grid_Z * CONTAINER_DIM_X * CONTAINER_DIM_Y + 2]);
+
+			//bubbleVelList[j][i] = velocity+ velocityField + vec3(0, 1, 0);
+
+			// TODO: update bubble velocity in m_bubbles
+
+
+
 
 
 			// TODO: clean up everything below this point

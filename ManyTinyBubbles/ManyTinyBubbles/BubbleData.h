@@ -53,6 +53,9 @@ public:
 	void createMayaParticlesWithName( const std::string& particle_name ) const;
 	void setRadiiForMayaParticlesWithName( const std::string& particle_name ) const;
 
+	void setVelocityAtIndex( const unsigned int& i,
+							  const unsigned int& j );
+
 private:
 
 	void setRadii( const double&	radius_min,

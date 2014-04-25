@@ -63,6 +63,10 @@ void BubbleData::setRadii( const double& radius_min,
 
 	// fill m_radii_list
 	for ( unsigned int i = 0; i < NUM_RADII; ++i ) {
+
+		// debug
+		//Convenience::printInScriptEditor( ( int )radius_min + step * (int)i );
+
 		m_radii_list.push_back( radius_min + step * i );
 	}
 

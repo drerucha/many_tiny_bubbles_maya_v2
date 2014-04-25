@@ -304,6 +304,7 @@ global proc fill3dContainer( string $fluid_container, float $default_fluid_fill_
 	$cmd = $fluid_container + ".boundaryZ";
 	setAttr $cmd 1;
 
+	/*
 	// Auto Resize -> Auto Resize: On
 	$cmd = $fluid_container + ".autoResize";
 	setAttr $cmd 1;
@@ -319,6 +320,7 @@ global proc fill3dContainer( string $fluid_container, float $default_fluid_fill_
 	// Auto Resize -> Auto Resize Margin: 1 or greater
 	$cmd = $fluid_container + ".autoResizeMargin";
 	setAttr $cmd 1;
+	*/
 
 	// Surface -> Surface Render: On
 	$cmd = $fluid_container + ".surfaceRender";
