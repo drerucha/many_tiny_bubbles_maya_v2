@@ -28,6 +28,9 @@ void BubbleData::init( double scattering_frequency,
 					   double size_min,
 					   double size_max )
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in BubbleData::init()" ) );
+
 	m_scattering_frequency = scattering_frequency;
 	m_scattering_coefficient = scattering_coefficient;
 	m_breakup_frequency = breakup_frequency;
@@ -46,6 +49,9 @@ void BubbleData::setRadii( const double& radius_min,
 						   const double& radius_max )
 {
 	// TODO: add back logic that ensures bubble radii are generated so each bubble size it twice the volume of the size immediately smaller than it
+
+	// debug
+	Convenience::printInScriptEditor( MString( "in BubbleData::setRadii()" ) );
 
 	// clear m_radii_list
 	if ( m_radii_list.size() > 0 ) {
@@ -75,6 +81,9 @@ void BubbleData::setRadii( const double& radius_min,
 ////////////////////////////////////////////////////
 void BubbleData::deleteAllParticlesInMaya()
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in BubbleData::deleteAllParticlesInMaya()" ) );
+
 	// particles are separated into groups based on their radii
 	for ( unsigned int i = 1; i <= getNumRadii(); ++i ) {
 		int particle_exists = checkIfParticleExists( i );
@@ -90,6 +99,12 @@ void BubbleData::deleteAllParticlesInMaya()
 ////////////////////////////////////////////////////
 int BubbleData::checkIfParticleExists( const unsigned int& num ) const
 {
+	// TODO: change "bubbleParticle" to be the constant string set in ManyTinyBubblesNode
+	// maybe make the name a member variable of BubbleData
+
+	// debug
+	Convenience::printInScriptEditor( MString( "in BubbleData::checkIfParticleExists()" ) );
+
 	std::string cmd = "particleExists bubbleParticle";
 	Convenience::appendNumToStdString( cmd, num );
 	cmd += ";";
@@ -106,6 +121,12 @@ int BubbleData::checkIfParticleExists( const unsigned int& num ) const
 ////////////////////////////////////////////////////
 void BubbleData::deleteParticle( const unsigned int& num ) const
 {
+	// TODO: change "bubbleParticle" to be the constant string set in ManyTinyBubblesNode
+	// maybe make the name a member variable of BubbleData
+
+	// debug
+	Convenience::printInScriptEditor( MString( "in BubbleData::deleteParticle()" ) );
+
 	std::string cmd = "select -replace bubbleParticle";
 	Convenience::appendNumToStdString( cmd, num );
 	cmd += ";";
@@ -122,6 +143,9 @@ void BubbleData::reset()
 {
 	// TODO: iterate through outer std::vectors and clear inner std::vectors before clearing the outer one
 
+	// debug
+	Convenience::printInScriptEditor( MString( "in BubbleData::reset()" ) );
+
 	m_pos_list.clear();
 	m_vel_list.clear();
 	m_radii_list.clear();
@@ -137,6 +161,9 @@ void BubbleData::removeBubbleAtIndex( const unsigned int& i,
 {
 	// TODO: test this
 
+	// debug
+	Convenience::printInScriptEditor( MString( "in BubbleData::removeBubbleAtIndex()" ) );
+
 	// m_pos_list is std::vector<std::vector<vec3>>
 	std::vector<vec3> pos_list = m_pos_list[i];
 	m_pos_list.at( i ).erase( pos_list.begin() + j );
@@ -151,6 +178,9 @@ void BubbleData::addBubblePosToRadiusGroupAtIndex( const vec3& pos,
 {
 	// TODO: test this
 
+	// debug
+	Convenience::printInScriptEditor( MString( "in BubbleData::addBubblePosToRadiusGroupAtIndex()" ) );
+
 	// m_pos_list is std::vector<std::vector<vec3>>
 	m_pos_list.at( i ).push_back( pos );
 }
@@ -163,6 +193,9 @@ void BubbleData::addBubblePosToRadiusGroupAtIndex( std::vector<vec3>			pos_list,
 												   std::vector<unsigned int>	radius_group_index_list )
 {
 	// TODO: test this
+
+	// debug
+	Convenience::printInScriptEditor( MString( "in BubbleData::addBubblePosToRadiusGroupAtIndex()" ) );
 
 	if ( pos_list.size() != radius_group_index_list.size() ) {
 		Convenience::printInScriptEditor( MString( "ERROR: vectors are not same size in BubbleData::addBubblePosToRadiusGroupAtIndex" ) );
@@ -184,6 +217,9 @@ void BubbleData::addBubbleVelToRadiusGroupAtIndex( std::vector<vec3>			vel_list,
 {
 	// TODO: test this
 
+	// debug
+	Convenience::printInScriptEditor( MString( "in BubbleData::addBubbleVelToRadiusGroupAtIndex()" ) );
+
 	if ( vel_list.size() != radius_group_index_list.size() ) {
 		Convenience::printInScriptEditor( MString( "ERROR: vectors are not same size in BubbleData::addBubbleVelToRadiusGroupAtIndex" ) );
 	}
@@ -201,6 +237,9 @@ void BubbleData::addBubbleVelToRadiusGroupAtIndex( std::vector<vec3>			vel_list,
 ////////////////////////////////////////////////////
 void BubbleData::createMayaParticlesWithName( const std::string& particle_name ) const
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in BubbleData::createMayaParticlesWithName()" ) );
+
 	for ( unsigned int radius_group_index = 0; radius_group_index < m_pos_list.size(); ++radius_group_index ) {
 		std::vector<vec3> bubble_pos_list = m_pos_list.at( radius_group_index );
 
@@ -236,6 +275,9 @@ void BubbleData::createMayaParticlesWithName( const std::string& particle_name )
 ////////////////////////////////////////////////////
 void BubbleData::setRadiiForMayaParticlesWithName( const std::string& particle_name ) const
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in BubbleData::setRadiiForMayaParticlesWithName()" ) );
+
 	for ( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
 		std::string object_name = particle_name;
 		Convenience::appendNumToStdString( object_name, i + 1 );

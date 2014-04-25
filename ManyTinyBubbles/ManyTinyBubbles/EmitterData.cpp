@@ -31,6 +31,9 @@ EmitterData::~EmitterData()
 ////////////////////////////////////////////////////
 void EmitterData::init( MString name )
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in EmitterData::init()" ) );
+
 	m_name = name;
 }
 

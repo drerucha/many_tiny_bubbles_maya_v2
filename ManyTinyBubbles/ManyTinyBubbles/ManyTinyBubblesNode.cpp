@@ -88,7 +88,7 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 	// TODO: arrange output attribute in such a way that Maya recomputes it when I want it to
 
 	// debug
-	//Convenience::printInScriptEditor( MString( "in compute()" ) );
+	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::compute()" ) );
 
 	MStatus returnStatus;
 
@@ -98,10 +98,6 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 	////////////////////////////////////////////////////
 
 	if ( plug == ManyTinyBubbles::m_output ) {
-
-		// debug
-		//Convenience::printInScriptEditor( MString( "recomputing stuff" ) );
-
 
 		////////////////////////////////////////////////////
 		// get handles to input attribute we will need for computation
@@ -181,15 +177,15 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			m_emitter.init( emitter_mesh_name_val );
 
 
-			// TODO: get bubble emitter attributes
+			// TODO: get primitive emitter center/location
 
 
 			////////////////////////////////////////////////////
 			// create bubbles
 			////////////////////////////////////////////////////
 
-			//createBubbles( time_val,
-			//			   step_size_val );
+			createBubbles( time_val,
+						   step_size_val );
 
 
 			////////////////////////////////////////////////////
@@ -224,6 +220,9 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 										const float& step_size )
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::createBubbles()" ) );
+
 	// ensure frame_num is not zero 
 	unsigned int frame_num = ( unsigned int )time.as( MTime::kFilm );
 	if ( frame_num == 0 ) {
@@ -238,6 +237,9 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 
 	// delete all particles in Maya
 	m_bubbles.deleteAllParticlesInMaya();
+
+	// debug
+	return MS::kSuccess;
 
 	// simulate ( frame_num - m_current_frame ) frames starting from current m_current_frame
 	for ( unsigned int i = 0; i < frame_num - m_current_frame; ++i ) {
@@ -287,6 +289,9 @@ MStatus ManyTinyBubbles::createBubbles( const MTime& time,
 ////////////////////////////////////////////////////
 void ManyTinyBubbles::computeFractionField()
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::computeFractionField()" ) );
+
 	// set fraction field value at each voxel to 1.0f
 	m_fluid_container.resetFractionField();
 
@@ -316,6 +321,9 @@ void ManyTinyBubbles::computeFractionField()
 ////////////////////////////////////////////////////
 void ManyTinyBubbles::advectParticles( const float& dt )
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::advectParticles()" ) );
+
 	// update velocity field to match the Maya fluid
 	m_fluid_container.updateVelocityField();
 
@@ -438,6 +446,9 @@ void ManyTinyBubbles::advectParticles( const float& dt )
 double ManyTinyBubbles::computeScatteringProbabilityOfBubble( const vec3& bubble_vel,
 															  const vec3& bubble_pos ) const
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::computeScatteringProbabilityOfBubble()" ) );
+
 	double voxel_vel_magnitude = bubble_vel.Length();
 	double fraction_field = m_fluid_container.getFractionFieldOfVoxelAtPos( bubble_pos );
 
@@ -450,6 +461,9 @@ double ManyTinyBubbles::computeScatteringProbabilityOfBubble( const vec3& bubble
 ////////////////////////////////////////////////////
 double ManyTinyBubbles::computeAlteredAngle() const
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::computeAlteredAngle()" ) );
+
 	double uniform_random_num = Convenience::generateRandomDoubleBetweenZeroAndOneInclusive();
 	double numerator = 2.0 * uniform_random_num + m_bubbles.getScatteringCoefficient() - 1.0;
 	double denominator = 2.0 * m_bubbles.getScatteringCoefficient() * uniform_random_num - m_bubbles.getScatteringCoefficient() + 1.0;
@@ -474,6 +488,9 @@ double ManyTinyBubbles::computeAlteredAngle() const
 vec3 ManyTinyBubbles::updateBubbleVelocity( const vec3&		old_vel,
 											const double&	altered_dir ) const
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::updateBubbleVelocity()" ) );
+
 	vec3 new_vel;
 
 	// create a random axis to rotate around using quaternions
@@ -553,6 +570,9 @@ void ManyTinyBubbles::splitBubble( const vec3&		current_pos,
 								   vec3&			new_pos_1,
 								   vec3&			new_pos_2 ) const
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::splitBubble()" ) );
+
 	// random angle for use when generating initial positions of new bubbles formed from split
 	double phi = Convenience::generateRandomDoubleInclusive( 0.0, 2.0 ) * M_PI;
 
@@ -584,7 +604,7 @@ void ManyTinyBubbles::splitBubble( const vec3&		current_pos,
 void* ManyTinyBubbles::creator()
 {
 	// debug
-	//Convenience::printInScriptEditor( MString( "in creator()" ) );
+	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::creator()" ) );
 
 	return new ManyTinyBubbles();
 }
@@ -597,7 +617,7 @@ void* ManyTinyBubbles::creator()
 MStatus ManyTinyBubbles::initialize()	
 {
 	// debug
-	//Convenience::printInScriptEditor( MString( "in initialize()" ) );
+	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::initialize()" ) );
 
 
 	////////////////////////////////////////////////////
@@ -771,13 +791,18 @@ MStatus ManyTinyBubbles::initialize()
 }
 
 
+////////////////////////////////////////////////////
+// reset
+////////////////////////////////////////////////////
 void ManyTinyBubbles::reset()
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::reset()" ) );
+
 	m_bubbles.reset();
 
-	// TODO: set fraction field to some default value
-	// TODO: allow fraction field to handle voxels that aren't squares
-	//mFractionField.initialize(1.0f, m_fluid_container_cell_size_x, m_fluid_container_dim_x, m_fluid_container_dim_y, m_fluid_container_dim_z); // set default fraction field 
+	// set fraction field value at each voxel to 1.0f
+	m_fluid_container.resetFractionField();
 }
 
 
@@ -786,6 +811,9 @@ void ManyTinyBubbles::reset()
 ////////////////////////////////////////////////////
 void ManyTinyBubbles::testCode( const MString& str  ) const
 {
+	// debug
+	Convenience::printInScriptEditor( MString( "in ManyTinyBubbles::testCode()" ) );
+
 	//MDoubleArray velocity_field = Convenience::getVelocityFieldFromMayaFluid( str );
 
 	//std::string to_print = "velocity_field size: ";
