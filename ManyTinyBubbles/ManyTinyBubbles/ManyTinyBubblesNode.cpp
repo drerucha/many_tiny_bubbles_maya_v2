@@ -11,11 +11,7 @@
 
 // TODO: add if defines to all classes
 // TODO: change all floats to doubles b/c I think they're faster on x86 architecture
-// TODO: should bubbles have their own velocity members?
-// TODO: create an EmitterData class to complement the BubbleData class
 // TODO: alter node to allow multiple bubble emitter sources
-// TODO: think about moving EmitterData logic into BubbleData logic
-// TODO: initialize m_pos_list and m_vel_list in BubbleData to ensure lists always exist to add to when generating bubbles
 // TODO: index vectors using [] instead of at() b/c it seems faster
 
 
@@ -195,8 +191,7 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 ////////////////////////////////////////////////////
 // simulationLoop()
 ////////////////////////////////////////////////////
-MStatus	ManyTinyBubbles::simulationLoop( const MTime& time,
-										 const float& step_size )
+MStatus	ManyTinyBubbles::simulationLoop( const MTime& time, const float& step_size )
 {
 	// cleanup before simulation
 	unsigned int requested_frame = simulationSetup( time );
@@ -416,23 +411,38 @@ void ManyTinyBubbles::computeFractionField()
 	m_fluid_container.resetFractionField();
 
 	// get positions for every bubble present in the simulation
-	std::vector<std::vector<vec3>> bubble_pos_list = m_bubbles.getPosList();
+	//std::vector<std::vector<vec3>> bubble_pos_list = m_bubbles.getPosList();
 
-	// iterate through the bubble radius groups
-	unsigned int radius_index = 0;
-	for ( std::vector<std::vector<vec3>>::iterator outer_it = bubble_pos_list.begin() ; outer_it != bubble_pos_list.end(); ++outer_it ) {
-		std::vector<vec3> bubble_pos_sublist = *outer_it;
+	// loop through radius groups
+	unsigned int num_radius_groups = m_bubbles.getNumRadiusGroups();
+	for ( unsigned int radius_group_index = 0; radius_group_index < num_radius_groups; ++radius_group_index ) {
 
-		// iterate through the list of vec3s in the current radius group
-		for ( std::vector<vec3>::iterator inner_it = bubble_pos_sublist.begin() ; inner_it != bubble_pos_sublist.end(); ++inner_it ) {
-			vec3 bubble_pos = *inner_it;
+		// loop through bubbles in the current radius group
+		unsigned int num_bubbles_in_list = m_bubbles.getNumBubblesInListWithIndex( radius_group_index );
+		for ( unsigned int bubble_index = 0; bubble_index < num_bubbles_in_list; ++bubble_index ) {
 
 			// reduce fraction field of the voxel the current bubble is inside
-			m_fluid_container.reduceFractionFieldOfVoxelAtPos( bubble_pos, m_bubbles.getRadiusAtIndex( radius_index ) );
-		}
+			vec3 bubble_pos = m_bubbles.getPosAtIndex( radius_group_index, bubble_index );
 
-		++radius_index;
+			m_fluid_container.reduceFractionFieldOfVoxelAtPos( bubble_pos, m_bubbles.getRadiusAtIndex( radius_group_index ) );
+		}
 	}
+
+	//// iterate through the bubble radius groups
+	//unsigned int radius_index = 0;
+	//for ( std::vector<std::vector<vec3>>::iterator outer_it = bubble_pos_list.begin() ; outer_it != bubble_pos_list.end(); ++outer_it ) {
+	//	std::vector<vec3> bubble_pos_sublist = *outer_it;
+
+	//	// iterate through the list of vec3s in the current radius group
+	//	for ( std::vector<vec3>::iterator inner_it = bubble_pos_sublist.begin() ; inner_it != bubble_pos_sublist.end(); ++inner_it ) {
+	//		vec3 bubble_pos = *inner_it;
+
+	//		// reduce fraction field of the voxel the current bubble is inside
+	//		m_fluid_container.reduceFractionFieldOfVoxelAtPos( bubble_pos, m_bubbles.getRadiusAtIndex( radius_index ) );
+	//	}
+
+	//	++radius_index;
+	//}
 }
 
 
@@ -490,7 +500,7 @@ vec3 ManyTinyBubbles::computeBubbleVelAfterScattering( const vec3& old_vel, cons
 	vec3 rotation_axis( 1.0, 0.0, 0.0 );
 					
 	// if velocity[VZ] == 0, then the computation of rotation_axis_z will divide by zero
-	if ( old_vel[VZ] > -DBL_EPSILON && old_vel[VZ] < DBL_EPSILON ) {
+	if ( old_vel[VZ] < -DBL_EPSILON || old_vel[VZ] > DBL_EPSILON ) {
 
 		// generate random numbers for x and y components [-1, 1] so that they are not both 0
 		do {
@@ -501,7 +511,7 @@ vec3 ManyTinyBubbles::computeBubbleVelAfterScattering( const vec3& old_vel, cons
 
 		rotation_axis[VZ] = -1.0 * ( rotation_axis[VX] * old_vel[VX] + rotation_axis[VY] * old_vel[VY] ) / old_vel[VZ];
 	}
-	else if ( old_vel[VY] > -DBL_EPSILON && old_vel[VY] < DBL_EPSILON ) {
+	else if ( old_vel[VY] < -DBL_EPSILON || old_vel[VY] > DBL_EPSILON ) {
 
 		// generate random numbers for x and z components [-1, 1] so that they are not both 0
 		do {
@@ -512,7 +522,7 @@ vec3 ManyTinyBubbles::computeBubbleVelAfterScattering( const vec3& old_vel, cons
 
 		rotation_axis[VZ] = -1.0 * ( rotation_axis[VX] * old_vel[VX] + rotation_axis[VZ] * old_vel[VZ] ) / old_vel[VY];
 	}
-	else if ( old_vel[VX] > -DBL_EPSILON && old_vel[VX] < DBL_EPSILON ) {
+	else if ( old_vel[VX] < -DBL_EPSILON || old_vel[VX] > DBL_EPSILON ) {
 
 		// generate random numbers for y and z components [-1, 1] so that they are not both 0
 		do {
