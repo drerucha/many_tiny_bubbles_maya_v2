@@ -41,14 +41,14 @@ public:
 					   double	&valueP1,
 					   double	&valueP2 );
 
-	void createObjFile( std::string fileName,
-						std::vector<vec3> marchingCubePointList,
-						std::vector<std::vector<int>> triangleList );
+	//void createObjFile( std::string fileName,
+	//					std::vector<vec3> marchingCubePointList,
+	//					std::vector<std::vector<int>> triangleList );
 
-	int getSourcePosListSize( void );
+	//int getSourcePosListSize( void );
 
-	void deleteTheCurrentSceneEmitterMeshs( void );
-	void createObjFileFromStoredMeshData( void );
+	//void deleteTheCurrentSceneEmitterMeshs( void );
+	//void createObjFileFromStoredMeshData( void );
 
 private:
 	//MString m_name;
