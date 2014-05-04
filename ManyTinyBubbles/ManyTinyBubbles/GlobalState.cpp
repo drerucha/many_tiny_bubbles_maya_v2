@@ -34,7 +34,7 @@ void GlobalState::setSelectedObject( std::string name )
 {
 	// if the name has been stored in the selectObjectArray, then skip it
 	for ( unsigned int i = 0; i < m_select_object_array.size(); ++i ) {
-		string nameOnList = m_select_object_array[i];
+		std::string nameOnList = m_select_object_array[i];
 		if ( nameOnList == name ) {
 			return;
 		}
@@ -49,8 +49,8 @@ void GlobalState::setSelectedObject( std::string name )
 void GlobalState::deleteSelectedObject( std::string name )
 {
 	int i = 0;
-	for ( vector<string>::iterator iter = m_select_object_array.begin(); iter != m_select_object_array.end(); ++i, ++iter ) {
-		string nameOnList = m_select_object_array[i];
+	for ( std::vector<std::string>::iterator iter = m_select_object_array.begin(); iter != m_select_object_array.end(); ++i, ++iter ) {
+		std::string nameOnList = m_select_object_array[i];
 		if ( nameOnList == name ) {
 			m_select_object_array.erase( iter );
 			break;
@@ -95,7 +95,7 @@ void GlobalState::storePointList( std::vector<vec3> list )
 ///////////////////////////////////////////////////////////////////
 // get point lists for all mesh emitters
 ///////////////////////////////////////////////////////////////////
-vector<vector<vec3>> GlobalState::getStoredPointList()
+std::vector<std::vector<vec3>> GlobalState::getStoredPointList()
 {
 	return m_initial_mesh_point_list;
 }
@@ -145,7 +145,7 @@ void GlobalState::storeFluidTransformName( std::string name)
 	m_fluid_transform_name = name;
 }
 
-string GlobalState::getFluidTransformName()
+std::string GlobalState::getFluidTransformName()
 {
 	return m_fluid_transform_name;
 }

@@ -83,7 +83,7 @@ MStatus AddEmitterMeshCmd::doIt( const MArgList& args )
 			// create and store face list
 			////////////////////////////////////////////////////
 
-			vector<int> face_list;
+			std::vector<int> face_list;
 			for ( unsigned int i = 0; i < triangle_vertex_num; i += 3 ) {
 				face_list.push_back( triangle_vertex_indices[i] + 1 );
 				face_list.push_back( triangle_vertex_indices[i + 1] + 1 );
@@ -98,7 +98,7 @@ MStatus AddEmitterMeshCmd::doIt( const MArgList& args )
 			// create and store vertex list
 			////////////////////////////////////////////////////
 
-			vector<vec3> vert_list;
+			std::vector<vec3> vert_list;
 
 			MFloatPointArray mesh_vertices;
 			mesh_surface.getPoints(mesh_vertices, MSpace::kWorld);

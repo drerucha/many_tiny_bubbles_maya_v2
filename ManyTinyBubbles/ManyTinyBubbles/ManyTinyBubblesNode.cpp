@@ -913,7 +913,7 @@ void ManyTinyBubbles::storeMeshInfoByName( MString emitter_mesh_name ) const
 	// create vertex list
 	////////////////////////////////////////////////////
 
-	vector<vec3> vert_list;
+	std::vector<vec3> vert_list;
 
 	MFloatPointArray mesh_vertices;
 	mesh_surface.getPoints(mesh_vertices, MSpace::kWorld);

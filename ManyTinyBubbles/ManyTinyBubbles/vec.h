@@ -29,7 +29,7 @@
 #include <assert.h>
 #include <cmath>
 
-using namespace std;
+//using namespace std;
 
 enum {VX, VY, VZ, VW};		    // axes
 enum {PA, PB, PC, PD};		    // planes
@@ -172,7 +172,7 @@ const vec3 axisY(0.0f, 1.0f, 0.0f);
 const vec3 axisZ(0.0f, 0.0f, 1.0f);
 const vec3 vec3Zero(0.0f, 0.0f, 0.0f);
 
-inline ostream& operator << (ostream& ostrm, const vec3& v)
+inline std::ostream& operator << ( std::ostream& ostrm, const vec3& v )
 {
    ostrm << "(" << v[0] << ", " << v[1] << ", " << v[2] << ") ";
    return ostrm;

@@ -258,7 +258,7 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 
 			
 			// debug
-			Convenience::printInScriptEditor( "just before melting" );
+			Convenience::printInScriptEditor( "melting start" );
 
 			// TODO: should probably move this melting logic into its own method
 
@@ -293,7 +293,7 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 				////////////////////////////////////////////////////
 
 				// debug
-				Convenience::printInScriptEditor( "just before calling marching cube function" );
+				Convenience::printInScriptEditor( "before calling marching cube function" );
 
 				for ( unsigned int z = 0 ; z < sizes[2] - 1; ++z ) {
 					for ( unsigned int y = 0 ; y < sizes[1] - 1; ++y ) {
@@ -312,7 +312,7 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 				}
 
 				// debug
-				Convenience::printInScriptEditor( "just after calling marching cube function" );
+				Convenience::printInScriptEditor( "after calling marching cube function" );
 
 
 				////////////////////////////////////////////////////
@@ -324,15 +324,21 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 				if ( bounding_box_max_length > m_min_bubble_radius ) {
 					std::string newMeshNameStr;
 
+					// debug
+					Convenience::printInScriptEditor( "before computing new mesh name" );
+
 					if ( Convenience::stringHasEnding( Convenience::convertMStringToStdString( strSelectObjName ), "_melltingmesh_Mesh" ) ) {
 						std::string initialName = Convenience::convertMStringToStdString( strSelectObjName );
 						newMeshNameStr = initialName.substr( 0, initialName.length() - 18 ) + "_melltingmesh";
 					}
 					else {
-						newMeshNameStr  = Convenience::convertMStringToStdString( strSelectObjName ) + "_melltingmesh";
+						newMeshNameStr = Convenience::convertMStringToStdString( strSelectObjName ) + "_melltingmesh";
 					}
 					
 					MString newMeshNameMStr = newMeshNameStr.c_str();
+
+					// debug
+					Convenience::printInScriptEditor( "after computing new mesh name" );
 					
 					MString fileNameMStr = mllPath + "/" + newMeshNameMStr + ".obj";
 					std::string fileNameStr = fileNameMStr.asChar();
@@ -349,6 +355,9 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 					// import new obj
 					MGlobal::executeCommand( importObj );
 
+					// debug
+					Convenience::printInScriptEditor( "before deleting obj file" );
+
 					// delete the created obj file
 					std::string deleteFilePath;
 					if ( Convenience::stringHasEnding( Convenience::convertMStringToStdString( strSelectObjName ), "_melltingmesh_Mesh" ) ) {
@@ -360,27 +369,44 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 
 					DeleteFile( deleteFilePath.c_str() );
 
+					// debug
+					Convenience::printInScriptEditor( "after deleting obj file" );
+
 					// delete the old stored mesh's name
 					GlobalState::deleteSelectedObject( Convenience::convertMStringToStdString(strSelectObjName) );
 
+					// debug
+					Convenience::printInScriptEditor( "before applying shaders" );
+
 					if ( Convenience::stringHasEnding( Convenience::convertMStringToStdString( strSelectObjName ), "_melltingmesh_Mesh" ) ) {
+
+						// debug
+						Convenience::printInScriptEditor( "if string has ending..." );
+
 						GlobalState::setSelectedObject( Convenience::convertMStringToStdString( strSelectObjName ) );
 
 						// apply shader to our new emitter mesh
-						MGlobal::executeCommand( "select -r " + strSelectObjName );
-						MGlobal::executeCommand( "sets -e -forceElement " + emitterMeshMaterial );
+						//MGlobal::executeCommand( "select -r " + strSelectObjName );
+						//MGlobal::executeCommand( "sets -e -forceElement " + emitterMeshMaterial );
 					}
 					else {
+
+						// debug
+						Convenience::printInScriptEditor( "if string does not have ending..." );
+
 						GlobalState::setSelectedObject( Convenience::convertMStringToStdString( strSelectObjName ) + "_melltingmesh_Mesh" );
 
 						// apply shader to our new emitter mesh
-						MGlobal::executeCommand( "select -r " + strSelectObjName + "_melltingmesh_Mesh" );
-						MGlobal::executeCommand( "sets -e -forceElement " + emitterMeshMaterial );
+						//MGlobal::executeCommand( "select -r " + strSelectObjName + "_melltingmesh_Mesh" );
+						//MGlobal::executeCommand( "sets -e -forceElement " + emitterMeshMaterial );
 					}
+
+					// debug
+					Convenience::printInScriptEditor( "after applying shaders" );
 				}
 				else {
 					// debug
-					Convenience::printInScriptEditor( "just before deleting old mesh" );
+					Convenience::printInScriptEditor( "before deleting old mesh" );
 
 					// delete old mesh
 					MGlobal::executeCommand( "delete " + strSelectObjName );
@@ -490,29 +516,14 @@ void EmitterData::generateBubbles( const std::vector<double>&	bubble_radii_list,
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ////////////////////////////////////////////////////
 // EmitterData::createObjFile()
 ////////////////////////////////////////////////////
 void EmitterData::createObjFile( std::string fileName,
 								 std::vector<vec3> marchingCubePointList,
-								 std::vector<vector<int>> triangleList)
+								 std::vector<std::vector<int>> triangleList)
 {
-	ofstream outfile( fileName.c_str() );
+	std::ofstream outfile( fileName.c_str() );
 
 	for ( unsigned int i = 0; i < marchingCubePointList.size(); ++i ) {
 		outfile << "v " << marchingCubePointList[i][0] << " " << marchingCubePointList[i][1] << " " << marchingCubePointList[i][2] << std::endl;
@@ -1020,7 +1031,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else if(indexY == 0)
 		{
 			int vertexIndex = (indexZ-1) * meshResX  * meshResY + indexX;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[0] = temp2[4];
 			//edge[0] = temp[vertexIndex][4];
 			pointList_eachgrid.push_back(edge[0]);
@@ -1028,7 +1039,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else if(indexZ == 0)
 		{
 			int vertexIndex = (indexY-1) * meshResX + indexX;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[0] = temp2[2];
 			//edge[0] = temp[vertexIndex][2];
 			pointList_eachgrid.push_back(edge[0]);
@@ -1036,7 +1047,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else
 		{
 			int vertexIndex = (indexZ-1) * meshResX  * meshResY + (indexY-1) * meshResX + indexX;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[0] = temp2[6];
 			//edge[0] = temp[vertexIndex][6];
 			pointList_eachgrid.push_back(edge[0]);
@@ -1058,7 +1069,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else
 		{
 			int vertexIndex = (indexZ-1) * meshResX  * meshResY + indexY * meshResX + indexX;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[1] = temp2[5];
 			//edge[1] = temp[vertexIndex][5];
 			pointList_eachgrid.push_back(edge[1]);
@@ -1080,7 +1091,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else
 		{
 			int vertexIndex = (indexZ-1) * meshResX  * meshResY + indexY * meshResX + indexX;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[2] = temp2[6];
 			//edge[2] = temp[vertexIndex][6];
 			pointList_eachgrid.push_back(edge[2]);
@@ -1102,7 +1113,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else if(indexX == 0)
 		{
 			int vertexIndex = (indexZ-1) * meshResX  * meshResY + indexY * meshResX;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[3] = temp2[7];
 			//edge[3] = temp[vertexIndex][7];
 			pointList_eachgrid.push_back(edge[3]);
@@ -1110,7 +1121,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else if(indexZ == 0)
 		{
 			int vertexIndex = indexY * meshResX + indexX-1;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[3] = temp2[1];
 			//edge[3] = temp[vertexIndex][1];
 			pointList_eachgrid.push_back(edge[3]);
@@ -1118,7 +1129,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else
 		{
 			int vertexIndex = (indexZ-1) * meshResX  * meshResY + indexY * meshResX + indexX-1;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[3] = temp2[5];
 			//edge[3] = temp[vertexIndex][5];
 			pointList_eachgrid.push_back(edge[3]);
@@ -1140,7 +1151,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else
 		{
 			int vertexIndex = indexZ * meshResX  * meshResY + (indexY-1) * meshResX + indexX;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[4] = temp2[6];
 			//edge[4] = temp[vertexIndex][6];
 			pointList_eachgrid.push_back(edge[4]);
@@ -1184,7 +1195,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else
 		{
 			int vertexIndex = indexZ * meshResX  * meshResY + indexY * meshResX + indexX-1;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[7] = temp2[5];
 			//edge[7] = temp[vertexIndex][5];
 			pointList_eachgrid.push_back(edge[7]);
@@ -1206,7 +1217,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else if(indexX == 0)
 		{
 			int vertexIndex = indexZ * meshResX  * meshResY + (indexY-1) * meshResX;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[8] = temp2[11];
 			//edge[8] = temp[vertexIndex][11];
 			pointList_eachgrid.push_back(edge[8]);
@@ -1214,7 +1225,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else if(indexY == 0)
 		{
 			int vertexIndex = indexZ * meshResX  * meshResY + indexX-1;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[8] = temp2[9];
 			//edge[8] = temp[vertexIndex][9];
 			pointList_eachgrid.push_back(edge[8]);
@@ -1222,7 +1233,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else
 		{
 			int vertexIndex = indexZ * meshResX  * meshResY + (indexY-1) * meshResX + indexX-1;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[8] = temp2[10];
 			//edge[8] = temp[vertexIndex][10];
 			pointList_eachgrid.push_back(edge[8]);
@@ -1244,7 +1255,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else
 		{
 			int vertexIndex = indexZ * meshResX  * meshResY + (indexY-1) * meshResX + indexX;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[9] = temp2[10];
 			//edge[9] = temp[vertexIndex][10];
 			pointList_eachgrid.push_back(edge[9]);
@@ -1277,7 +1288,7 @@ int EmitterData::marchingCube( double							&isolevel,
 		else
 		{
 			int vertexIndex = indexZ * meshResX  * meshResY + indexY * meshResX + indexX-1;
-			vector<int> temp2 = temp->at(vertexIndex);
+			std::vector<int> temp2 = temp->at(vertexIndex);
 			edge[11] = temp2[10];
 			//edge[11] = temp[vertexIndex][10];
 			pointList_eachgrid.push_back(edge[11]);
@@ -1295,7 +1306,7 @@ int EmitterData::marchingCube( double							&isolevel,
 
 	for (int i = 0; triTable[cubeindex][i] != -1; i+=3) 
 	{
-		vector<int> triangle;
+		std::vector<int> triangle;
 		triangle.push_back(edge[triTable[cubeindex][i  ]]);
 		triangle.push_back(edge[triTable[cubeindex][i+1]]);
 		triangle.push_back(edge[triTable[cubeindex][i+2]]);

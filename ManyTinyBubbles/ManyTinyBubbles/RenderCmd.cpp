@@ -151,7 +151,7 @@ MStatus RenderCmd::doIt( const MArgList& args )
 	////////////////////////////////////////////////////
 
 	// set render type to mental ray
-	string renderType = ( std::string )"setAttr " + '\"' + ( std::string )"defaultRenderGlobals.currentRenderer" + '\"' + ( std::string )" -type " + '\"' + ( std::string )"string" + '\"' +" "+ '\"'+ ( std::string )"mentalRay"+ '\"';
+	std::string renderType = ( std::string )"setAttr " + '\"' + ( std::string )"defaultRenderGlobals.currentRenderer" + '\"' + ( std::string )" -type " + '\"' + ( std::string )"string" + '\"' +" "+ '\"'+ ( std::string )"mentalRay"+ '\"';
 	char *renderTypeChar = ( char* )renderType.c_str();
 	MString strRenderType = renderTypeChar;
 	MGlobal::executeCommand( strRenderType );
@@ -198,7 +198,7 @@ MStatus RenderCmd::doIt( const MArgList& args )
 		ss >> frameIndex;
 		ss.clear();
 
-		string saveRender = ( std::string )"renderWindowSaveImageCallback " + '\"' + ( std::string )"renderView" + '\"' + " " + '\"' + savePath + "/Image_" + frameCount + '\"' + " "+ '\"'+ ( std::string )"JPEG"+ '\"';
+		std::string saveRender = ( std::string )"renderWindowSaveImageCallback " + '\"' + ( std::string )"renderView" + '\"' + " " + '\"' + savePath + "/Image_" + frameCount + '\"' + " "+ '\"'+ ( std::string )"JPEG"+ '\"';
 		
 		MString strSaveRender = ( char* )saveRender.c_str();
 		MString strFrameIndex = ( char* )frameIndex.c_str();
