@@ -52,8 +52,8 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 
 	// get all selected mesh names
 	std::vector<std::string> selectedObjectNames = GlobalState::getSelectedObject();
-	for(int objectCount= 0 ; objectCount< selectedObjectNames.size(); objectCount++)
-	{
+	for ( int objectCount = 0; objectCount< selectedObjectNames.size(); ++objectCount ) {
+
 		// retrieve the selected mesh object
 		MString strSelectObjName = ( char* )selectedObjectNames[objectCount].c_str();
 
@@ -185,14 +185,12 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 				bounding_box_max_length = bounding_box_size_z;
 			}
 
-
 			// compute reasonable dx for computing level sets
 			// dx represents the level set resolution
 			float bounding_box_volume = bounding_box_size_x * bounding_box_size_y * bounding_box_size_z;
 			float voxel_volume = bounding_box_volume / voxel_num; // voxel_num is a method argument
 			//float dx = pow( voxel_volume, ( 1.0f / 3.0f ) );
 			m_level_set_dx = pow( voxel_volume, ( 1.0f / 3.0f ) );
-
 
 			// add padding around bounding box
 			Vec3f unit( 1.0f, 1.0f, 1.0f );
@@ -267,9 +265,9 @@ void EmitterData::generateBubbles( const std::vector<double>&	bubble_radii_list,
 								   std::vector<vec3>&			new_bubble_velocities,
 								   std::vector<unsigned int>&	new_bubble_radius_group ) const
 {
-	// TODO: remove this condition b/c both meshes and spheres should fill up m_source_pos_list
 	// TODO: make bubble generate rate dependent on user-defined emission rate
 
+	int total_bubbles_per_frame = m_emission_rate;
 	const vec3 INITIAL_BUBBLE_VELOCITY( 0.0, 1.0, 0.0 );
 
 	// if emitter is a mesh
@@ -278,42 +276,67 @@ void EmitterData::generateBubbles( const std::vector<double>&	bubble_radii_list,
 		// iterate through bubble radius groups
 		for ( unsigned int k = 0; k < bubble_radii_list.size(); ++k ) {
 
-			// iterate through every available emission position
-			for ( unsigned int i = 0; i < m_source_pos_list.size(); ++i ) {
+			// divide the total bubbles per frame with frame number, and round the result
+			unsigned int bubbles_in_this_radii = ( int )std::floor( ( float )total_bubbles_per_frame / ( ( float )bubble_radii_list.size() - k ) + 0.5f );
+			total_bubbles_per_frame -= bubbles_in_this_radii;
 
-				// generate bubbles randomly so every available emission position in m_source_pos_list is not "filled" every frame
-				// generate random number [1, 10] and generate a bubble 20% of the time
-				double random_num = Convenience::generateRandomIntInclusive( 1, 10 );
-				if ( random_num > 8 ) {
-					new_bubble_positions.push_back( m_source_pos_list[i] );
-					new_bubble_velocities.push_back( INITIAL_BUBBLE_VELOCITY );
-					new_bubble_radius_group.push_back( k );
-				}
+			if ( bubbles_in_this_radii == 0 ) {
+				continue;
 			}
-		}
-	}
-	// if emitter is a sphere
-	else {
-		for ( unsigned int k = 0; k < bubble_radii_list.size(); ++k ) {
-			for ( unsigned int i = 0; i < 180 ; i += 20 ) {
-				for ( unsigned int j = 0; j < 360 ; j += 20 ) {
 
-					// generate random number [1, 10] and generate a bubble 50% of the time
-					double random_num = Convenience::generateRandomIntInclusive( 1, 10 );
-					if ( random_num > 5 ) {
-						double theta = ( double ) i / 180.0 * M_PI;
-						double phi = ( double ) j / 180.0 * M_PI;
+			// if the bubbles in this radius group are more than the source postions
+			if ( bubbles_in_this_radii > m_source_pos_list.size() ) {
 
-						double bubble_pos_x = m_sphere_center[VX] + m_sphere_radius * sin( theta ) * cos( phi );
-						double bubble_pos_y = m_sphere_center[VY] + m_sphere_radius * cos( theta );
-						double bubble_pos_z = m_sphere_center[VZ] + m_sphere_radius * sin( theta ) * sin( phi );
+				// iterate through every available emission position
+				for ( unsigned int i = 0; i < m_source_pos_list.size(); ++i ) {
 
-						new_bubble_positions.push_back( vec3( bubble_pos_x,
-															  bubble_pos_y,
-															  bubble_pos_z ) );
+					// compute the bubbles in each position and round the number
+					unsigned int bubbles_per_position = ( int )std::floor( ( float )bubbles_in_this_radii / ( float )m_source_pos_list.size() + 0.5f ) ;
+					bubbles_in_this_radii -= bubbles_per_position;
+
+					// each position has multiple bubbles, so iterate to generate bubbles
+					for ( unsigned int p = 0; p < bubbles_per_position; ++p ) {
+						vec3 bubble_position = m_source_pos_list[i];
+
+						double random_num_x = Convenience::generateRandomDoubleInclusive( -0.5, 0.5 );
+						double random_num_y = Convenience::generateRandomDoubleInclusive( -0.5, 0.5 );
+						double random_num_z = Convenience::generateRandomDoubleInclusive( -0.5, 0.5 );
+
+						// jitter the position
+						bubble_position += vec3( m_level_set_dx * random_num_x,
+												 m_level_set_dx * random_num_y,
+												 m_level_set_dx * random_num_z );
+
+						new_bubble_positions.push_back( bubble_position );
 						new_bubble_velocities.push_back( INITIAL_BUBBLE_VELOCITY );
 						new_bubble_radius_group.push_back( k );
 					}
+				}
+
+			}
+			// if the bubbles in this radius group are less than the source postions
+			else {
+
+				// iterate through every available emission position
+				// but because the postions are more than the bubbles, bubbles are generated on period positions
+				for ( unsigned int i = 0; i < bubbles_in_this_radii; ++i ) {
+
+					//get random index from the total position list
+					int position_index = Convenience::generateRandomIntInclusive( 0, ( int )m_source_pos_list.size() - 1 );
+					vec3 bubble_position = m_source_pos_list[position_index];
+
+					double random_num_x = Convenience::generateRandomDoubleInclusive( -0.5, 0.5 );
+					double random_num_y = Convenience::generateRandomDoubleInclusive( -0.5, 0.5 );
+					double random_num_z = Convenience::generateRandomDoubleInclusive( -0.5, 0.5 );
+
+					// jitter the position
+					bubble_position += vec3( m_level_set_dx * random_num_x,
+											 m_level_set_dx * random_num_y,
+											 m_level_set_dx * random_num_z );
+
+					new_bubble_positions.push_back( bubble_position );
+					new_bubble_velocities.push_back( INITIAL_BUBBLE_VELOCITY );
+					new_bubble_radius_group.push_back( k );
 				}
 			}
 		}
