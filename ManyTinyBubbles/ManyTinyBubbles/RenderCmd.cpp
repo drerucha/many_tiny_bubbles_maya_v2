@@ -162,15 +162,12 @@ MStatus RenderCmd::doIt( const MArgList& args )
 	std::string savePath = "";
 	int folderNum = 1;
 
-	// TODO: uncomment the do-while condition after adding dirExists() to Convenience class
-
 	do {
 		savePath = Convenience::convertMStringToStdString(mllPath) + "/Render_Image_";
 		Convenience::appendNumToStdString(savePath, folderNum);
 		folderNum++;
 	}
-	//while( Convenience::dirExists( savePath ) );
-	while( true );
+	while( Convenience::dirExists( savePath ) );
 
 	mkdir( savePath.c_str() );
 

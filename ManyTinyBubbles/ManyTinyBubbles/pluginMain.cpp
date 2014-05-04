@@ -10,7 +10,9 @@
 
 #include <maya/MFnPlugin.h>
 #include <maya/MGlobal.h>
+
 #include "Convenience.h"
+#include "RenderCmd.h"
 
 
 //
@@ -38,11 +40,11 @@ MStatus initializePlugin( MObject obj )
     //    return status;
     //}
 
-    //status = plugin.registerCommand( "RenderSequentialImagesCmd", RenderSequentialImagesCmd::creator );
-    //if (!status) {
-    //    status.perror("registerCommand");
-    //    return status;
-    //}
+    status = plugin.registerCommand( "RenderCmd", RenderCmd::creator );
+    if ( !status ) {
+        status.perror( "registerCommand" );
+        return status;
+    }
 
 
 	////////////////////////////////////////////////////
@@ -84,6 +86,9 @@ MStatus initializePlugin( MObject obj )
 	command = "source \"" + mel_filepath + "/create3dContainerWithEmitter.mel\";";
 	MGlobal::executeCommand( command );
 
+	command = "source \"" + mel_filepath + "/render.mel\";";
+	MGlobal::executeCommand( command );
+
 	return status;
 }
 
@@ -121,12 +126,12 @@ MStatus uninitializePlugin( MObject obj )
 	//	status.perror( "deregisterCommand" );
 	//	return status;
 	//}
-	//
-	//status = plugin.deregisterCommand( "RenderSequentialImagesCmd" );
-	//if ( !status ) {
-	//	status.perror( "deregisterCommand" );
-	//	return status;
-	//}
+	
+	status = plugin.deregisterCommand( "RenderCmd" );
+	if ( !status ) {
+		status.perror( "deregisterCommand" );
+		return status;
+	}
 
 
 	////////////////////////////////////////////////////

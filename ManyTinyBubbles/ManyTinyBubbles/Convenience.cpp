@@ -309,3 +309,38 @@ unsigned int Convenience::getIndexFromIterator( std::vector<std::vector<vec3>>::
 {
 	return ( int )( it - vec.begin() );
 }
+
+
+////////////////////////////////////////////////////
+// stringHasEnding()
+////////////////////////////////////////////////////
+bool Convenience::stringHasEnding( std::string const &full_string, std::string const &ending )
+{
+    if ( full_string.length() >= ending.length() ) {
+        return ( 0 == full_string.compare( full_string.length() - ending.length(), ending.length(), ending ) );
+    }
+	else {
+        return false;
+    }
+}
+
+////////////////////////////////////////////////////
+// dirExists()
+////////////////////////////////////////////////////
+bool Convenience::dirExists( const std::string& dir_name )
+{
+	DWORD ftyp = GetFileAttributesA( dir_name.c_str() );
+
+	if ( ftyp == INVALID_FILE_ATTRIBUTES ) {
+		// something is wrong with the path
+		return false;
+	}
+
+	if ( ftyp & FILE_ATTRIBUTE_DIRECTORY ) {
+		// this is a directory
+		return true;
+	}
+
+	// this is not a directory
+	return false;
+}

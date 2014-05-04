@@ -66,4 +66,10 @@ public:
 	static unsigned int getIndexFromIterator( std::vector<double>::iterator it, std::vector<double> vec );
 	static unsigned int getIndexFromIterator( std::vector<vec3>::iterator it, std::vector<vec3> vec );
 	static unsigned int getIndexFromIterator( std::vector<std::vector<vec3>>::iterator it, std::vector<std::vector<vec3>> vec );
+
+	// string compare
+	static bool stringHasEnding( std::string const &full_string, std::string const &ending );
+
+	// folder path exists
+	static bool dirExists( const std::string &dir_name );
 };
