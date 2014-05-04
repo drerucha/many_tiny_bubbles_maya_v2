@@ -49,6 +49,11 @@ void Convenience::printInScriptEditor( std::string std_string )
 	MGlobal::displayInfo( convertStdStringToMString( std_string ) );
 }
 
+void Convenience::printInScriptEditor( char *char_ptr )
+{
+	printInScriptEditor( MString( char_ptr ) );
+}
+
 void Convenience::printInScriptEditor( const int& value_to_print )
 {
 	std::string string_to_print = "";

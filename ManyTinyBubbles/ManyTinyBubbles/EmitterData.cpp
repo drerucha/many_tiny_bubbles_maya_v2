@@ -56,6 +56,9 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 	// TODO: fill m_source_pos_list directly instead of filling source_pos_list and copying
 	// TODO: break this method up into multiple smaller methods b/c it's too long and difficult to work in
 
+	// debug
+	Convenience::printInScriptEditor( "start" );
+
 	// list of possible bubble generation locations on mesh
 	std::vector<vec3> source_pos_list;
 
@@ -253,6 +256,9 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 				}
 			}
 
+			
+			// debug
+			Convenience::printInScriptEditor( "just before melting" );
 
 			// TODO: should probably move this melting logic into its own method
 
@@ -286,6 +292,9 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 				// call marching cube method
 				////////////////////////////////////////////////////
 
+				// debug
+				Convenience::printInScriptEditor( "just before calling marching cube function" );
+
 				for ( unsigned int z = 0 ; z < sizes[2] - 1; ++z ) {
 					for ( unsigned int y = 0 ; y < sizes[1] - 1; ++y ) {
 						for ( unsigned int x = 0 ; x < sizes[0] - 1; ++x ) {
@@ -301,6 +310,9 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 						}
 					}
 				}
+
+				// debug
+				Convenience::printInScriptEditor( "just after calling marching cube function" );
 
 
 				////////////////////////////////////////////////////
@@ -367,6 +379,9 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 					}
 				}
 				else {
+					// debug
+					Convenience::printInScriptEditor( "just before deleting old mesh" );
+
 					// delete old mesh
 					MGlobal::executeCommand( "delete " + strSelectObjName );
 					GlobalState::deleteSelectedObject( Convenience::convertMStringToStdString( strSelectObjName ) );
@@ -381,6 +396,9 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 	// copy source_pos_list into the m_source_pos_list member variable
 	m_source_pos_list.clear();
 	m_source_pos_list = source_pos_list;
+
+	// debug
+	Convenience::printInScriptEditor( "end" );
 }
 
 

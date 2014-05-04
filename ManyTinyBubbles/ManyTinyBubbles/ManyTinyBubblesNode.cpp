@@ -254,14 +254,14 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			////////////////////////////////////////////////////
 
 			data.setClean( plug );
+
+			// select Many Tiny Bubbles node
+			MGlobal::executeCommand( "select -replace " + node_name_val );
 		}
 	}
 	else {
 		return MS::kUnknownParameter;
 	}
-
-	// select Many Tiny Bubbles node
-	MGlobal::executeCommand( "select -replace CreateBubbleNode1" );
 
 	return MS::kSuccess;
 }

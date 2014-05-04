@@ -23,6 +23,7 @@ public:
 	// print in Maya's script editor
 	static void printInScriptEditor( MString mstring );
 	static void printInScriptEditor( std::string std_string );
+	static void printInScriptEditor( char *char_ptr );
 	static void printInScriptEditor( const int& value_to_print );
 	static void printInScriptEditor( const float& value_to_print );
 
