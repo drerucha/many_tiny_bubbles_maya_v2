@@ -59,6 +59,12 @@ MObject ManyTinyBubbles::m_bubble_size_min;
 MObject ManyTinyBubbles::m_bubble_size_max;
 MObject ManyTinyBubbles::m_step_size;
 
+MObject ManyTinyBubbles::m_fluid_transform_name;
+MObject ManyTinyBubbles::m_node_name;
+MObject ManyTinyBubbles::m_melting_rate;
+MObject ManyTinyBubbles::m_level_set_resolution;
+MObject ManyTinyBubbles::m_simulation_status;
+
 
 ////////////////////////////////////////////////////
 // constructor/destructor
@@ -662,7 +668,7 @@ void* ManyTinyBubbles::creator()
 // initialize(): called to create and initialize all attributes and attribute dependencies for this node type;
 //				 only called once when the node type is registered with Maya
 ////////////////////////////////////////////////////
-MStatus ManyTinyBubbles::initialize()	
+MStatus ManyTinyBubbles::initialize()
 {
 	////////////////////////////////////////////////////
 	// create attributes
@@ -765,6 +771,35 @@ MStatus ManyTinyBubbles::initialize()
 	nAttr.setWritable( true );
  	nAttr.setKeyable( true );
 
+	ManyTinyBubbles::m_fluid_transform_name = tAttr.create( "fluid_transform_name", "ftn", MFnData::kString );
+ 	tAttr.setStorable( true );
+    tAttr.setWritable( false );
+	tAttr.setStorable( false );
+
+	ManyTinyBubbles::m_node_name = tAttr.create( "node_name", "nn", MFnData::kString );
+ 	tAttr.setStorable( true );
+    tAttr.setWritable( false );
+	tAttr.setStorable( false );
+
+	ManyTinyBubbles::m_melting_rate = nAttr.create( "melting_rate", "mr", MFnNumericData::kFloat, 0 );
+	nAttr.setMin( 0 );
+	nAttr.setMax( 20 );
+ 	nAttr.setStorable( true );
+	nAttr.setWritable( true );
+ 	nAttr.setKeyable( true );
+
+	ManyTinyBubbles::m_level_set_resolution = nAttr.create( "level_set_resolution", "lsr", MFnNumericData::kInt, 1000 );
+	nAttr.setMin( 100 );
+	nAttr.setMax( 10000 );
+ 	nAttr.setStorable( true );
+	nAttr.setWritable( true );
+ 	nAttr.setKeyable( true );
+
+	ManyTinyBubbles::m_simulation_status = nAttr.create( "simulation_statue", "st", MFnNumericData::kInt, 0 );
+ 	nAttr.setStorable( true );
+	nAttr.setWritable( true );
+ 	nAttr.setKeyable( true );
+
 
 	////////////////////////////////////////////////////
 	// add attributes to node
@@ -795,6 +830,16 @@ MStatus ManyTinyBubbles::initialize()
 	stat = addAttribute( ManyTinyBubbles::m_step_size );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
 
+	stat = addAttribute( ManyTinyBubbles::m_fluid_transform_name );
+		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
+	stat = addAttribute( ManyTinyBubbles::m_node_name );
+		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
+	stat = addAttribute( ManyTinyBubbles::m_melting_rate );
+		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
+	stat = addAttribute( ManyTinyBubbles::m_level_set_resolution );
+		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
+	// m_simulation_status
+
 
 	////////////////////////////////////////////////////
 	// setup dependencies between attributes
@@ -823,230 +868,15 @@ MStatus ManyTinyBubbles::initialize()
 	stat = attributeAffects( ManyTinyBubbles::m_step_size, ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
 
+	stat = attributeAffects( ManyTinyBubbles::m_fluid_transform_name, ManyTinyBubbles::m_output );
+		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
+	stat = attributeAffects( ManyTinyBubbles::m_node_name, ManyTinyBubbles::m_output );
+		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
+	stat = attributeAffects( ManyTinyBubbles::m_melting_rate, ManyTinyBubbles::m_output );
+		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
+	stat = attributeAffects( ManyTinyBubbles::m_level_set_resolution, ManyTinyBubbles::m_output );
+		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
+	// m_simulation_status
+
 	return MS::kSuccess;
 }
-
-
-
-
-
-////////////////////////////////////////////////////
-// createBubbles()
-////////////////////////////////////////////////////
-//MStatus ManyTinyBubbles::createBubbles( const MTime& time,
-//										const float& step_size )
-//{
-//	// ensure frame_num is not zero 
-//	unsigned int frame_num = ( unsigned int )time.as( MTime::kFilm );
-//	if ( frame_num == 0 ) {
-//		frame_num = 1;
-//	}
-//
-//	// if the user wants a previously simulated frame, then we must run the simulation from the very beginning
-//	if ( frame_num < m_current_frame ) {
-//		reset();
-//		m_current_frame = 0;
-//	}
-//
-//	// delete all particles in Maya
-//	m_bubbles.deleteAllParticlesInMaya();
-//
-//	// simulate ( frame_num - m_current_frame ) frames starting from current m_current_frame
-//	for ( unsigned int i = 0; i < frame_num - m_current_frame; ++i ) {
-//		computeFractionField();
-//
-//		// TODO: set fluid density
-//		//setDensity( "fluid1" );
-//
-//		advectParticles( step_size );
-//
-//		m_emitter.createEmissionPositionsOnMesh( EMITTER_LEVEL_SET_RES,
-//												 EMITTER_MELTING_RATE );
-//
-//		// generate bubbles
-//		std::vector<vec3> new_bubble_positions;
-//		std::vector<vec3> new_bubble_velocities;
-//		std::vector<unsigned int> new_bubble_radius_group;
-//		m_emitter.generateBubbles( m_bubbles.getRadiiList(),
-//								   new_bubble_positions,
-//								   new_bubble_velocities,
-//								   new_bubble_radius_group );
-//
-//		// add new bubble positions and velocities to m_bubbles
-//		m_bubbles.addBubblePosToRadiusGroupAtIndex( new_bubble_positions, new_bubble_radius_group );
-//		m_bubbles.addBubbleVelToRadiusGroupAtIndex( new_bubble_velocities, new_bubble_radius_group );
-//	}
-//
-//	m_current_frame = frame_num;
-//
-//	// create particle group in Maya
-//	m_bubbles.createMayaParticlesWithName( MAYA_PARTICLE_NAME );
-//
-//	// set particle radii in Maya
-//	m_bubbles.setRadiiForMayaParticlesWithName( MAYA_PARTICLE_NAME );
-//
-//	// TODO: ask why we're selecting the node
-//	//MGlobal::executeCommand("select -r CreateBubbleNode1");
-//
-//	// TODO: maybe create a dummy mesh if the program doesn't work without one?
-//
-//	return MS::kSuccess;
-//}
-
-
-////////////////////////////////////////////////////
-// main simulation loop
-////////////////////////////////////////////////////
-//void ManyTinyBubbles::advectParticles( const float& dt )
-//{
-//	// TODO: change workflow here
-//	// what I'm thinking:
-//	//		- update all bubble velocities based on scattering and fluid velocity field
-//	//		- perform explicit Euler integration to update bubble positions
-//	//		- remove or adjust particles that "escape" from the fluid container
-//
-//	// update velocity field to match the Maya fluid
-//	m_fluid_container.updateVelocityField();
-//
-//	// get positions for every bubble present in the simulation
-//	std::vector<std::vector<vec3>> bubble_pos_list = m_bubbles.getPosList();
-//
-//	// TODO: find a more elegant way to store data for updating bubble list after iteration than vectors of vec2s and vec4s
-//
-//	// list of bubble indices to remove from lists after iteration is complete
-//	// indices map to bubbles that either escape fluid container or are split into two smaller bubbles
-//	std::vector<vec2> indices_of_bubbles_to_remove;
-//
-//	// list of positions and radius group indices for new bubbles created when bubbles split
-//	std::vector<vec4> new_bubble_data_list;
-//
-//	// iterate through the bubble radius groups
-//	for ( std::vector<std::vector<vec3>>::iterator outer_it = bubble_pos_list.begin() ; outer_it != bubble_pos_list.end(); ++outer_it ) {
-//		std::vector<vec3> bubble_pos_sublist = *outer_it;
-//
-//		// iterate through the list of vec3s in the current radius group
-//		for ( std::vector<vec3>::iterator inner_it = bubble_pos_sublist.begin() ; inner_it != bubble_pos_sublist.end(); ++inner_it ) {
-//			vec3 bubble_pos = *inner_it;
-//
-//			// get indices of radius group and position within radius group
-//			unsigned int radius_group_index = Convenience::getIndexFromIterator( outer_it, bubble_pos_list );
-//			unsigned int pos_list_index = Convenience::getIndexFromIterator( inner_it, bubble_pos_sublist );
-//
-//			// TODO: get actual bubble velocity here instead of just the velocity of the voxel the bubble is in
-//			//vec3 bubble_vel = m_fluid_container.getVelocityOfVoxelAtPos( bubble_pos );
-//
-//			// TODO: tune this
-//			// get stored velocity for bubble
-//			vec3 prev_bubble_vel = m_bubbles.getVelocityAtIndex( radius_group_index, pos_list_index );
-//			vec3 bubble_vel( 0.0,
-//							 prev_bubble_vel.Length(),
-//							 0.0 );
-//
-//			double scattering_probability = computeScatteringProbabilityOfBubble( bubble_vel, bubble_pos );
-//
-//			// bubble will scatter, so alter bubble direction
-//			if ( scattering_probability > Convenience::generateRandomDoubleBetweenZeroAndOneInclusive() ) {
-//				double altered_angle = computeAlteredAngle();
-//
-//				// altered angle is not zero, so update bubble velocity direction
-// 				if ( altered_angle < -DBL_EPSILON || altered_angle > DBL_EPSILON ) {
-//
-//					// update bubble velocity due to scattering
-//					bubble_vel = updateBubbleVelocity( bubble_vel, altered_angle );
-//				}
-//			}
-//			
-//
-//
-//
-//
-//			// TODO: This is SUPER messy!  Please, please, please clean this shit up future me!
-//			// TODO: tune this
-//			// set altered velocity and then update bubble position
-//
-//			vec3 fluid_vel_at_voxel = m_fluid_container.getVelocityOfVoxelAtPos( bubble_pos );
-//			vec3 new_bubble_vel = bubble_vel + fluid_vel_at_voxel + vec3( 0.0, 1.0, 0.0 );
-//
-//			// check for terminal velocity
-//			if ( new_bubble_vel.Length() > 5.0 ) {
-//				new_bubble_vel = vec3( new_bubble_vel / new_bubble_vel.Length() * 5.0 );
-//			}
-//
-//			m_bubbles.setVelocityAtIndex( new_bubble_vel,
-//										  radius_group_index,
-//										  pos_list_index );
-//
-//			m_bubbles.updateBubblePositionsAtIndex( radius_group_index,
-//													pos_list_index,
-//													dt );
-//
-//			vec3 new_bubble_pos = m_bubbles.getPosAtIndex( radius_group_index, pos_list_index );
-//
-//
-//
-//
-//
-//			// TODO: clean up everything below this point
-//
-//			// if new bubble position escapes fluid container, then remove bubble from list
-//			if ( m_fluid_container.posIsOutsideFluidContainer( new_bubble_pos ) ) {
-//
-//				// TODO: if bubble escapes in the x, z, or -y directions, just push them back into the container
-//				// TODO: only remove bubbles that have reached the water surface
-//
-//				// mark escaped bubble to be removed instead of mutating data structure in middle of iterating
-//				indices_of_bubbles_to_remove.push_back( vec2( radius_group_index, pos_list_index ) );
-//			}
-//			else {
-//
-//				// bubble wants to split
-//				if ( m_bubbles.getBreakupFrequency() > Convenience::generateRandomDoubleBetweenZeroAndOneInclusive() ) {
-//
-//					// bubble cannot split because it is a member of the smallest radius group
-//					if ( radius_group_index > 0 ) {
-//
-//						// compute new positions for two new bubbles created from split bubble
-//						vec3 new_pos_1, new_pos_2;
-//						splitBubble( new_bubble_pos,
-//									 m_bubbles.getRadiusAtIndex( radius_group_index ),
-//									 new_pos_1,
-//									 new_pos_2 );
-//
-//						new_bubble_data_list.push_back( vec4( new_pos_1[VX],
-//														new_pos_1[VY],
-//														new_pos_1[VZ],
-//														radius_group_index - 1 ) );
-//						new_bubble_data_list.push_back( vec4( new_pos_2[VX],
-//														new_pos_2[VY],
-//														new_pos_2[VZ],
-//														radius_group_index - 1 ) );
-//
-//						// mark bubble that just split to be removed from bubble list
-//						indices_of_bubbles_to_remove.push_back( vec2( radius_group_index, pos_list_index ) );
-//					}
-//				}
-//			}
-//		}
-//	}
-//
-//	// remove escaped bubbles from list
-//	for ( std::vector<vec2>::iterator it = indices_of_bubbles_to_remove.begin() ; it != indices_of_bubbles_to_remove.end(); ++it ) {
-//		vec2 bubble_index = *it;
-//		m_bubbles.removeBubbleAtIndex( ( int )bubble_index[VX],
-//									   ( int )bubble_index[VY] );
-//	}
-//
-//	// add new bubbles to list
-//	for ( std::vector<vec4>::iterator it = new_bubble_data_list.begin(); it != new_bubble_data_list.end(); ++it ) {
-//		vec4 new_bubble_data = *it;
-//
-//		vec3 split_bubble_pos( new_bubble_data[VX],
-//							   new_bubble_data[VY],
-//							   new_bubble_data[VZ] );
-//
-//		int radius_group_index = ( int )new_bubble_data[VW];
-//
-//		m_bubbles.addBubblePosToRadiusGroupAtIndex( split_bubble_pos,
-//													radius_group_index );
-//	}
-//}
