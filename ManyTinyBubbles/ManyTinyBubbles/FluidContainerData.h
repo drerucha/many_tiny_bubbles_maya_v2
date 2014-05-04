@@ -34,17 +34,15 @@ public:
 	//double getFractionFieldAtXYZ( const unsigned int& x, const unsigned int& y, const unsigned int& z ) const;
 	//void setFractionFieldAtXYZ( const float& val, const unsigned int& x, const unsigned int& y, const unsigned int& z );
 
-	bool posIsOutsideFluidContainer( const vec3& pos ) const;
-
-	void prepareFluidMeshForLevelSetMethod( MString fluid_polygon_name );
-
-	//bool posIsOutsideFluidLevel_Density( const vec3& pos ) const;
-	//bool posIsOutsideFluidLevel_LevelSet( const vec3& pos ) const;
-	//int posIsUnderBoundary( const vec3& pos ) const;
-	//void updateFluidLevelSetDistanceFunction( MString fluid_polygon_name ) const;
-	//void updateDensityField();
-	//double getDensityOfVoxelAtPos( const vec3& pos ) const;
-	//double getDistanceFunctionOfVoxelAtPos( const vec3& pos ) const;
+	bool	posIsOutsideFluidContainer				( const vec3& pos ) const;
+	void	prepareFluidMeshForLevelSetMethod		( MString fluid_polygon_name );
+	bool	isPosOutsideFluidViaDensity				( const vec3& pos ) const;
+	double	getDensityOfVoxelAtPos					( const vec3& pos ) const;
+	bool	isPosOutsideFluidViaLevelSet			( const vec3& pos ) const;
+	int		posIsUnderBoundary						( const vec3& pos ) const;
+	double	getDistanceFunctionOfVoxelAtPos			( const vec3& pos ) const;
+	void	updateLevelSetSignedDistanceFunction	( MString fluid_polygon_name ) const;
+	void	updateDensityField						( void );
 
 private:
 
