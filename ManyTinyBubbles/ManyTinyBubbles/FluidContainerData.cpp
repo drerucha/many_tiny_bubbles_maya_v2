@@ -213,3 +213,91 @@ bool FluidContainerData::posIsOutsideFluidContainer( const vec3& pos ) const
 		return false;
 	}
 }
+
+
+
+#include <maya/MItSelectionList.h>
+//#include <maya/MGlobal.h>
+#include <maya/MDagPath.h>
+//#include <maya/MFnDependencyNode.h>
+#include <maya/MFnMesh.h>
+#include <maya/MFloatPointArray.h>
+
+////////////////////////////////////////////////////
+// prepareFluidMeshForLevelSetMethod()
+////////////////////////////////////////////////////
+void FluidContainerData::prepareFluidMeshForLevelSetMethod( MString fluid_polygon_name )
+{
+	////////////////////////////////////////////////////
+	// first, get Maya mesh object from mesh name
+	////////////////////////////////////////////////////
+
+	// select Maya object by name
+	MSelectionList maya_sel_list;
+	MGlobal::getSelectionListByName( fluid_polygon_name, maya_sel_list );
+
+	// get path to a mesh DAG node
+	MDagPath dag_node_path;
+	maya_sel_list.getDagPath( 0, dag_node_path );
+
+	// if dag_node_path points to a transform node instead of a shape node, try to extend the DAG path to reach a shape node
+	bool node_has_shape = true;
+	if ( dag_node_path.apiType() == MFn::kTransform ) {
+		MStatus stat = dag_node_path.extendToShape();
+		if ( stat != MStatus::kSuccess ) {
+			node_has_shape = false;
+		}
+	}
+
+	// if we were able to find the shape node for the input mesh, and the node supports the kMesh function set
+	if ( node_has_shape && dag_node_path.hasFn( MFn::kMesh ) ) {
+
+		// get MFnMesh from MDagPath
+		MFnMesh mesh_surface( dag_node_path );
+
+		////////////////////////////////////////////////////
+		// next, get surface data from Maya mesh object
+		////////////////////////////////////////////////////
+
+		// get number of triangles in mesh and the vertex indices for each triangle
+		// triangle_vertex_indices will be three times larger than triangle_num
+		MIntArray minta_tri_num;
+		MIntArray minta_tri_vertex_indices;
+		mesh_surface.getTriangles( minta_tri_num,
+								   minta_tri_vertex_indices );
+		unsigned int triangle_vertex_num = minta_tri_vertex_indices.length();
+
+		// copy triangle_vertex_indices into a C++ vector
+		std::vector<int> triangle_vertex_indices;
+		triangle_vertex_indices.resize( triangle_vertex_num );
+		minta_tri_vertex_indices.get( &triangle_vertex_indices[0] );
+
+	
+		////////////////////////////////////////////////////
+		// create face list
+		// use Vec3ui for compatibility with SDFGen level set library
+		////////////////////////////////////////////////////
+		m_fluid_mesh_face_list.clear();
+		for ( unsigned int i = 0; i < triangle_vertex_num; i += 3 ) {
+			m_fluid_mesh_face_list.push_back( Vec3ui( triangle_vertex_indices[i],
+													  triangle_vertex_indices[i + 1],
+													  triangle_vertex_indices[i + 2] ) );
+		}
+
+
+		////////////////////////////////////////////////////
+		// create vertex list
+		// use Vec3f for compatibility with SDFGen level set library
+		////////////////////////////////////////////////////
+		MFloatPointArray mesh_vertices;
+		mesh_surface.getPoints(mesh_vertices, MSpace::kWorld);
+		m_fluid_mesh_vert_list.clear();
+		for ( unsigned int i = 0; i < mesh_vertices.length(); ++i ) {
+			MFloatPoint vertex = mesh_vertices[i];
+			Vec3f new_vert( vertex[VX],
+							vertex[VY],
+							vertex[VZ] );
+			m_fluid_mesh_vert_list.push_back( new_vert );
+		}
+	}
+}

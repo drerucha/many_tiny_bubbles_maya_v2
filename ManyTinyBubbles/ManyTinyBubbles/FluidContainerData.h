@@ -4,6 +4,7 @@
 #include <maya/MDoubleArray.h>
 
 #include "vec.h"
+#include "SDFGen/makelevelset3.h"
 
 
 class FluidContainerData
@@ -35,6 +36,16 @@ public:
 
 	bool posIsOutsideFluidContainer( const vec3& pos ) const;
 
+	void prepareFluidMeshForLevelSetMethod( MString fluid_polygon_name );
+
+	//bool posIsOutsideFluidLevel_Density( const vec3& pos ) const;
+	//bool posIsOutsideFluidLevel_LevelSet( const vec3& pos ) const;
+	//int posIsUnderBoundary( const vec3& pos ) const;
+	//void updateFluidLevelSetDistanceFunction( MString fluid_polygon_name ) const;
+	//void updateDensityField();
+	//double getDensityOfVoxelAtPos( const vec3& pos ) const;
+	//double getDistanceFunctionOfVoxelAtPos( const vec3& pos ) const;
+
 private:
 
 	// pos / array index conversion methods
@@ -60,6 +71,12 @@ private:
 
 	// how much water is in each voxel
 	double *m_fraction_field_list;
+
+	double *m_density_list;
+	double *m_distance_function;
+
+	std::vector<Vec3ui> m_fluid_mesh_face_list;
+	std::vector<Vec3f> m_fluid_mesh_vert_list;
 
 	int m_res_x;
 	int m_res_y;

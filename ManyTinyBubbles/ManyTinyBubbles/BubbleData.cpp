@@ -38,6 +38,8 @@ void BubbleData::init( double scattering_frequency,
 	setRadii( size_min, size_max );
 
 
+	// TODO: don't repeat this block of code here and in reset()
+
 	// TODO: this might be a dumb thing to do
 	// init m_pos_list and m_vel_list with empty std::vector<vec3>
 	// only perform this action once
@@ -154,11 +156,14 @@ void BubbleData::deleteParticle( const unsigned int& num ) const
 ////////////////////////////////////////////////////
 void BubbleData::reset()
 {
-	// TODO: iterate through outer std::vectors and clear inner std::vectors before clearing the outer one
-
 	m_pos_list.clear();
 	m_vel_list.clear();
-	m_radii_list.clear();
+		 
+	for ( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
+		std::vector<vec3> empty_pos, empty_vel;
+		m_pos_list.push_back( empty_pos );
+		m_vel_list.push_back( empty_vel );
+	}
 }
 
 
@@ -280,17 +285,20 @@ void BubbleData::createMayaParticlesWithName( const std::string& particle_name )
 void BubbleData::setRadiiForMayaParticlesWithName( const std::string& particle_name ) const
 {
 	for ( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
-		std::string object_name = particle_name;
-		Convenience::appendNumToStdString( object_name, i + 1 );
+		int particle_exists = checkIfParticleExists( i + 1 );
+		if( particle_exists ) {
+			std::string object_name = particle_name;
+			Convenience::appendNumToStdString( object_name, i + 1 );
 
-		// TODO: ask about this long MEL command
-		// addAttr -internalSet true -longName radius -attributeType "float" -minValue 0 -maxValue 10 -defaultValue 0.5 bubbleParticle1Shape
-		std::string cmd = "addAttr -internalSet true -longName radius -attributeType \"float\" -minValue 0 -maxValue 10 -defaultValue 0.5 ";
-		cmd += object_name;
-		cmd += "Shape";
-		MGlobal::executeCommand( Convenience::convertStdStringToMString( cmd ) );
+			// TODO: ask about this long MEL command
+			// addAttr -internalSet true -longName radius -attributeType "float" -minValue 0 -maxValue 10 -defaultValue 0.5 bubbleParticle1Shape
+			std::string cmd = "addAttr -internalSet true -longName radius -attributeType \"float\" -minValue 0 -maxValue 10 -defaultValue 0.5 ";
+			cmd += object_name;
+			cmd += "Shape";
+			MGlobal::executeCommand( Convenience::convertStdStringToMString( cmd ) );
 
-		MGlobal::executeCommand( "setAttr " + Convenience::convertStdStringToMString( object_name ) + "Shape.radius " + m_radii_list[i] );
+			MGlobal::executeCommand( "setAttr " + Convenience::convertStdStringToMString( object_name ) + "Shape.radius " + m_radii_list[i] );
+		}
 	}
 }
 

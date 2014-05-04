@@ -1,12 +1,14 @@
 #include "RenderCmd.h"
 
+#include <sstream>
+#include <direct.h>
+
 #include <maya/MSyntax.h>
 #include <maya/MGlobal.h>
 #include <maya/MArgDatabase.h>
 
 #include "Convenience.h"
-#include <sstream>
-#include <direct.h>
+#include "GlobalState.h"
 
 
 ////////////////////////////////////////////////////
@@ -72,8 +74,7 @@ MStatus RenderCmd::doIt( const MArgList& args )
 		// TODO: uncomment the following line after creating StatusData class
 
 		// convert Maya fluid to polygon mesh
-		std::string fluid_transform_name = "";
-		//std::string fluidTransformName = StatusData::getFluidTransformName();
+		std::string fluid_transform_name = GlobalState::getFluidTransformName();
 		MGlobal::executeCommand( "select -r " + Convenience::convertStdStringToMString( fluid_transform_name ) );
 		MGlobal::executeCommand( "fluidToPoly" );
 	}

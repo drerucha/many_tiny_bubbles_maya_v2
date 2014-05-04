@@ -19,6 +19,9 @@
     <Filter Include="SDFGen">
       <UniqueIdentifier>{8a4e8388-80b4-40b8-8fe6-87a52e66ef42}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Commands">
+      <UniqueIdentifier>{3cf8052d-082a-4f59-8c75-035a31db3476}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt">
@@ -92,14 +95,14 @@
     <ClInclude Include="SDFGen\vecL.h">
       <Filter>SDFGen</Filter>
     </ClInclude>
-    <ClInclude Include="RenderCmd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GlobalState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RenderCmd.h">
+      <Filter>Commands</Filter>
+    </ClInclude>
     <ClInclude Include="AddEmitterMeshCmd.h">
-      <Filter>Header Files</Filter>
+      <Filter>Commands</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -130,14 +133,14 @@
     <ClCompile Include="SDFGen\makelevelset3.cpp">
       <Filter>SDFGen</Filter>
     </ClCompile>
-    <ClCompile Include="RenderCmd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GlobalState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AddEmitterMeshCmd.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderCmd.cpp">
+      <Filter>Commands</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
