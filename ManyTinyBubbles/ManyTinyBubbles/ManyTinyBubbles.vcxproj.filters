@@ -95,6 +95,9 @@
     <ClInclude Include="RenderCmd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GlobalState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ManyTinyBubblesNode.cpp">
@@ -125,6 +128,9 @@
       <Filter>SDFGen</Filter>
     </ClCompile>
     <ClCompile Include="RenderCmd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
