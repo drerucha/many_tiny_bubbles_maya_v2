@@ -45,9 +45,9 @@ global proc int getDefaultEmissionRate()
 	return 100;
 }
 
-global proc float getDefaultMeltingRate()
+global proc int getDefaultMeltingRate()
 {
-	return 5;
+	return 0;
 }
 
 global proc int getDefaultLevelSetResolution()

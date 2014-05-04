@@ -36,12 +36,30 @@ EmitterData::~EmitterData()
 
 
 ////////////////////////////////////////////////////
-// set m_name
+// init()
 ////////////////////////////////////////////////////
-void EmitterData::init( int emit_rate, double min_bubble_radius )
+void EmitterData::init( int emit_rate, double min_bubble_radius,
+						unsigned int level_set_res, unsigned int melting_rate )
 {
 	m_emission_rate = emit_rate;
 	m_min_bubble_radius = min_bubble_radius;
+	m_level_set_res = level_set_res;
+	m_melting_rate = melting_rate;
+}
+
+
+////////////////////////////////////////////////////
+// getters
+////////////////////////////////////////////////////
+
+unsigned int EmitterData::getLevelSetRes()
+{
+	return m_level_set_res;
+}
+
+unsigned int EmitterData::getMeltingRate()
+{
+	return m_melting_rate;
 }
 
 
@@ -49,15 +67,12 @@ void EmitterData::init( int emit_rate, double min_bubble_radius )
 // generate list of positions on mesh where bubbles can emit from
 // basically, fill m_source_pos_list
 ////////////////////////////////////////////////////
-void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
-												 const unsigned int& melting_rate )
+void EmitterData::createEmissionPositionsOnMesh( const unsigned int &voxel_num,
+												 const unsigned int &melting_rate )
 {
 	// TODO: see if we can remove some of the data copying we're currently doing
 	// TODO: fill m_source_pos_list directly instead of filling source_pos_list and copying
 	// TODO: break this method up into multiple smaller methods b/c it's too long and difficult to work in
-
-	// debug
-	Convenience::printInScriptEditor( "start" );
 
 	// list of possible bubble generation locations on mesh
 	std::vector<vec3> source_pos_list;
@@ -256,9 +271,6 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 				}
 			}
 
-			
-			// debug
-			Convenience::printInScriptEditor( "melting start" );
 
 			// TODO: should probably move this melting logic into its own method
 
@@ -292,9 +304,6 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 				// call marching cube method
 				////////////////////////////////////////////////////
 
-				// debug
-				Convenience::printInScriptEditor( "before calling marching cube function" );
-
 				for ( unsigned int z = 0 ; z < sizes[2] - 1; ++z ) {
 					for ( unsigned int y = 0 ; y < sizes[1] - 1; ++y ) {
 						for ( unsigned int x = 0 ; x < sizes[0] - 1; ++x ) {
@@ -311,9 +320,6 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 					}
 				}
 
-				// debug
-				Convenience::printInScriptEditor( "after calling marching cube function" );
-
 
 				////////////////////////////////////////////////////
 				// create obj file from marchingCubePointList & triangleList
@@ -323,9 +329,6 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 				
 				if ( bounding_box_max_length > m_min_bubble_radius ) {
 					std::string newMeshNameStr;
-
-					// debug
-					Convenience::printInScriptEditor( "before computing new mesh name" );
 
 					if ( Convenience::stringHasEnding( Convenience::convertMStringToStdString( strSelectObjName ), "_melltingmesh_Mesh" ) ) {
 						std::string initialName = Convenience::convertMStringToStdString( strSelectObjName );
@@ -337,9 +340,6 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 					
 					MString newMeshNameMStr = newMeshNameStr.c_str();
 
-					// debug
-					Convenience::printInScriptEditor( "after computing new mesh name" );
-					
 					MString fileNameMStr = mllPath + "/" + newMeshNameMStr + ".obj";
 					std::string fileNameStr = fileNameMStr.asChar();
 
@@ -355,9 +355,6 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 					// import new obj
 					MGlobal::executeCommand( importObj );
 
-					// debug
-					Convenience::printInScriptEditor( "before deleting obj file" );
-
 					// delete the created obj file
 					std::string deleteFilePath;
 					if ( Convenience::stringHasEnding( Convenience::convertMStringToStdString( strSelectObjName ), "_melltingmesh_Mesh" ) ) {
@@ -369,45 +366,25 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 
 					DeleteFile( deleteFilePath.c_str() );
 
-					// debug
-					Convenience::printInScriptEditor( "after deleting obj file" );
-
 					// delete the old stored mesh's name
 					GlobalState::deleteSelectedObject( Convenience::convertMStringToStdString(strSelectObjName) );
 
-					// debug
-					Convenience::printInScriptEditor( "before applying shaders" );
-
 					if ( Convenience::stringHasEnding( Convenience::convertMStringToStdString( strSelectObjName ), "_melltingmesh_Mesh" ) ) {
-
-						// debug
-						Convenience::printInScriptEditor( "if string has ending..." );
-
 						GlobalState::setSelectedObject( Convenience::convertMStringToStdString( strSelectObjName ) );
 
 						// apply shader to our new emitter mesh
-						//MGlobal::executeCommand( "select -r " + strSelectObjName );
-						//MGlobal::executeCommand( "sets -e -forceElement " + emitterMeshMaterial );
+						MGlobal::executeCommand( "select -r " + strSelectObjName );
+						MGlobal::executeCommand( "sets -e -forceElement " + emitterMeshMaterial );
 					}
 					else {
-
-						// debug
-						Convenience::printInScriptEditor( "if string does not have ending..." );
-
 						GlobalState::setSelectedObject( Convenience::convertMStringToStdString( strSelectObjName ) + "_melltingmesh_Mesh" );
 
 						// apply shader to our new emitter mesh
-						//MGlobal::executeCommand( "select -r " + strSelectObjName + "_melltingmesh_Mesh" );
-						//MGlobal::executeCommand( "sets -e -forceElement " + emitterMeshMaterial );
+						MGlobal::executeCommand( "select -r " + strSelectObjName + "_melltingmesh_Mesh" );
+						MGlobal::executeCommand( "sets -e -forceElement " + emitterMeshMaterial );
 					}
-
-					// debug
-					Convenience::printInScriptEditor( "after applying shaders" );
 				}
 				else {
-					// debug
-					Convenience::printInScriptEditor( "before deleting old mesh" );
-
 					// delete old mesh
 					MGlobal::executeCommand( "delete " + strSelectObjName );
 					GlobalState::deleteSelectedObject( Convenience::convertMStringToStdString( strSelectObjName ) );
@@ -422,9 +399,6 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 	// copy source_pos_list into the m_source_pos_list member variable
 	m_source_pos_list.clear();
 	m_source_pos_list = source_pos_list;
-
-	// debug
-	Convenience::printInScriptEditor( "end" );
 }
 
 

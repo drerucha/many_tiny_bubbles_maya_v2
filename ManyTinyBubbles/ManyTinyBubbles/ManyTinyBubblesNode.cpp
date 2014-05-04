@@ -40,8 +40,6 @@
 ////////////////////////////////////////////////////
 
 const double GAS_DENSITY = 100.0;
-const unsigned int EMITTER_LEVEL_SET_RES = 10000;
-const unsigned int EMITTER_MELTING_RATE = 100;
 const std::string MAYA_PARTICLE_NAME = "bubbleParticle";
 
 
@@ -131,22 +129,22 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			// read input values from handles
 			////////////////////////////////////////////////////
 
-			MTime time_val						= time_data.asTime();
-			//MObject emitter_mesh_val			= emitter_mesh_data.asMesh();
-			MString emitter_mesh_name_val		= emitter_mesh_name_data.asString();
-			MString fluid_container_name_val	= fluid_container_name_data.asString();
-			int emission_rate_val				= emission_rate_data.asInt();
-			float scattering_frequency_val		= scattering_frequency_data.asFloat();
-			float scattering_coefficient_val	= scattering_coefficient_data.asFloat();
-			float breakup_frequency_val			= breakup_frequency_data.asFloat();
-			float bubble_size_min_val			= bubble_size_min_data.asFloat();
-			float bubble_size_max_val			= bubble_size_max_data.asFloat();
-			float step_size_val					= step_size_data.asFloat();
+			MTime time_val							= time_data.asTime();
+			//MObject emitter_mesh_val				= emitter_mesh_data.asMesh();
+			MString emitter_mesh_name_val			= emitter_mesh_name_data.asString();
+			MString fluid_container_name_val		= fluid_container_name_data.asString();
+			int emission_rate_val					= emission_rate_data.asInt();
+			float scattering_frequency_val			= scattering_frequency_data.asFloat();
+			float scattering_coefficient_val		= scattering_coefficient_data.asFloat();
+			float breakup_frequency_val				= breakup_frequency_data.asFloat();
+			float bubble_size_min_val				= bubble_size_min_data.asFloat();
+			float bubble_size_max_val				= bubble_size_max_data.asFloat();
+			float step_size_val						= step_size_data.asFloat();
 
-			MString fluid_transform_name_val	= fluid_transform_name_data.asString();
-			MString node_name_val				= node_name_data.asString();
-			m_emitter_melting_rate				= melting_rate_data.asFloat();
-			m_emitter_level_set_res				= level_set_resolution_data.asInt();
+			MString fluid_transform_name_val		= fluid_transform_name_data.asString();
+			MString node_name_val					= node_name_data.asString();
+			unsigned int emitter_level_set_res_val	= level_set_resolution_data.asInt();
+			unsigned int emitter_melting_rate_val	= melting_rate_data.asInt();
 
 			
 			////////////////////////////////////////////////////
@@ -190,7 +188,8 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 				}
 			}
 
-			m_emitter.init( emission_rate_val, bubble_size_min_val );
+			m_emitter.init( emission_rate_val, bubble_size_min_val,
+							emitter_level_set_res_val, emitter_melting_rate_val );
 
 
 			////////////////////////////////////////////////////
@@ -471,9 +470,9 @@ void ManyTinyBubbles::generateMoreBubblesFromEmitter()
 	// TODO: consider case where user starts a simulation and then moves the emitter mesh
 
 	//if ( EMITTER_MELTING_RATE != 0 || m_emitter.getSourcePosListSize() == 0 ) {
-	//	m_emitter.createEmissionPositionsOnMesh( EMITTER_LEVEL_SET_RES, EMITTER_MELTING_RATE );
+	//	m_emitter.createEmissionPositionsOnMesh( m_emitter.getLevelSetRes(), m_emitter.getMeltingRate() );
 	//}
-	m_emitter.createEmissionPositionsOnMesh( EMITTER_LEVEL_SET_RES, EMITTER_MELTING_RATE );
+	m_emitter.createEmissionPositionsOnMesh( m_emitter.getLevelSetRes(), m_emitter.getMeltingRate() );
 
 	// generate bubbles
 	std::vector<vec3> new_bubble_positions;
@@ -1063,9 +1062,9 @@ MStatus ManyTinyBubbles::initialize()
     tAttr.setWritable( false );
 	tAttr.setStorable( false );
 
-	ManyTinyBubbles::m_melting_rate = nAttr.create( "melting_rate", "mr", MFnNumericData::kFloat, 0 );
+	ManyTinyBubbles::m_melting_rate = nAttr.create( "melting_rate", "mr", MFnNumericData::kInt, 0 );
 	nAttr.setMin( 0 );
-	nAttr.setMax( 20 );
+	nAttr.setMax( 100 );
  	nAttr.setStorable( true );
 	nAttr.setWritable( true );
  	nAttr.setKeyable( true );

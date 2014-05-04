@@ -62,8 +62,6 @@ struct BubbleStruct {
 ////////////////////////////////////////////////////
 
 public:
-
-	// necessary for Maya node
 						ManyTinyBubbles();
 	virtual				~ManyTinyBubbles();
 	virtual MStatus		compute( const MPlug& plug, MDataBlock& data );
@@ -71,7 +69,6 @@ public:
 	static MStatus		initialize();
 
 private:
-
 	MStatus			simulationLoop( const MTime& time, const float& step_size );
 	//MStatus			simulationLoop( const MTime& time, const float& step_size, MObject& outData,
 	//								const MPlug& plug, MDataBlock& block );
@@ -105,7 +102,6 @@ private:
 ////////////////////////////////////////////////////
 
 public:
-
 	// there must be an MObject handle declared for each attribute that the node will have
 	static MObject	m_output;
 	static MObject	m_time;
@@ -129,17 +125,11 @@ public:
 	static MTypeId	m_id;
 
 private:
-
 	BubbleData			m_bubbles;
 	FluidContainerData	m_fluid_container;
 	EmitterData			m_emitter;
 
 	unsigned int		m_current_frame;
-
-	// TODO: move these member variables into EmitterData class
-
-	unsigned int        m_emitter_level_set_res;
-	float               m_emitter_melting_rate;
 };
 
 #endif

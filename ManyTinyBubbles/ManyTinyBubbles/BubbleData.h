@@ -7,11 +7,6 @@
 #include <vector>
 
 
-// TODO: make NUM_RADII a user-definable node attribute
-
-// constants
-const int NUM_RADII = 10;
-
 class BubbleData
 {
 
@@ -20,7 +15,6 @@ class BubbleData
 ////////////////////////////////////////////////////
 
 public:
-
 	BubbleData( void );
 	~BubbleData( void );
 
@@ -70,7 +64,6 @@ public:
 					vec3				vel ); // Danny was here
 
 private:
-
 	void setRadii( const double& radius_min, const double& radius_max );
 
 	int checkIfParticleExists( const unsigned int& num ) const;
@@ -82,9 +75,6 @@ private:
 ////////////////////////////////////////////////////
 
 private:
-	
-	// TODO: find out what m_vel_list is used for
-
 	std::vector<std::vector<vec3>> m_pos_list;
 	std::vector<std::vector<vec3>> m_vel_list;
 	std::vector<double> m_radii_list;

@@ -15,7 +15,8 @@ public:
 	EmitterData( void );
 	~EmitterData( void );
 
-	void init( int emit_rate, double min_bubble_radius );
+	void init( int emit_rate, double min_bubble_radius,
+			   unsigned int level_set_res, unsigned int melting_rate );
 
 	void createEmissionPositionsOnMesh( const unsigned int &voxel_num, const unsigned int &melting_rate );
 
@@ -53,6 +54,10 @@ public:
 	void deleteEmitterMeshesFromScene( void );
 	void createObjFileFromStoredMeshData( void );
 
+	// getters
+	unsigned int getLevelSetRes( void );
+	unsigned int getMeltingRate( void );
+
 private:
 	//MString m_name;
 
@@ -65,10 +70,10 @@ private:
 	double m_level_set_dx;
 	int m_emission_rate;
 	double m_min_bubble_radius;
+
+	unsigned int m_level_set_res;
+	unsigned int m_melting_rate;
+
 };
 
 #endif
-
-// TODO: move emitter attributes from BubbleData to here
-// TODO: create method to generate generation positions from mesh
-// TODO: add the bounding box as a member variable?
