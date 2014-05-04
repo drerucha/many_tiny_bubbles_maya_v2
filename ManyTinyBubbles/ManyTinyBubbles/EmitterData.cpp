@@ -38,9 +38,10 @@ EmitterData::~EmitterData()
 ////////////////////////////////////////////////////
 // set m_name
 ////////////////////////////////////////////////////
-void EmitterData::init( int emit_rate )
+void EmitterData::init( int emit_rate, double min_bubble_radius )
 {
 	m_emission_rate = emit_rate;
+	m_min_bubble_radius = min_bubble_radius;
 }
 
 

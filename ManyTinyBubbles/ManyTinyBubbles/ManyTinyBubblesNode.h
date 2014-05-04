@@ -71,6 +71,10 @@ public:
 private:
 
 	MStatus			simulationLoop( const MTime& time, const float& step_size );
+	//MStatus			simulationLoop( const MTime& time, const float& step_size, MObject& outData,
+	//								const MPlug& plug, MDataBlock& block );
+
+
 	unsigned int	simulationSetup( const MTime& time );
 	void			reset();
 
@@ -91,7 +95,7 @@ private:
 								 vec3&			new_pos_1,
 								 vec3&			new_pos_2 ) const;
 
-	//void			storeMeshInfoByName(MString emitter_mesh_name) const;
+	void			storeMeshInfoByName( MString emitter_mesh_name ) const;
 
 
 ////////////////////////////////////////////////////
@@ -118,7 +122,6 @@ public:
 	static MObject	m_node_name;
 	static MObject  m_melting_rate;
 	static MObject  m_level_set_resolution;
-	static MObject  m_simulation_status;
 
 	// typeid is a unique 32bit indentifier that describes this node
 	static MTypeId	m_id;
@@ -131,8 +134,10 @@ private:
 
 	unsigned int		m_current_frame;
 
-	//unsigned int        m_emitter_level_set_res;
-	//float               m_emitter_melting_rate;
+	// TODO: move these member variables into EmitterData class
+
+	unsigned int        m_emitter_level_set_res;
+	float               m_emitter_melting_rate;
 };
 
 #endif

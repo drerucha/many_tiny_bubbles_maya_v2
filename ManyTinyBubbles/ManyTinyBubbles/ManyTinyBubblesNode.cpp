@@ -25,9 +25,14 @@
 #include <maya/MFnMeshData.h>
 #include <maya/MFnTypedAttribute.h>
 #include <maya/MTime.h>
+#include <maya/MSelectionList.h>
+#include <maya/MDagPath.h>
+#include <maya/MFnMesh.h>
+#include <maya/MFloatPointArray.h>
 
 #include "Convenience.h"
 #include "vec.h"
+#include "GlobalState.h"
 
 
 ////////////////////////////////////////////////////
@@ -63,7 +68,6 @@ MObject ManyTinyBubbles::m_fluid_transform_name;
 MObject ManyTinyBubbles::m_node_name;
 MObject ManyTinyBubbles::m_melting_rate;
 MObject ManyTinyBubbles::m_level_set_resolution;
-MObject ManyTinyBubbles::m_simulation_status;
 
 
 ////////////////////////////////////////////////////
@@ -113,6 +117,11 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 		MDataHandle bubble_size_max_data			= data.inputValue( ManyTinyBubbles::m_bubble_size_max, &returnStatus );
 		MDataHandle step_size_data					= data.inputValue( ManyTinyBubbles::m_step_size, &returnStatus );
 
+		MDataHandle fluid_transform_name_data		= data.inputValue( ManyTinyBubbles::m_fluid_transform_name, &returnStatus );
+		MDataHandle node_name_data					= data.inputValue( ManyTinyBubbles::m_node_name, &returnStatus );
+		MDataHandle melting_rate_data				= data.inputValue( ManyTinyBubbles::m_melting_rate, &returnStatus );
+		MDataHandle level_set_resolution_data		= data.inputValue( ManyTinyBubbles::m_level_set_resolution, &returnStatus );
+
 		if ( returnStatus != MS::kSuccess ) {
 			MGlobal::displayError( "Node ManyTinyBubbles cannot get value\n" );
 		}
@@ -134,7 +143,22 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			float bubble_size_max_val			= bubble_size_max_data.asFloat();
 			float step_size_val					= step_size_data.asFloat();
 
+			MString fluid_transform_name_val	= fluid_transform_name_data.asString();
+			MString node_name_val				= node_name_data.asString();
+			m_emitter_melting_rate				= melting_rate_data.asFloat();
+			m_emitter_level_set_res				= level_set_resolution_data.asInt();
+
 			
+			////////////////////////////////////////////////////
+			// store fluid tranform name
+			////////////////////////////////////////////////////
+
+			// trim first char b/c we want something like "fluid1", not "|fluid1"
+			std::string fluid_transform_name = Convenience::convertMStringToStdString( fluid_transform_name_val );
+			fluid_transform_name = fluid_transform_name.substr( 1 );
+			GlobalState::storeFluidTransformName( fluid_transform_name );
+
+
 			////////////////////////////////////////////////////
 			// initialize data structures
 			////////////////////////////////////////////////////
@@ -151,20 +175,22 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 							bubble_size_min_val,
 							bubble_size_max_val );
 
-			// TODO: fix EmitterData initialization here
+			// store emitter name and infor (vertex list, face list) in GlobalState class
+			// check if info for emitter is already stored to reduce rendundant computations
+			if ( emitter_mesh_name_val.length() != 0 &&
+				 GlobalState::objectExists( Convenience::convertMStringToStdString( emitter_mesh_name_val ) ) == false )
+			{
+				GlobalState::setSelectedObject( Convenience::convertMStringToStdString( emitter_mesh_name_val ) );
 
-			// store emitter name in m_emitter
-			//m_emitter.init( emitter_mesh_name_val );
+				int exists;
+				MGlobal::executeCommand( "objExists " + emitter_mesh_name_val, exists );
 
+				if ( exists ) {
+					storeMeshInfoByName( emitter_mesh_name_val );
+				}
+			}
 
-			// TODO: get primitive emitter center/location
-
-
-			////////////////////////////////////////////////////
-			// perform bubble simulation
-			////////////////////////////////////////////////////
-
-			simulationLoop( time_val, step_size_val );
+			m_emitter.init( emission_rate_val, bubble_size_min_val );
 
 
 			////////////////////////////////////////////////////
@@ -172,10 +198,55 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 			////////////////////////////////////////////////////
 
 			MDataHandle output_data = data.outputValue( ManyTinyBubbles::m_output );
-			
-			// this just copies the input value through to the output
-			//output_handle.set( input_val );
-			output_data.set( ( int )time_val.as( MTime::kFilm ) );
+
+
+			////////////////////////////////////////////////////
+			// perform bubble simulation
+			////////////////////////////////////////////////////
+
+			simulationLoop( time_val, step_size_val );
+			//simulationLoop( time_val, step_size_val, new_output_data,
+			//				plug, data );
+
+
+			////////////////////////////////////////////////////
+			// create dummy cube mesh for output
+			////////////////////////////////////////////////////
+
+			MFnMeshData data_creator;
+			MObject new_output_data = data_creator.create( &returnStatus );
+
+			MFnMesh	meshFS;
+			float cubeSize = 0.000001f ;
+			MFloatPointArray points;
+			const int numFaces = 6;
+			int numVertices	= 8;
+			const int numFaceConnects = 24;
+
+			MFloatPoint vtx_1( -cubeSize, -cubeSize, -cubeSize );
+			MFloatPoint vtx_2(  cubeSize, -cubeSize, -cubeSize );
+			MFloatPoint vtx_3(  cubeSize, -cubeSize,  cubeSize );
+			MFloatPoint vtx_4( -cubeSize, -cubeSize,  cubeSize );
+			MFloatPoint vtx_5( -cubeSize,  cubeSize, -cubeSize );
+			MFloatPoint vtx_6( -cubeSize,  cubeSize,  cubeSize );
+			MFloatPoint vtx_7(  cubeSize,  cubeSize,  cubeSize );
+			MFloatPoint vtx_8(  cubeSize,  cubeSize, -cubeSize );
+			points.append( vtx_1 );
+			points.append( vtx_2 );
+			points.append( vtx_3 );
+			points.append( vtx_4 );
+			points.append( vtx_5 );
+			points.append( vtx_6 );
+			points.append( vtx_7 );
+			points.append( vtx_8 );
+			int face_counts[numFaces] = { 4, 4, 4, 4, 4, 4 };
+			MIntArray faceCounts( face_counts, numFaces );
+			int face_connects[ numFaceConnects ] = { 0, 1, 2, 3, 4, 5, 6, 7, 3, 2, 6, 5, 0, 3, 5, 4, 0, 4, 7, 1, 1, 7, 6, 2 };
+			MIntArray faceConnects( face_connects, numFaceConnects );
+			MObject newMesh = meshFS.create( numVertices, numFaces, points, faceCounts, faceConnects, new_output_data );
+
+			//output_data.set( ( int )time_val.as( MTime::kFilm ) );
+			output_data.set( new_output_data );
 
 
 			////////////////////////////////////////////////////
@@ -190,7 +261,7 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 	}
 
 	// select Many Tiny Bubbles node
-	//MGlobal::executeCommand( "select -replace CreateBubbleNode1" );
+	MGlobal::executeCommand( "select -replace CreateBubbleNode1" );
 
 	return MS::kSuccess;
 }
@@ -655,6 +726,73 @@ void ManyTinyBubbles::splitBubble( const vec3&		current_pos,
 
 
 ////////////////////////////////////////////////////
+// store the first emitter mesh information (vertext list, face list) in GlobalState
+////////////////////////////////////////////////////
+void ManyTinyBubbles::storeMeshInfoByName( MString emitter_mesh_name ) const
+{
+	// select Maya object by name
+	MSelectionList maya_sel_list;
+	MGlobal::getSelectionListByName( emitter_mesh_name, maya_sel_list );
+
+	// get path to a mesh DAG node
+	MDagPath dag_node_path;
+	maya_sel_list.getDagPath( 0, dag_node_path );
+
+	// get MFnMesh from MDagPath
+	MFnMesh mesh_surface( dag_node_path );
+
+	// get number of triangles in mesh and the vertex indices for each triangle
+	// triangle_vertex_indices will be three times larger than triangle_num
+	MIntArray minta_tri_num;
+	MIntArray minta_tri_vertex_indices;
+	mesh_surface.getTriangles( minta_tri_num,
+							   minta_tri_vertex_indices );
+	unsigned int triangle_vertex_num = minta_tri_vertex_indices.length();
+
+	// copy triangle_vertex_indices into a C++ vector
+	std::vector<int> triangle_vertex_indices;
+	triangle_vertex_indices.resize( triangle_vertex_num );
+	minta_tri_vertex_indices.get( &triangle_vertex_indices[0] );
+
+
+	////////////////////////////////////////////////////
+	// create face list
+	////////////////////////////////////////////////////
+
+	std::vector<int> face_list;
+	for ( unsigned int i = 0; i < triangle_vertex_num; i += 3 ) {
+		face_list.push_back( triangle_vertex_indices[i] + 1 );
+		face_list.push_back( triangle_vertex_indices[i + 1] + 1 );
+		face_list.push_back( triangle_vertex_indices[i + 2] + 1 );
+	}
+
+	// store face list data in GlobalState
+	GlobalState::storeFaceList( face_list );
+	
+
+	////////////////////////////////////////////////////
+	// create vertex list
+	////////////////////////////////////////////////////
+
+	vector<vec3> vert_list;
+
+	MFloatPointArray mesh_vertices;
+	mesh_surface.getPoints(mesh_vertices, MSpace::kWorld);
+
+	for ( unsigned int i = 0; i < mesh_vertices.length(); ++i ) {
+		MFloatPoint vertex = mesh_vertices[i];
+		vec3 new_vert( vertex[VX],
+						vertex[VY],
+						vertex[VZ] );
+		vert_list.push_back( new_vert );
+	}
+
+	// store vertex list data in GlobalState
+	GlobalState::storePointList( vert_list );
+}
+
+
+////////////////////////////////////////////////////
 // creator(): exists to give Maya a way to create new objects of this type
 //		returns a new object of this type
 ////////////////////////////////////////////////////
@@ -687,7 +825,12 @@ MStatus ManyTinyBubbles::initialize()
 	// setStorable: attribute will or will not be written to files when this type of node is stored
 	// setKeyable: attribute is or is not keyable and will show up in the channel box
 
-	ManyTinyBubbles::m_output = nAttr.create( "output", "out", MFnNumericData::kFloat, 0.0 );
+	//ManyTinyBubbles::m_output = nAttr.create( "output", "out", MFnNumericData::kFloat, 0.0 );
+	//nAttr.setWritable( true );
+	//nAttr.setStorable( false );
+	//nAttr.setKeyable( false );
+
+	ManyTinyBubbles::m_output = tAttr.create(  "output_mesh", "out", MFnData::kMesh, &stat );
 	nAttr.setWritable( true );
 	nAttr.setStorable( false );
 	nAttr.setKeyable( false );
@@ -795,11 +938,6 @@ MStatus ManyTinyBubbles::initialize()
 	nAttr.setWritable( true );
  	nAttr.setKeyable( true );
 
-	ManyTinyBubbles::m_simulation_status = nAttr.create( "simulation_statue", "st", MFnNumericData::kInt, 0 );
- 	nAttr.setStorable( true );
-	nAttr.setWritable( true );
- 	nAttr.setKeyable( true );
-
 
 	////////////////////////////////////////////////////
 	// add attributes to node
@@ -838,7 +976,6 @@ MStatus ManyTinyBubbles::initialize()
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
 	stat = addAttribute( ManyTinyBubbles::m_level_set_resolution );
 		if ( !stat ) { stat.perror( "addAttribute" ); return stat; }
-	// m_simulation_status
 
 
 	////////////////////////////////////////////////////
@@ -876,7 +1013,6 @@ MStatus ManyTinyBubbles::initialize()
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
 	stat = attributeAffects( ManyTinyBubbles::m_level_set_resolution, ManyTinyBubbles::m_output );
 		if ( !stat ) { stat.perror( "attributeAffects" ); return stat; }
-	// m_simulation_status
 
 	return MS::kSuccess;
 }

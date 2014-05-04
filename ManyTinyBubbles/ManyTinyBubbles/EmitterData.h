@@ -12,7 +12,7 @@ public:
 	EmitterData( void );
 	~EmitterData( void );
 
-	void init( int emit_rate );
+	void init( int emit_rate, double min_bubble_radius );
 
 	void createEmissionPositionsOnMesh( const unsigned int &voxel_num, const unsigned int &melting_rate );
 
