@@ -16,6 +16,13 @@
 #include "AddEmitterMeshCmd.h"
 
 
+////////////////////////////////////////////////////
+// global variable
+////////////////////////////////////////////////////
+
+MString mllPath;
+
+
 //
 //	Description:
 //		this method is called when the plug-in is loaded into Maya.  It 
@@ -89,6 +96,9 @@ MStatus initializePlugin( MObject obj )
 
 	command = "source \"" + mel_filepath + "/render.mel\";";
 	MGlobal::executeCommand( command );
+
+	// set global variable mllPath
+	mllPath = mel_filepath;
 
 	return status;
 }

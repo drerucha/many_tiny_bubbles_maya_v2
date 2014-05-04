@@ -1,5 +1,8 @@
 #include "EmitterData.h"
 
+#include <fstream>
+#include <string>
+
 #include <maya/MGlobal.h>
 #include <maya/MSelectionList.h>
 #include <maya/MDagPath.h>
@@ -11,7 +14,12 @@
 #include "Convenience.h"
 #include "GlobalState.h"
 
-// TODO: check if mesh is a sphere, and generate emission positions as appropriate
+
+////////////////////////////////////////////////////
+// reference to global variable
+////////////////////////////////////////////////////
+
+extern MString mllPath;
 
 
 ////////////////////////////////////////////////////
@@ -245,8 +253,127 @@ void EmitterData::createEmissionPositionsOnMesh( const unsigned int& voxel_num,
 			}
 
 
-			// TODO: melting logic
 			// TODO: should probably move this melting logic into its own method
+
+			////////////////////////////////////////////////////
+			// mesh melting
+			////////////////////////////////////////////////////
+
+			if ( melting_rate != 0 ) {
+				double *verticesValueArray = new double[signed_distance_values.a.size()];
+
+				// storage locations for marching cube method
+				std::vector<vec3> marchingCubePointList;
+				std::vector<std::vector<int>> triangleList; 
+				std::vector<std::vector<int>> temp;
+				
+				// origin position is the left bottom corner of the bounding box
+				vec3 originPos( min_bounds[0],
+								min_bounds[1],
+								min_bounds[2] );
+
+				// compute melting thickness; higher value means greater melting speed
+				double meltingThickness = bounding_box_max_length * melting_rate / 100.0;
+
+				// reverse sign of each grid's distance function
+				for ( unsigned int i = 0; i < signed_distance_values.a.size(); ++i ) {
+					verticesValueArray[i] = -signed_distance_values.a[i];
+				}
+
+
+				////////////////////////////////////////////////////
+				// call marching cube method
+				////////////////////////////////////////////////////
+
+				for ( unsigned int z = 0 ; z < sizes[2] - 1; ++z ) {
+					for ( unsigned int y = 0 ; y < sizes[1] - 1; ++y ) {
+						for ( unsigned int x = 0 ; x < sizes[0] - 1; ++x ) {
+							marchingCube( meltingThickness,
+										  x, y, z,
+										  sizes[0]-1, sizes[1]-1, sizes[2]-1,
+										  m_level_set_dx,
+										  verticesValueArray,
+										  originPos,
+										  &marchingCubePointList,
+										  &triangleList,
+										  &temp);
+						}
+					}
+				}
+
+
+				////////////////////////////////////////////////////
+				// create obj file from marchingCubePointList & triangleList
+				// import this obj file as a new mesh
+				// after importing, old mesh should be deleted
+				////////////////////////////////////////////////////
+				
+				if ( bounding_box_max_length > m_min_bubble_radius ) {
+					std::string newMeshNameStr;
+
+					if ( Convenience::stringHasEnding( Convenience::convertMStringToStdString( strSelectObjName ), "_melltingmesh_Mesh" ) ) {
+						std::string initialName = Convenience::convertMStringToStdString( strSelectObjName );
+						newMeshNameStr = initialName.substr( 0, initialName.length() - 18 ) + "_melltingmesh";
+					}
+					else {
+						newMeshNameStr  = Convenience::convertMStringToStdString( strSelectObjName ) + "_melltingmesh";
+					}
+					
+					MString newMeshNameMStr = newMeshNameStr.c_str();
+					
+					MString fileNameMStr = mllPath + "/" + newMeshNameMStr + ".obj";
+					std::string fileNameStr = fileNameMStr.asChar();
+
+					// create obj file
+					createObjFile( fileNameStr, marchingCubePointList, triangleList );
+
+					// prepare to import this new OBJ
+					MString importObj = "file -import -type OBJ -ignoreVersion -ra true -rpr \"" + newMeshNameMStr + "\" -options \"mo=1\"  -pr -loadReferenceDepth \"all\" \"" + fileNameMStr + "\"";
+
+					// delete old mesh
+					MGlobal::executeCommand( "delete " + strSelectObjName );
+
+					// import new obj
+					MGlobal::executeCommand( importObj );
+
+					// delete the created obj file
+					std::string deleteFilePath;
+					if ( Convenience::stringHasEnding( Convenience::convertMStringToStdString( strSelectObjName ), "_melltingmesh_Mesh" ) ) {
+						deleteFilePath = Convenience::convertMStringToStdString( mllPath + "/" + newMeshNameMStr + ".obj" );
+					}
+					else {
+						deleteFilePath = Convenience::convertMStringToStdString( mllPath + "/" + strSelectObjName ) + "_melltingmesh.obj";
+					}
+
+					DeleteFile( deleteFilePath.c_str() );
+
+					// delete the old stored mesh's name
+					GlobalState::deleteSelectedObject( Convenience::convertMStringToStdString(strSelectObjName) );
+
+					if ( Convenience::stringHasEnding( Convenience::convertMStringToStdString( strSelectObjName ), "_melltingmesh_Mesh" ) ) {
+						GlobalState::setSelectedObject( Convenience::convertMStringToStdString( strSelectObjName ) );
+
+						// apply shader to our new emitter mesh
+						MGlobal::executeCommand( "select -r " + strSelectObjName );
+						MGlobal::executeCommand( "sets -e -forceElement " + emitterMeshMaterial );
+					}
+					else {
+						GlobalState::setSelectedObject( Convenience::convertMStringToStdString( strSelectObjName ) + "_melltingmesh_Mesh" );
+
+						// apply shader to our new emitter mesh
+						MGlobal::executeCommand( "select -r " + strSelectObjName + "_melltingmesh_Mesh" );
+						MGlobal::executeCommand( "sets -e -forceElement " + emitterMeshMaterial );
+					}
+				}
+				else {
+					// delete old mesh
+					MGlobal::executeCommand( "delete " + strSelectObjName );
+					GlobalState::deleteSelectedObject( Convenience::convertMStringToStdString( strSelectObjName ) );
+				}
+
+				// reclaim memory
+				delete[] verticesValueArray;
+			}
 		}
 	}
 
@@ -344,8 +471,133 @@ void EmitterData::generateBubbles( const std::vector<double>&	bubble_radii_list,
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ////////////////////////////////////////////////////
-// EmitterData::vertexInterp() - used in marching cubes method
+// EmitterData::createObjFile()
+////////////////////////////////////////////////////
+void EmitterData::createObjFile( std::string fileName,
+								 std::vector<vec3> marchingCubePointList,
+								 std::vector<vector<int>> triangleList)
+{
+	ofstream outfile( fileName.c_str() );
+
+	for ( unsigned int i = 0; i < marchingCubePointList.size(); ++i ) {
+		outfile << "v " << marchingCubePointList[i][0] << " " << marchingCubePointList[i][1] << " " << marchingCubePointList[i][2] << std::endl;
+	}
+
+	for ( unsigned int i = 0; i < triangleList.size(); ++i ) {
+		outfile << "f " << triangleList[i][0] << " " << triangleList[i][1] << " " << triangleList[i][2] << std::endl;
+	}
+   
+	outfile.close();
+}
+
+
+////////////////////////////////////////////////////
+// EmitterData::getSourcePosListSize()
+////////////////////////////////////////////////////
+int EmitterData::getSourcePosListSize()
+{
+	return ( int )m_source_pos_list.size();
+}
+
+
+////////////////////////////////////////////////////
+// EmitterData::deleteTheCurrentSceneEmitterMeshs()
+////////////////////////////////////////////////////
+void EmitterData::deleteTheCurrentSceneEmitterMeshs()
+{
+	// get all the selected mesh name
+	std::vector<std::string> selectedObjectNames = GlobalState::getSelectedObject();
+
+	for ( int objectCount= 0; objectCount< selectedObjectNames.size(); ++objectCount ) {
+
+		// retrieve the selected mesh object
+		MString strSelectObjName = ( char* )selectedObjectNames[objectCount].c_str();
+		int exist;
+		MGlobal::executeCommand( "objExists " + strSelectObjName, exist );
+
+		if ( exist == 1 ) {
+			// delete all the meshes from current scene
+			MGlobal::executeCommand("delete " + strSelectObjName);
+		}
+
+		GlobalState::deleteSelectedObject( Convenience::convertMStringToStdString( strSelectObjName ) );
+	}
+}
+
+
+////////////////////////////////////////////////////
+// EmitterData::createObjFileFromStoredMeshData()
+////////////////////////////////////////////////////
+void EmitterData::createObjFileFromStoredMeshData()
+{
+	std::vector<std::vector<vec3>> pointLists = GlobalState::getStoredPointList();
+	std::vector<std::vector<int>> faceLists = GlobalState::getStoredFaceList();
+
+	for ( unsigned int i = 0; i < pointLists.size(); ++i ) {
+		std::vector<vec3> pointList = pointLists[i];
+		std::vector<int> faceList = faceLists[i];
+		std::vector<std::vector<int>> triangleFaceList;
+
+		// convert the linear face list index into a triangle format
+		for ( unsigned int j = 0; j < faceList.size(); j += 3 ) {
+			std::vector<int> newFace;
+			newFace.push_back( faceList[j] );
+			newFace.push_back( faceList[j + 1] );
+			newFace.push_back( faceList[j + 2] );
+			triangleFaceList.push_back( newFace );
+		}
+
+		std::string generalFileName = "initialMesh";
+		Convenience::appendNumToStdString( generalFileName, i );
+		std::string specificFileName = generalFileName + ".obj"; 
+		std::string file_path_name = Convenience::convertMStringToStdString( mllPath ) + "/" + specificFileName;
+
+		// create new mesh in the directory
+		createObjFile( file_path_name, pointList, triangleFaceList );
+
+		// store the newly created mesh name in the list of StatusData
+		GlobalState::setSelectedObject(generalFileName + "_Mesh");
+		std::vector<std::string> selectedObjectNames = GlobalState::getSelectedObject();
+		MString importObj = "file -import -type OBJ -ignoreVersion -ra true -rpr \"" 
+			+ Convenience::convertStdStringToMString( generalFileName )+ "\" -options \"mo=1\"  -pr -loadReferenceDepth \"all\" \"" 
+			+ Convenience::convertStdStringToMString( file_path_name ) + "\"";
+
+		// import new obj
+		MGlobal::executeCommand( importObj );
+
+		// delete the created OBJ file
+		DeleteFile( file_path_name.c_str() );
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////////
+// EmitterData::vertexInterp() - used in marching cube method
 ////////////////////////////////////////////////////
 vec3 EmitterData::vertexInterp( double	&isolevel,
 								vec3	p1,

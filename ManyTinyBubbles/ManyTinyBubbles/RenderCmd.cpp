@@ -12,10 +12,15 @@
 
 
 ////////////////////////////////////////////////////
-// constants
+// reference to global variable
 ////////////////////////////////////////////////////
 
-MString mllPath;
+extern MString mllPath;
+
+
+////////////////////////////////////////////////////
+// constants
+////////////////////////////////////////////////////
 
 // short flag can't be longer than 3 char
 // long flag can't be less than 4 char
@@ -170,7 +175,7 @@ MStatus RenderCmd::doIt( const MArgList& args )
 	}
 	while( Convenience::dirExists( savePath ) );
 
-	mkdir( savePath.c_str() );
+	_mkdir( savePath.c_str() );
 
 	for ( unsigned int i = 1 ; i <= end_frame - start_frame + 1 ; ++i ) {
 		std::stringstream ss;
