@@ -1,4 +1,7 @@
-#pragma once
+//#pragma once
+
+#ifndef _BubbleData
+#define _BubbleData
 
 #include "vec.h"
 #include <vector>
@@ -93,3 +96,5 @@ private:
 	double m_size_max;
 
 };
+
+#endif

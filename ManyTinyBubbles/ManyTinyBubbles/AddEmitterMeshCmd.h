@@ -1,7 +1,7 @@
-#pragma once
+//#pragma once
 
-#ifndef AddEmitterMeshCmd_H_
-#define AddEmitterMeshCmd_H_
+#ifndef _AddEmitterMeshCmd
+#define _AddEmitterMeshCmd
 
 #include <maya/MPxCommand.h>
 

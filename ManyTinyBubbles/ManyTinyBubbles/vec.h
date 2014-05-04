@@ -23,7 +23,10 @@
 // - Added Cross Product operator, set/Print functions
 // - Add divide by zero length check to Length()
 
-#pragma once
+//#pragma once
+
+#ifndef _vec
+#define _vec
 
 #include <iostream>
 #include <assert.h>
@@ -206,3 +209,5 @@ public:
    void Print(const char* title) const;
 
 };
+
+#endif

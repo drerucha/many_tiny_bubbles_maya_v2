@@ -1,4 +1,7 @@
-#pragma once
+//#pragma once
+
+#ifndef _Convenience
+#define _Convenience
 
 #include <maya/MString.h>
 #include <maya/MIntArray.h>
@@ -74,3 +77,5 @@ public:
 	// folder path exists
 	static bool dirExists( const std::string &dir_name );
 };
+
+#endif

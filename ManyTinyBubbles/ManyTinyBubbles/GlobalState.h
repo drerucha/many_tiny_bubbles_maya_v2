@@ -1,4 +1,7 @@
-#pragma once
+//#pragma once
+
+#ifndef _GlobalState
+#define _GlobalState
 
 #include <vector>
 #include "vec.h"
@@ -37,3 +40,5 @@ public:
 	static void storeFluidTransformName( std::string name );
 	static std::string getFluidTransformName( void );
 };
+
+#endif

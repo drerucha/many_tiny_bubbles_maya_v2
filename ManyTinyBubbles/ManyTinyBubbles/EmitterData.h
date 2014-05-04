@@ -1,4 +1,7 @@
-#pragma once
+//#pragma once
+
+#ifndef _EmitterData
+#define _EmitterData
 
 #include <maya/MString.h>
 
@@ -63,6 +66,8 @@ private:
 	int m_emission_rate;
 	double m_min_bubble_radius;
 };
+
+#endif
 
 // TODO: move emitter attributes from BubbleData to here
 // TODO: create method to generate generation positions from mesh

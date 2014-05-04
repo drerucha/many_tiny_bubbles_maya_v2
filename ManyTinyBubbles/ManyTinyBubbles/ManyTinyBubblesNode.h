@@ -1,5 +1,7 @@
+
 #ifndef _ManyTinyBubblesNode
 #define _ManyTinyBubblesNode
+
 //
 // Copyright (C) CIS660
 // 

@@ -1,4 +1,7 @@
-#pragma once
+//#pragma once
+
+#ifndef _FluidContainerData
+#define _FluidContainerData
 
 #include <maya/MString.h>
 #include <maya/MDoubleArray.h>
@@ -96,3 +99,5 @@ private:
 
 	double m_sphere_volume_constant;
 };
+
+#endif

@@ -1,7 +1,7 @@
-#pragma once
+//#pragma once
 
-#ifndef RenderCmd_H_
-#define RenderCmd_H_
+#ifndef _RenderCmd
+#define _RenderCmd
 
 #include <maya/MPxCommand.h>
 
