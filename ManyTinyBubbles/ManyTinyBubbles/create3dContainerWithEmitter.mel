@@ -172,7 +172,6 @@ global proc showCreate3dContainerWithEmitterOptionsWindow()
 
 global proc create3dContainerWithEmitter( int $options_window_displayed, int $close_window )
 {
-	// TODO: create ManyTinyBubbles node
 	// TODO: move spherical emitter to bottom of fluid container
 
 

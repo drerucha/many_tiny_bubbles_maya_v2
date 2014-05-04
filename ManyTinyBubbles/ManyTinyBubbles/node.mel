@@ -60,9 +60,6 @@ global proc createManyTinyBubblesNode( string $fluid_container, string $emitter_
 
 	string $cmd;
 
-
-	// TODO: connect time attribute to system clock?
-
 	//string $emitter_shape = getShapeFromName( $emitter_mesh );
 	//$emitter_shape += ".inMesh";
 	//$emitter_shape += ".outMesh";
@@ -70,10 +67,7 @@ global proc createManyTinyBubblesNode( string $fluid_container, string $emitter_
 	//connectAttr ManyTinyBubbles1.emitter_mesh pSphere2.outMesh;
 	//connectAttr $cmd $emitter_shape;
 
-	
-
 	// connect time attribute
-	// connectAttr time1.outTime CreateBubbleNode1.time;
 	string $node_time_attr = $node + ".time";
 	connectAttr time1.outTime $node_time_attr;
 
@@ -85,12 +79,6 @@ global proc createManyTinyBubblesNode( string $fluid_container, string $emitter_
 
 	$cmd = $node + ".emission_rate";
 	setAttr $cmd $emission_rate;
-
-	$cmd = $node + ".melting_rate";
-	setAttr $cmd $melt_rate;
-
-	$cmd = $node + ".level_set_resolution";
-	setAttr $cmd $level_set_resolution;
 
 	$cmd = $node + ".scattering_frequency";
 	setAttr $cmd $scattering_frequency;
@@ -106,6 +94,30 @@ global proc createManyTinyBubblesNode( string $fluid_container, string $emitter_
 
 	$cmd = $node + ".bubble_size_max";
 	setAttr $cmd $bubble_radius_max;
+
+	string $fluid_shape_parents[] = `listRelatives -fullPath -parent $fluid_container`;
+    $fluid_transform = $fluid_shape_parents[0];
+
+	$cmd = $node + ".fluid_transform_name";
+	setAttr $cmd -type "string" $fluid_transform;
+
+	$cmd = $node + ".node_name";
+	setAttr $cmd -type "string" $node;
+
+	$cmd = $node + ".melting_rate";
+	setAttr $cmd $melt_rate;
+
+	$cmd = $node + ".level_set_resolution";
+	setAttr $cmd $level_set_resolution;
+
+	// dummy mesh ouput so we can batch render
+	string $dummy_transform = `createNode transform`;
+	string $dummy_mesh = `createNode mesh -parent $dummy_transform`;
+
+	// dummy mesh ouput so we can batch render
+	string $node_output_mesh_attr = $node + ".output_mesh";
+	string $node_dummy_mesh_attr = $dummy_mesh + ".inMesh";
+	connectAttr $node_output_mesh_attr $node_dummy_mesh_attr;
 
 	mtbLog( "created node" );
 }
