@@ -45,6 +45,16 @@ global proc int getDefaultEmissionRate()
 	return 100;
 }
 
+global proc float getDefaultMeltingRate()
+{
+	return 5;
+}
+
+global proc int getDefaultLevelSetResolution()
+{
+	return 1000;
+}
+
 global proc float getDefaultScatteringFrequency()
 {
 	return 0.5;

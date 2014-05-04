@@ -1,0 +1,67 @@
+
+
+/******************************
+ * show render options window *
+ ******************************/
+
+global proc showRenderWindow()
+{
+	////////////////////////////////////////////////////
+	// clear window if it already exists
+	////////////////////////////////////////////////////
+
+	if ( `window -exists render_options_window` ) {
+  		deleteUI render_options_window;
+		windowPref -remove render_options_window;
+	}
+
+
+	////////////////////////////////////////////////////
+	// create window
+	////////////////////////////////////////////////////
+
+	window -title "Render simulation"
+		   -width 150 -height 100
+		   render_options_window;
+
+	columnLayout -adjustableColumn true;
+
+	intFieldGrp -label "Start Frame"
+				-numberOfFields 1
+				-value1 2
+				ui_start_frame;
+	intFieldGrp -label "End Frame"
+				-numberOfFields 1
+				-value1 5
+				ui_end_frame;
+
+	setParent ..;
+	
+	rowLayout -numberOfColumns 2
+			  -columnAttach 1 "right" 100;
+	
+	button -label "Create"
+		   -command "renderSimulation()";
+	button -label "Cancel"
+		   -command "deleteUI render_options_window";
+
+	showWindow render_options_window;
+}
+
+
+
+/************************************
+ * execute command to render images *
+ ************************************/
+
+global proc renderSimulation()
+{
+	int $start_frame = `intFieldGrp -query -value1 ui_start_frame`;
+	int $end_frame = `intFieldGrp -query -value1 ui_end_frame`;
+
+	RenderSequentialImagesCmd -start_frame $start_frame
+							  -end_frame $end_frame;
+
+  	deleteUI render_options_window;
+	windowPref -remove render_options_window;
+}

@@ -23,7 +23,7 @@ global proc createManyTinyBubblesNode( string $fluid_container, string $emitter_
 
 
 	int $emission_rate;
-	float $scattering_frequency, $scattering_coefficient, $bubble_breakup, $bubble_radius_min, $bubble_radius_max;
+	float $melt_rate, $level_set_resolution, $scattering_frequency, $scattering_coefficient, $bubble_breakup, $bubble_radius_min, $bubble_radius_max;
 
 	if ( $options_window_displayed ) {
 		$emission_rate			= `intSliderGrp -query -value ui_bubble_rate`;
@@ -32,6 +32,8 @@ global proc createManyTinyBubblesNode( string $fluid_container, string $emitter_
 		$bubble_breakup			= `floatSliderGrp -query -value ui_bubble_breakup`;
 		$bubble_radius_min		= getDefaultBubbleRadiusMin();
 		$bubble_radius_max		= getDefaultBubbleRadiusMax();
+		$melt_rate      		= getDefaultMeltingRate();
+		$level_set_resolution   = getDefaultLevelSetResolution();
 	}
 	else {
 		$emission_rate			= getDefaultEmissionRate();
@@ -40,6 +42,8 @@ global proc createManyTinyBubblesNode( string $fluid_container, string $emitter_
 		$bubble_breakup			= getDefaultBreakupFrequency();
 		$bubble_radius_min		= getDefaultBubbleRadiusMin();
 		$bubble_radius_max		= getDefaultBubbleRadiusMax();
+		$melt_rate      		= getDefaultMeltingRate();
+		$level_set_resolution   = getDefaultLevelSetResolution();
 	}
 
 
@@ -81,6 +85,12 @@ global proc createManyTinyBubblesNode( string $fluid_container, string $emitter_
 
 	$cmd = $node + ".emission_rate";
 	setAttr $cmd $emission_rate;
+
+	$cmd = $node + ".melting_rate";
+	setAttr $cmd $melt_rate;
+
+	$cmd = $node + ".level_set_resolution";
+	setAttr $cmd $level_set_resolution;
 
 	$cmd = $node + ".scattering_frequency";
 	setAttr $cmd $scattering_frequency;

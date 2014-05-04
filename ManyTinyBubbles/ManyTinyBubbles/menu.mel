@@ -54,16 +54,15 @@ global proc createMenu()
 	////////////////////////////////////////////////////
 
 	menuItem -label "Convert Mesh to Bubble Emitter"
-			 -command "temp()";
-	menuItem -optionBox true
-			 -command "temp()";
+			 -command "CreateMeshEmitterCmd()";
+
 	
 	////////////////////////////////////////////////////
 	// Render Simulation
 	////////////////////////////////////////////////////
 
 	menuItem -label "Render Simulation"
-			 -command "temp()";
+			 -command "showRenderWindow()";
 
 	mtbLog( "created menu" );
 }
