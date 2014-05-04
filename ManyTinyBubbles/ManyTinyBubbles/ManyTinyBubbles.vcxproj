@@ -22,6 +22,7 @@
     <None Include="SDFGen\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AddEmitterMeshCmd.h" />
     <ClInclude Include="BubbleData.h" />
     <ClInclude Include="Convenience.h" />
     <ClInclude Include="EmitterData.h" />
@@ -40,6 +41,7 @@
     <ClInclude Include="vec.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AddEmitterMeshCmd.cpp" />
     <ClCompile Include="BubbleData.cpp" />
     <ClCompile Include="Convenience.cpp" />
     <ClCompile Include="EmitterData.cpp" />

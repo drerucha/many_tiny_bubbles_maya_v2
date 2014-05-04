@@ -54,7 +54,7 @@ global proc createMenu()
 	////////////////////////////////////////////////////
 
 	menuItem -label "Convert Mesh to Bubble Emitter"
-			 -command "CreateMeshEmitterCmd()";
+			 -command "AddEmitterMeshCmd()";
 
 	
 	////////////////////////////////////////////////////

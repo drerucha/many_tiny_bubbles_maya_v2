@@ -13,6 +13,7 @@
 
 #include "Convenience.h"
 #include "RenderCmd.h"
+#include "AddEmitterMeshCmd.h"
 
 
 //
@@ -34,13 +35,13 @@ MStatus initializePlugin( MObject obj )
 	// register commands
 	////////////////////////////////////////////////////
 
-    //status = plugin.registerCommand( "CreateBubbleCmd", CreateBubbleCmd::creator );
-    //if (!status) {
-    //    status.perror("registerCommand");
-    //    return status;
-    //}
-
     status = plugin.registerCommand( "RenderCmd", RenderCmd::creator );
+    if ( !status ) {
+        status.perror( "registerCommand" );
+        return status;
+    }
+
+    status = plugin.registerCommand( "AddEmitterMeshCmd", AddEmitterMeshCmd::creator );
     if ( !status ) {
         status.perror( "registerCommand" );
         return status;
@@ -120,14 +121,14 @@ MStatus uninitializePlugin( MObject obj )
 	////////////////////////////////////////////////////
 	// deregister commands
 	////////////////////////////////////////////////////
-
-	//status = plugin.deregisterCommand( "CreateBubbleCmd" );
-	//if ( !status ) {
-	//	status.perror( "deregisterCommand" );
-	//	return status;
-	//}
 	
 	status = plugin.deregisterCommand( "RenderCmd" );
+	if ( !status ) {
+		status.perror( "deregisterCommand" );
+		return status;
+	}
+
+	status = plugin.deregisterCommand( "AddEmitterMeshCmd" );
 	if ( !status ) {
 		status.perror( "deregisterCommand" );
 		return status;
