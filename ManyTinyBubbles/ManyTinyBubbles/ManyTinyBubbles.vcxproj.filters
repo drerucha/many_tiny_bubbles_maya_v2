@@ -45,6 +45,9 @@
     <None Include="SDFGen\CMakeLists.txt">
       <Filter>SDFGen</Filter>
     </None>
+    <None Include="render.mel">
+      <Filter>Scripts</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ManyTinyBubblesNode.h">
@@ -89,6 +92,9 @@
     <ClInclude Include="SDFGen\vecL.h">
       <Filter>SDFGen</Filter>
     </ClInclude>
+    <ClInclude Include="RenderCmd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ManyTinyBubblesNode.cpp">
@@ -117,6 +123,9 @@
     </ClCompile>
     <ClCompile Include="SDFGen\makelevelset3.cpp">
       <Filter>SDFGen</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderCmd.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

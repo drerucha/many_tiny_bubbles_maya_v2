@@ -18,6 +18,7 @@
     <None Include="node.mel" />
     <None Include="Options.txt" />
     <None Include="ReadMe.txt" />
+    <None Include="render.mel" />
     <None Include="SDFGen\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
@@ -26,6 +27,7 @@
     <ClInclude Include="EmitterData.h" />
     <ClInclude Include="FluidContainerData.h" />
     <ClInclude Include="ManyTinyBubblesNode.h" />
+    <ClInclude Include="RenderCmd.h" />
     <ClInclude Include="SDFGen\array1.h" />
     <ClInclude Include="SDFGen\array2.h" />
     <ClInclude Include="SDFGen\array3.h" />
@@ -43,6 +45,7 @@
     <ClCompile Include="FluidContainerData.cpp" />
     <ClCompile Include="ManyTinyBubblesNode.cpp" />
     <ClCompile Include="pluginMain.cpp" />
+    <ClCompile Include="RenderCmd.cpp" />
     <ClCompile Include="SDFGen\mainL.cpp" />
     <ClCompile Include="SDFGen\makelevelset3.cpp" />
     <ClCompile Include="vec.cpp" />
