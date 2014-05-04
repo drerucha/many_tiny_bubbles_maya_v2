@@ -47,7 +47,7 @@ public:
 
 	int getSourcePosListSize( void );
 
-	void deleteTheCurrentSceneEmitterMeshs( void );
+	void deleteEmitterMeshesFromScene( void );
 	void createObjFileFromStoredMeshData( void );
 
 private:

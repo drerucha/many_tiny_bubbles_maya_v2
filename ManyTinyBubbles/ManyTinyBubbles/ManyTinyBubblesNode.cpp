@@ -278,8 +278,28 @@ MStatus	ManyTinyBubbles::simulationLoop( const MTime& time, const float& step_si
 	// loop from current frame to requested frame
 	for ( unsigned int i = 0; i < requested_frame - m_current_frame; ++i ) {
 
+		// TODO: do not use hardcoded name here
+		// TODO: move hardcoded 1000 value below to the top of this file for easier access
+
+		// if polySurface1 exists, then Maya fluid has been converted to polygon mesh and we should use level set method to determine fluid surface boundary
+		int exists;
+		MGlobal::executeCommand( "objExists polySurface1", exists );
+		if ( exists == 1 ) {
+
+			// compute and store vertex list and face list of fluid for level set method
+			m_fluid_container.prepareFluidMeshForLevelSetMethod( "polySurface1" );
+
+			// for many particles, compute signed distance function of entire fluid which is used later to determine which particles lie near the fluid surface
+			if ( m_bubbles.getTotalBubbleNumber() > 1000 ) {
+				m_fluid_container.updateLevelSetSignedDistanceFunction( "polySurface1" );
+			}
+		}
+
 		// update bubble positions using explicit Euler integration
 		m_bubbles.updateBubblePositions( step_size );
+
+		// update density field to match the Maya fluid
+		m_fluid_container.updateDensityField();
 
 		// remove bubbles that "escape" fluid container
 		deleteEscapedBubbles();
@@ -320,6 +340,12 @@ unsigned int ManyTinyBubbles::simulationSetup( const MTime& time )
 	if ( requested_frame < m_current_frame ) {
 		reset();
 		m_current_frame = 0;
+
+		// remove current mesh from scene
+		m_emitter.deleteEmitterMeshesFromScene();
+
+		// create obj file and import it from stored face list data and vertex list data
+		m_emitter.createObjFileFromStoredMeshData();
 	}
 
 	// delete all rendered particles in Maya b/c we recreate them each simulation
@@ -346,6 +372,9 @@ void ManyTinyBubbles::reset()
 ////////////////////////////////////////////////////
 void ManyTinyBubbles::deleteEscapedBubbles()
 {
+	// TODO: remove hardcoded name "polySurface1"
+	// TODO: move hardcoded value "1000" to the top of this file
+
 	std::vector<BubbleLocator> bubbles_to_remove;
 
 	// loop through radius groups
@@ -360,8 +389,44 @@ void ManyTinyBubbles::deleteEscapedBubbles()
 			vec3 bubble_pos = m_bubbles.getPosAtIndex( radius_group_index, bubble_index );
 
 			// mark the bubble for deletion if it has "escaped" the fluid container
-			if ( m_fluid_container.posIsOutsideFluidContainer( bubble_pos ) ) {
-				bubbles_to_remove.push_back( BubbleLocator( radius_group_index, bubble_index ) );
+			//if ( m_fluid_container.posIsOutsideFluidContainer( bubble_pos ) ) {
+			//	bubbles_to_remove.push_back( BubbleLocator( radius_group_index, bubble_index ) );
+			//}
+
+			int exists;
+			MGlobal::executeCommand( "objExists polySurface1", exists );
+
+			// if polySurface1 exists, then fluid has been converted into a polygon mesh so we use the level set method to determine fluid surface boundary
+			if ( exists == 1 ) {
+
+				// if too many bubbles, then filter bubbles so we only concern ourselves with bubbles near the fluid's surface
+				if ( m_bubbles.getTotalBubbleNumber() > 1000 ) {
+
+					// bubbles are outside fluid surface boundary
+					if ( m_fluid_container.posIsUnderBoundary( bubble_pos ) == 1 ) {
+						bubbles_to_remove.push_back( BubbleLocator( radius_group_index, bubble_index ) );
+					}
+					// bubbles are located near the fluid surface boundary
+					else if ( m_fluid_container.posIsUnderBoundary( bubble_pos ) == 0 ) {
+
+						// use finer level set method to determine if bubbles should be removed
+						if ( m_fluid_container.isPosOutsideFluidViaLevelSet( bubble_pos ) ) {
+							bubbles_to_remove.push_back( BubbleLocator( radius_group_index, bubble_index ) );
+						}
+					}
+				}
+				// if there aren't too many bubbles, directly use the finer level set method to filter bubbles
+				else {
+					if ( m_fluid_container.isPosOutsideFluidViaLevelSet( bubble_pos ) ) {
+						bubbles_to_remove.push_back( BubbleLocator( radius_group_index, bubble_index ) );
+					}
+				}
+			}
+			else
+			{
+				if ( m_fluid_container.isPosOutsideFluidViaDensity( bubble_pos ) ) {
+					bubbles_to_remove.push_back( BubbleLocator( radius_group_index, bubble_index ) );
+				}
 			}
 		}
 	}
@@ -402,7 +467,12 @@ void ManyTinyBubbles::deleteBubblesInList( std::vector<BubbleLocator> bubbles_to
 void ManyTinyBubbles::generateMoreBubblesFromEmitter()
 {
 	// TODO: create a standard means to add new bubbles to m_bubbles b/c that operation is done in this method as well as in breakupBubbles()
+	// TODO: make sure we aren't recomputing emission positions unnecessarily
+	// TODO: consider case where user starts a simulation and then moves the emitter mesh
 
+	//if ( EMITTER_MELTING_RATE != 0 || m_emitter.getSourcePosListSize() == 0 ) {
+	//	m_emitter.createEmissionPositionsOnMesh( EMITTER_LEVEL_SET_RES, EMITTER_MELTING_RATE );
+	//}
 	m_emitter.createEmissionPositionsOnMesh( EMITTER_LEVEL_SET_RES, EMITTER_MELTING_RATE );
 
 	// generate bubbles
@@ -701,10 +771,11 @@ void ManyTinyBubbles::splitBubble( const vec3&		current_pos,
 								   vec3&			new_pos_1,
 								   vec3&			new_pos_2 ) const
 {
+	// TODO: remove "polySurface1" hardcoded value
+	// TODO: move hardcoded "1000" value to top of this file
+
 	// random angle for use when generating initial positions of new bubbles formed from split
 	double phi = Convenience::generateRandomDoubleInclusive( 0.0, 2.0 ) * M_PI;
-
-	// TODO: ask about this initial position logic
 
 	// generate new positions located at the two end points of horizontal diameter across parent bubble
 	new_pos_1 = current_pos + vec3( current_radius * cos(phi),
@@ -716,11 +787,79 @@ void ManyTinyBubbles::splitBubble( const vec3&		current_pos,
 
 	// check if newly generated positions are outside fluid container
 	// if they are, simply assign them the position of the bubble before it split
-	if ( m_fluid_container.posIsOutsideFluidContainer( new_pos_1 ) ) {
-		new_pos_1 = current_pos;
+
+	//if ( m_fluid_container.posIsOutsideFluidContainer( new_pos_1 ) ) {
+	//	new_pos_1 = current_pos;
+	//}
+	//if ( m_fluid_container.posIsOutsideFluidContainer( new_pos_2 ) ) {
+	//	new_pos_2 = current_pos;
+	//}
+
+	int exists;
+	MGlobal::executeCommand( "objExists polySurface1", exists );
+
+	// if polySurface1 exists, then fluid has been converted into a polygon mesh so we use the level set method to determine fluid surface boundary
+	if ( exists == 1 ) {
+
+		// if too many bubbles, then filter bubbles so we only concern ourselves with bubbles near the fluid's surface
+		if ( m_bubbles.getTotalBubbleNumber() > 1000 ) {
+
+			////////////////////////////////////////////////////
+			// compute for pos_1
+			////////////////////////////////////////////////////
+
+			// bubbles are outside fluid surface boundary
+			if ( m_fluid_container.posIsUnderBoundary( new_pos_1 ) == 1 ) {
+				new_pos_1 = current_pos;
+			}
+			// bubbles are located near the fluid surface boundary
+			else if ( m_fluid_container.posIsUnderBoundary( new_pos_1 ) == 0 ) {
+
+				// use finer level set method to determine if bubbles should be removed
+				if ( m_fluid_container.isPosOutsideFluidViaLevelSet( new_pos_1 ) ) {
+					new_pos_1 = current_pos;
+				}
+			}
+
+
+			////////////////////////////////////////////////////
+			// compute for pos_2
+			////////////////////////////////////////////////////
+
+			if ( m_fluid_container.posIsUnderBoundary( new_pos_2 ) == 1 ) {
+				new_pos_2 = current_pos;
+			}
+			else if ( m_fluid_container.posIsUnderBoundary( new_pos_2 ) == 0 ) {
+				if ( m_fluid_container.isPosOutsideFluidViaLevelSet( new_pos_2 ) ) {
+					new_pos_2 = current_pos;
+				}
+			}
+		}
+		// if there aren't too many bubbles, directly use the finer level set method to filter bubbles
+		else {
+
+			// compute for pos_1
+			if ( m_fluid_container.isPosOutsideFluidViaLevelSet( new_pos_1 ) ) {
+				new_pos_1 = current_pos;
+			}
+
+			// compute for pos_2
+			if ( m_fluid_container.isPosOutsideFluidViaLevelSet( new_pos_2 ) ) {
+				new_pos_2 = current_pos;
+			}
+		}
 	}
-	if ( m_fluid_container.posIsOutsideFluidContainer( new_pos_2 ) ) {
-		new_pos_2 = current_pos;
+	else {
+
+		// compute for pos_1
+		if ( m_fluid_container.isPosOutsideFluidViaDensity( new_pos_1 ) ) {
+			new_pos_1 = current_pos;
+		}
+
+		// compute for pos_2
+		if ( m_fluid_container.isPosOutsideFluidViaDensity( new_pos_2 ) ) {
+			new_pos_2 = current_pos;
+		}
 	}
 }
 

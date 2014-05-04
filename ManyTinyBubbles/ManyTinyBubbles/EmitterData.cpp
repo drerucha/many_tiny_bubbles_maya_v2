@@ -520,7 +520,7 @@ int EmitterData::getSourcePosListSize()
 ////////////////////////////////////////////////////
 // EmitterData::deleteTheCurrentSceneEmitterMeshs()
 ////////////////////////////////////////////////////
-void EmitterData::deleteTheCurrentSceneEmitterMeshs()
+void EmitterData::deleteEmitterMeshesFromScene()
 {
 	// get all the selected mesh name
 	std::vector<std::string> selectedObjectNames = GlobalState::getSelectedObject();
@@ -586,15 +586,6 @@ void EmitterData::createObjFileFromStoredMeshData()
 		DeleteFile( file_path_name.c_str() );
 	}
 }
-
-
-
-
-
-
-
-
-
 
 
 ////////////////////////////////////////////////////

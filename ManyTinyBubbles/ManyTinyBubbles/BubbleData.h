@@ -31,6 +31,7 @@ public:
 	std::vector<double>				getRadiiList( void ) const;
 	vec3							getVelocityAtIndex( const unsigned int& i, const unsigned int& j ) const;
 	//std::vector<vec3>				getPosListForRadiusGroupAtIndex( const unsigned int& i ) const;
+	unsigned int					getTotalBubbleNumber() const;
 
 	void addBubblePosToRadiusGroupAtIndex( const vec3& pos, const unsigned int& i );
 

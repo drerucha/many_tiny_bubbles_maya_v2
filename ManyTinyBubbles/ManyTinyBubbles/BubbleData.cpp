@@ -438,3 +438,12 @@ vec3 BubbleData::getVelAtIndex( const unsigned int& i, const unsigned int& j ) c
 {
 	return m_vel_list[i][j];
 }
+
+unsigned int BubbleData::getTotalBubbleNumber() const
+{
+	unsigned int total_bubble_num = 0;
+    for( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
+		total_bubble_num +=  ( unsigned int )m_pos_list[i].size();
+	}
+	return total_bubble_num;
+}
