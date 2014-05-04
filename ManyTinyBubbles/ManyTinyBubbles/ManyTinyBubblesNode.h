@@ -91,6 +91,8 @@ private:
 								 vec3&			new_pos_1,
 								 vec3&			new_pos_2 ) const;
 
+	//void			storeMeshInfoByName(MString emitter_mesh_name) const;
+
 
 ////////////////////////////////////////////////////
 // members
@@ -112,6 +114,12 @@ public:
 	static MObject	m_bubble_size_max;
 	static MObject	m_step_size;
 
+	static MObject  m_fluid_transform_name;
+	static MObject	m_node_name;
+	static MObject  m_melting_rate;
+	static MObject  m_level_set_resolution;
+	static MObject  m_simulation_status;
+
 	// typeid is a unique 32bit indentifier that describes this node
 	static MTypeId	m_id;
 
@@ -122,6 +130,9 @@ private:
 	EmitterData			m_emitter;
 
 	unsigned int		m_current_frame;
+
+	//unsigned int        m_emitter_level_set_res;
+	//float               m_emitter_melting_rate;
 };
 
 #endif

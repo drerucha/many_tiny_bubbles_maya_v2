@@ -145,8 +145,10 @@ MStatus ManyTinyBubbles::compute( const MPlug& plug, MDataBlock& data )
 							bubble_size_min_val,
 							bubble_size_max_val );
 
+			// TODO: fix EmitterData initialization here
+
 			// store emitter name in m_emitter
-			m_emitter.init( emitter_mesh_name_val );
+			//m_emitter.init( emitter_mesh_name_val );
 
 
 			// TODO: get primitive emitter center/location
