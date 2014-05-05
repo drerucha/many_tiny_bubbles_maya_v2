@@ -18,6 +18,7 @@
 
 FluidContainerData::FluidContainerData()
 {
+	m_initial_voxel_densities_have_been_stored = false;
 }
 
 FluidContainerData::~FluidContainerData()
@@ -68,6 +69,8 @@ void FluidContainerData::init( MString fluid_container_name )
 
 	m_density_list = new double[ num_voxels ];
 	m_distance_function = new double[ num_voxels ];
+
+	storeCurrentVoxelDensities();
 }
 
 
@@ -581,8 +584,57 @@ void FluidContainerData::updateLevelSetSignedDistanceFunction( MString fluid_pol
 						 sizes[VX], sizes[VY], sizes[VZ],
 						 signed_distance_values );
 
-		for( unsigned int i = 0; i < num_voxels; ++i ) {
+		for ( unsigned int i = 0; i < num_voxels; ++i ) {
 			m_distance_function[i] = signed_distance_values.a[i];
+		}
+	}
+}
+
+
+////////////////////////////////////////////////////
+// populate m_initial_voxel_densities with current voxel densities of fluid
+// should only be called one time when fluid is initialized
+////////////////////////////////////////////////////
+void FluidContainerData::storeCurrentVoxelDensities()
+{
+	if ( !m_initial_voxel_densities_have_been_stored ) {
+		m_initial_voxel_densities_have_been_stored = true;
+
+		MDoubleArray attr;
+		MString cmd = "getFluidAttr -attribute \"density\" " + m_name;
+		MGlobal::executeCommand( cmd, attr );
+
+		m_voxel_densities = attr;
+	}
+}
+
+
+////////////////////////////////////////////////////
+// fill fluid container voxels with densities stored in m_voxel_densities
+////////////////////////////////////////////////////
+void FluidContainerData::resetDensity()
+{
+	for ( unsigned int index_y = 0; index_y < m_res_y; ++index_y ) {
+		for ( unsigned int index_z = 0; index_z < m_res_z; ++index_z ) {
+			for ( unsigned int index_x = 0; index_x < m_res_x; ++index_x ) {
+
+				int index = convert3dIndexToLinearIndex( index_x, index_y, index_z );
+				MString mstr_density_val = Convenience::convertDoubleToMString( m_voxel_densities[index] );
+
+				MString mstr_index_x = Convenience::convertIntToMString( index_x );
+				MString mstr_index_y = Convenience::convertIntToMString( index_y );
+				MString mstr_index_z = Convenience::convertIntToMString( index_z );
+
+				//setFluidAttr -at "density"
+				//			 -fv 1.0
+				//			 -xIndex $index_x
+				//			 -yIndex $index_y
+				//			 -zIndex $index_z
+				//			 $fluid_container;
+
+				MString cmd = "setFluidAttr -attribute \"density\" -floatValue " + mstr_density_val + " -xIndex " + mstr_index_x + " -yIndex " + mstr_index_y + " -zIndex " + mstr_index_z + " " + m_name;
+				MGlobal::executeCommand( cmd );
+			}
 		}
 	}
 }

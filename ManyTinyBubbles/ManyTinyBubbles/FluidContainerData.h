@@ -47,6 +47,8 @@ public:
 	void	updateLevelSetSignedDistanceFunction	( MString fluid_polygon_name ) const;
 	void	updateDensityField						( void );
 
+	void resetDensity( void );
+
 private:
 
 	// pos / array index conversion methods
@@ -58,6 +60,8 @@ private:
 	unsigned int convert3dIndexToLinearIndex( const unsigned int& x,
 											  const unsigned int& y,
 											  const unsigned int& z ) const;
+
+	void storeCurrentVoxelDensities( void );
 
 
 ////////////////////////////////////////////////////
@@ -76,12 +80,15 @@ private:
 	double *m_density_list;
 	double *m_distance_function;
 
+	MDoubleArray m_voxel_densities;
+	bool m_initial_voxel_densities_have_been_stored;
+
 	std::vector<Vec3ui> m_fluid_mesh_face_list;
 	std::vector<Vec3f> m_fluid_mesh_vert_list;
 
-	int m_res_x;
-	int m_res_y;
-	int m_res_z;
+	unsigned int m_res_x;
+	unsigned int m_res_y;
+	unsigned int m_res_z;
 
 	unsigned int num_voxels;
 

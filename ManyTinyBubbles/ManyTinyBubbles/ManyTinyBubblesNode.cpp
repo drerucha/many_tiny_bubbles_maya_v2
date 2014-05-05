@@ -9,9 +9,7 @@
 //
 
 
-// TODO: add if defines to all classes
 // TODO: change all floats to doubles b/c I think they're faster on x86 architecture
-// TODO: alter node to allow multiple bubble emitter sources
 // TODO: index vectors using [] instead of at() b/c it seems faster
 
 
@@ -79,7 +77,6 @@ ManyTinyBubbles::ManyTinyBubbles()
 
 ManyTinyBubbles::~ManyTinyBubbles()
 {
-
 }
 
 
@@ -363,6 +360,8 @@ void ManyTinyBubbles::reset()
 
 	// set fraction field value at each voxel to 1.0f
 	m_fluid_container.resetFractionField();
+
+	m_fluid_container.resetDensity();
 }
 
 

@@ -79,8 +79,7 @@ void BubbleData::setRadii( const double& radius_min,
 	double l_radius_min = radius_min;
 
 	// ensure radius_max > radius_min
-	if ( l_radius_max < l_radius_min )
-	{
+	if ( l_radius_max < l_radius_min ) {
 		double tmp = l_radius_min;
 		l_radius_min = l_radius_max;
 		l_radius_max = tmp;
@@ -286,7 +285,7 @@ void BubbleData::setRadiiForMayaParticlesWithName( const std::string& particle_n
 {
 	for ( unsigned int i = 0; i < m_radii_list.size(); ++i ) {
 		int particle_exists = checkIfParticleExists( i + 1 );
-		if( particle_exists ) {
+		if ( particle_exists ) {
 			std::string object_name = particle_name;
 			Convenience::appendNumToStdString( object_name, i + 1 );
 

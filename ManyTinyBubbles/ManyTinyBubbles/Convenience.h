@@ -22,6 +22,8 @@ public:
 	// std::string / MString conversion
 	static std::string convertMStringToStdString( MString mstring );
 	static MString convertStdStringToMString( std::string std_string );
+	static MString convertDoubleToMString( const double &num );
+	static MString convertIntToMString( const int &num );
 
 	// print in Maya's script editor
 	static void printInScriptEditor( MString mstring );

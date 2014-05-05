@@ -34,6 +34,20 @@ MString Convenience::convertStdStringToMString( std::string std_string )
 	return mstring;
 }
 
+MString Convenience::convertDoubleToMString( const double &num )
+{
+	std::string str = "";
+	appendNumToStdString( str, num );
+	return convertStdStringToMString( str );
+}
+
+MString Convenience::convertIntToMString( const int &num )
+{
+	std::string str = "";
+	appendNumToStdString( str, num );
+	return convertStdStringToMString( str );
+}
+
 
 ////////////////////////////////////////////////////
 // print in Maya script editor

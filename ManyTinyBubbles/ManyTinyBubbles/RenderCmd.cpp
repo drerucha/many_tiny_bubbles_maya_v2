@@ -76,8 +76,6 @@ MStatus RenderCmd::doIt( const MArgList& args )
 
 	if ( fluid_exists == 0 ) {
 
-		// TODO: uncomment the following line after creating StatusData class
-
 		// convert Maya fluid to polygon mesh
 		std::string fluid_transform_name = GlobalState::getFluidTransformName();
 		MGlobal::executeCommand( "select -r " + Convenience::convertStdStringToMString( fluid_transform_name ) );
@@ -102,13 +100,13 @@ MStatus RenderCmd::doIt( const MArgList& args )
 		MGlobal::executeCommand( "delete seasky_skySphere3" );
 	}
 
-	// TODO: fix this part
-
 	// get the material of an object
 	MStringArray waterMeshInfoArray;
 	MGlobal::executeCommand( "listSets -t 1 -ets -o polySurface1", waterMeshInfoArray );
 	MString waterMeshMaterial = waterMeshInfoArray[0];
+
 	if ( waterMeshMaterial != "seasky_water_waterBlinnSG" ) {
+
 		// apply the shader to our water polygon mesh
 		MGlobal::executeCommand( "select -r polySurface1" );
 		MGlobal::executeCommand( "sets -e -forceElement seasky_water_waterBlinnSG" );
@@ -136,7 +134,7 @@ MStatus RenderCmd::doIt( const MArgList& args )
 		argData.getFlagArgument( end_frame_flag_short, 0, end_frame );
 	}
 
-	// TODO: add warning message
+	// TODO: add warning message if user inputs an invalid frame range
 
 	if ( start_frame < 1 ) {
 		start_frame = 1;
